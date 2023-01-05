@@ -4,7 +4,7 @@ import {
   getMetadata,
   loadScript,
   makeRelative,
-  loadStyle
+  loadStyle,
 } from '../../utils/utils.js';
 import { analyticsGetLabel } from '../../martech/attributes.js';
 import { toFragment } from './utilities.js';
@@ -33,11 +33,29 @@ function getBlockClasses(className) {
   return { name, variants };
 }
 
+const loadStyles = (path) => {
+  const { codeRoot } = getConfig();
+  return new Promise((resolve) => {
+    loadStyle(`${codeRoot}/blocks/global-navigation/blocks/${path}`, resolve);
+  });
+};
+
+const loadBlock = (path) => import(path)
+  .then((module) => module.default);
+
+const setNavLinkAttributes = (id, navLink) => {
+  navLink.setAttribute('role', 'button');
+  navLink.setAttribute('aria-expanded', false);
+  navLink.setAttribute('aria-controls', id);
+  navLink.setAttribute('daa-ll', navLink.textContent);
+  navLink.setAttribute('daa-lh', 'header|Open');
+};
+
 class Gnav {
   constructor(body, el) {
-    this.imsReady = new Promise(resolve => this.resolveIms = resolve)
-    
-    this.blocks = {}
+    this.imsReady = new Promise((resolve) => { this.resolveIms = resolve; });
+
+    this.blocks = {};
     this.el = el;
     this.body = body;
     this.desktop = window.matchMedia('(min-width: 1200px)');
@@ -48,7 +66,7 @@ class Gnav {
   }
 
   init = () => {
-    this.curtain = toFragment`<div class="gnav-curtain"></div>`
+    this.curtain = toFragment`<div class="gnav-curtain"></div>`;
     const nav = toFragment`
       <div class="gnav-wrapper">
         <nav class="gnav" aria-label="Main">
@@ -63,54 +81,42 @@ class Gnav {
         </nav>
         ${this.decorateBreadcrumbs()}
       </div>
-    `
-    this.el.addEventListener("click", this.loadDelayed)
+    `;
+    this.el.addEventListener('click', this.loadDelayed);
     setTimeout(() => this.loadDelayed(), 3000);
     this.el.append(this.curtain, nav);
   };
 
-  loadStyles(path) {
-    const { codeRoot } = getConfig();
-    return new Promise((resolve) => {
-      loadStyle(`${codeRoot}/blocks/global-navigation/blocks/${path}`, resolve);
-    })
-  }
-  
-  loadBlock = (path) => {
-    return import(path)
-    .then(module => module.default)
-  }
-
   loadDelayed = async () => {
     this.ready = this.ready || new Promise(async (resolve) => {
-      this.el.removeEventListener("click", this.loadDelayed)
+      this.el.removeEventListener('click', this.loadDelayed);
       const [
-        {MenuControls},
-        {decorateMenu, decorateLargeMenu},
-        {appLauncher},
-        {profile}
+        { MenuControls },
+        { decorateMenu, decorateLargeMenu },
+        { appLauncher },
+        { profile },
       ] = await Promise.all([
-        this.loadBlock("./delayed-utilities.js"),
-        this.loadBlock('./blocks/navMenu/menu.js'),
-        this.loadBlock("./blocks/appLauncher/appLauncher.js"),
-        this.loadBlock("./blocks/profile/profile.js"),
-        this.loadStyles("navMenu/menu.css")
-      ])
-      this.menuControls = new MenuControls()
-      this.decorateMenu = decorateMenu
-      this.decorateLargeMenu = decorateLargeMenu
-      this.appLauncher = appLauncher
-      this.profile = profile
+        loadBlock('./delayed-utilities.js'),
+        loadBlock('./blocks/navMenu/menu.js'),
+        loadBlock('./blocks/appLauncher/appLauncher.js'),
+        loadBlock('./blocks/profile/profile.js'),
+        loadStyles('navMenu/menu.css'),
+      ]);
+      this.menuControls = new MenuControls();
+      this.decorateMenu = decorateMenu;
+      this.decorateLargeMenu = decorateLargeMenu;
+      this.appLauncher = appLauncher;
+      this.profile = profile;
 
       this.imsReady
         .then((blockEl, profileEl) => {
-        this.decorateProfile(blockEl, profileEl)
-      })
-      resolve()
-    })
-    return this.ready
-  }
-  
+          this.decorateProfile(blockEl, profileEl);
+        });
+      resolve();
+    });
+    return this.ready;
+  };
+
   decorateProfileMenu = async (blockEl, profileEl) => {
     const accessToken = window.adobeIMS.getAccessToken();
     if (accessToken) {
@@ -120,7 +126,9 @@ class Gnav {
       if (ioResp.status === 200) {
         this.profile(blockEl, profileEl, this.menuControls.toggleMenu, ioResp);
         const appLauncherBlock = this.body.querySelector('.app-launcher');
-        if(appLauncherBlock) this.appLauncher(profileEl, appLauncherBlock, this.menuControls.toggleMenu);
+        if (appLauncherBlock) {
+          this.appLauncher(profileEl, appLauncherBlock, this.menuControls.toggleMenu);
+        }
       } else {
         this.decorateSignIn(blockEl, profileEl);
       }
@@ -137,8 +145,8 @@ class Gnav {
   };
 
   mobileToggle = () => {
-    const toggle = toFragment`<button class="gnav-toggle" aria-label="Navigation menu" aria-expanded="false"></button>`
-    const onMediaChange = (e) => e.matches && this.el.classList.remove(IS_OPEN)
+    const toggle = toFragment`<button class="gnav-toggle" aria-label="Navigation menu" aria-expanded="false"></button>`;
+    const onMediaChange = (e) => e.matches && this.el.classList.remove(IS_OPEN);
     toggle.addEventListener('click', async () => {
       if (this.el.classList.contains(IS_OPEN)) {
         this.el.classList.remove(IS_OPEN);
@@ -185,10 +193,10 @@ class Gnav {
   };
 
   decorateMainNav = () => {
-    const mainNav = toFragment`<div class="gnav-mainnav"></div>`
+    const mainNav = toFragment`<div class="gnav-mainnav"></div>`;
     const links = this.body.querySelectorAll('h2 > a');
-    links.forEach((link, i) => mainNav.appendChild(this.navLink(link, i)))
-    mainNav.appendChild(this.decorateCta())
+    links.forEach((link, i) => mainNav.appendChild(this.navLink(link, i)));
+    mainNav.appendChild(this.decorateCta());
     return mainNav;
   };
 
@@ -208,55 +216,49 @@ class Gnav {
     if (hasMenu) {
       const id = `navmenu-${idx}`;
       menu.id = id;
-      this.setNavLinkAttributes(id, navLink);
+      setNavLinkAttributes(id, navLink);
     }
 
     const navItem = toFragment`
       <div class="gnav-navitem${hasMenu}${largeMenu}${sectionMenu}">
         ${navLink}
       </div>
-    `
-    
-    let decorated
+    `;
+
+    let decorated;
     const decorate = async (event) => {
-      if(decorated) return
-      decorated = true
-      if(event) event.preventDefault()
-      await this.loadDelayed()
+      if (decorated) return;
+      decorated = true;
+      if (event) event.preventDefault();
+      await this.loadDelayed();
       // Small and medium menu types
-      if (menu.childElementCount > 0) navItem.appendChild(this.decorateMenu(navItem, navLink, menu, this.menuControls))
+      if (menu.childElementCount > 0) {
+        navItem.appendChild(this.decorateMenu(navItem, navLink, menu, this.menuControls));
+      }
 
       // Large Menus & Section Nav
-      if (navBlock) await this.decorateLargeMenu(navLink, navItem, menu, this.menuControls)
+      if (navBlock) await this.decorateLargeMenu(navLink, navItem, menu, this.menuControls);
 
-      navLink.removeEventListener("click", decorate)
-      if(event) navLink.click()
-    }
+      navLink.removeEventListener('click', decorate);
+      if (event) navLink.click();
+    };
 
     // Load the menu as fast as possible if it has been clicked
-    if(menu.childElementCount > 0 || navBlock) {
-      navLink.addEventListener("click", decorate)
+    if (menu.childElementCount > 0 || navBlock) {
+      navLink.addEventListener('click', decorate);
       setTimeout(decorate, 3000);
     }
 
-    return navItem
-  }
-
-  setNavLinkAttributes = (id, navLink) => {
-    navLink.setAttribute('role', 'button');
-    navLink.setAttribute('aria-expanded', false);
-    navLink.setAttribute('aria-controls', id);
-    navLink.setAttribute('daa-ll', navLink.textContent);
-    navLink.setAttribute('daa-lh', 'header|Open');
+    return navItem;
   };
 
   decorateCta = () => {
-    const cta = this.body.querySelector('strong a')
+    const cta = this.body.querySelector('strong a');
     const { origin } = new URL(cta.href);
     return toFragment`
       <strong class="gnav-cta">
         <a 
-          href="${cta.getAttribute("href")}"
+          href="${cta.getAttribute('href')}"
           class="con-button blue button-M" 
           daa-ll="${analyticsGetLabel(cta.textContent)}"
           target="${origin === window.location.origin ? '' : '_blank'}"
@@ -264,7 +266,7 @@ class Gnav {
           ${cta.textContent}
         </a>
       </strong>
-    `
+    `;
   };
 
   decorateSearch = () => {
@@ -285,7 +287,7 @@ class Gnav {
         SEARCH_ICON,
       );
       searchButton.addEventListener('click', async () => {
-        this.loadSearch()
+        this.loadSearch();
         await this.loadDelayed();
         this.menuControls.toggleMenu(searchEl);
       });
@@ -361,7 +363,7 @@ class Gnav {
       profileEl.insertAdjacentElement('beforeend', dropDown);
 
       this.decorateMenu(profileEl, signIn, dropDown);
-      this.setNavLinkAttributes(id, signIn);
+      setNavLinkAttributes(id, signIn);
     }
     signInEl.addEventListener('click', (e) => {
       e.preventDefault();

@@ -1,9 +1,9 @@
 const IS_OPEN = 'is-open';
-const curtain = document.querySelector('.gnav-curtain')
+const curtain = document.querySelector('.gnav-curtain');
 
 class MenuControls {
   constructor() {
-    this.state = {}
+    this.state = {};
   }
 
   toggleOnSpace = (e) => {
@@ -24,7 +24,7 @@ class MenuControls {
       document.removeEventListener('scroll', this.closeOnScroll);
     }
   };
-  
+
   toggleMenu = (el) => {
     const isSearch = el.classList.contains('gnav-search');
     const sameMenu = el === this.state.openMenu;
@@ -38,7 +38,7 @@ class MenuControls {
 
   closeOnEscape = (e) => {
     if (e.code === 'Escape') {
-      this.toggleMenu(state.openMenu);
+      this.toggleMenu(this.state.openMenu);
     }
   };
 
@@ -46,28 +46,26 @@ class MenuControls {
     const closest = e.target.closest(`.${IS_OPEN}`);
     const isCurtain = e.target === curtain;
     if ((this.state.openMenu && !closest) || isCurtain) {
-      this.toggleMenu(state.openMenu);
+      this.toggleMenu(this.state.openMenu);
     }
     if (isCurtain) {
       curtain.classList.remove('is-open');
     }
   };
-  
+
   openMenu = (el, isSearch) => {
     el.classList.add(IS_OPEN);
-  
+
     const menuToggle = el.querySelector('[aria-expanded]');
     menuToggle.setAttribute('aria-expanded', true);
     menuToggle.setAttribute('daa-lh', 'header|Close');
-  
+
     document.addEventListener('click', this.closeOnDocClick);
     window.addEventListener('keydown', this.closeOnEscape);
     if (!isSearch) {
       const desktop = window.matchMedia('(min-width: 900px)');
       if (desktop.matches) {
-        document.addEventListener('scroll', this.closeOnScroll, {
-          passive: true,
-        });
+        document.addEventListener('scroll', this.closeOnScroll, { passive: true });
         if (el.classList.contains('large-menu')) {
           curtain.classList.add('is-open', 'is-quiet');
         }
@@ -92,4 +90,4 @@ class MenuControls {
   };
 }
 
-export default {MenuControls}
+export default { MenuControls };

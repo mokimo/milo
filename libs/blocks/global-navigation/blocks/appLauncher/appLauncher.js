@@ -52,7 +52,7 @@ async function appLauncher(profileEl, appLauncherBlock, toggle) {
 
   const appsLink = appLauncherBlock.querySelector('a');
   appsLink.href = makeRelative(appsLink.href, true);
-  
+
   const path = appsLink.href;
   const resp = await fetch(`${path}.plain.html`);
   if (!resp.ok) return null;
@@ -64,4 +64,4 @@ async function appLauncher(profileEl, appLauncherBlock, toggle) {
   return decorateAppsMenu(profileEl, appsDom, toggle);
 }
 
-export default {appLauncher}
+export default { appLauncher };

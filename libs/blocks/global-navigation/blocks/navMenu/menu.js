@@ -10,10 +10,9 @@ import {
 
 const isHeading = (el) => el?.nodeName.startsWith('H');
 
-const childIndexOf = (el) =>
-  [...el.parentElement.children]
-    .filter((e) => e.nodeName === 'DIV' || e.nodeName === 'P')
-    .indexOf(el);
+const childIndexOf = (el) => [...el.parentElement.children]
+  .filter((e) => e.nodeName === 'DIV' || e.nodeName === 'P')
+  .indexOf(el);
 
 const decorateButtons = (menu) => {
   const buttons = menu.querySelectorAll('strong a');
@@ -46,12 +45,11 @@ const setMenuAnalytics = (el) => {
   switch (el.nodeName) {
     case 'DIV':
       if (el.classList.contains('link-group')) {
-        const title =
-          el.querySelector('.link-group-title')?.childNodes?.[0]?.textContent;
+        const title = el.querySelector('.link-group-title')?.childNodes?.[0]?.textContent;
         if (title) {
           el.firstChild.setAttribute(
             'daa-lh',
-            `${analyticsGetLabel(title)}-${childIndexOf(el) + 1}`
+            `${analyticsGetLabel(title)}-${childIndexOf(el) + 1}`,
           );
         }
       } else {
@@ -69,15 +67,14 @@ const setMenuAnalytics = (el) => {
       if (a) {
         a.setAttribute(
           'daa-ll',
-          `${analyticsGetLabel(a.textContent)}-${childIndexOf(el) + 1}`
+          `${analyticsGetLabel(a.textContent)}-${childIndexOf(el) + 1}`,
         );
       }
     }
   }
 };
 
-const decorateAnalytics = (menu) =>
-  [...menu.children].forEach((child) => setMenuAnalytics(child));
+const decorateAnalytics = (menu) => [...menu.children].forEach((child) => setMenuAnalytics(child));
 
 const decorateMenu = (navItem, navLink, menu, menuControls) => {
   menu.className = 'gnav-navitem-menu';
@@ -113,8 +110,8 @@ const decorateMenu = (navItem, navLink, menu, menuControls) => {
 const decorateLargeMenu = async (navLink, navItem, menu, menuControls) => {
   let path = navLink.href;
   path = makeRelative(path, true);
-  const res = await fetch(`${path}.plain.html`)
-  if(res.status !== 200) return
+  const res = await fetch(`${path}.plain.html`);
+  if (res.status !== 200) return;
 
   const text = await res.text();
   menu.insertAdjacentHTML('beforeend', text);
@@ -124,7 +121,7 @@ const decorateLargeMenu = async (navLink, navItem, menu, menuControls) => {
   });
   const decoratedMenu = decorateMenu(navItem, navLink, menu, menuControls);
   const menuSections = decoratedMenu.querySelectorAll(
-    '.gnav-menu-container > div'
+    '.gnav-menu-container > div',
   );
   menuSections.forEach((sec) => {
     sec.classList.add('section');

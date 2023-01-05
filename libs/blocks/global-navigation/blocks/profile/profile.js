@@ -92,4 +92,4 @@ async function profile(blockEl, profileEl, toggle, ioResp) {
   decorateProfileMenu(blockEl, profileEl, profiles, toggle);
 }
 
-export default {profile}
+export default { profile };
