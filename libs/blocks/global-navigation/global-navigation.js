@@ -101,7 +101,8 @@ class Gnav {
       this.decorateLargeMenu = decorateLargeMenu
       this.appLauncher = appLauncher
       this.profile = profile
-      await this.imsReady
+
+      this.imsReady
         .then((blockEl, profileEl) => {
         this.decorateProfile(blockEl, profileEl)
       })
@@ -337,7 +338,7 @@ class Gnav {
       autoValidateToken: true,
       environment: env.ims,
       useLocalStorage: false,
-      onReady: () => { this.resolveIms(blockEl, profileEl)},
+      onReady: () => this.resolveIms(blockEl, profileEl),
     };
     loadScript('https://auth.services.adobe.com/imslib/imslib.min.js');
     return profileEl;
