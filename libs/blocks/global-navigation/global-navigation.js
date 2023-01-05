@@ -4,6 +4,7 @@ import {
   getMetadata,
   loadScript,
   makeRelative,
+  loadStyle
 } from '../../utils/utils.js';
 import { analyticsGetLabel } from '../../martech/attributes.js';
 import { toFragment } from './utilities.js';
@@ -34,6 +35,8 @@ function getBlockClasses(className) {
 
 class Gnav {
   constructor(body, el) {
+    this.imsReady = new Promise(resolve => this.resolveIms = resolve)
+    
     this.blocks = {}
     this.el = el;
     this.body = body;
@@ -45,7 +48,6 @@ class Gnav {
   }
 
   init = () => {
-    this.state = {};
     this.curtain = toFragment`<div class="gnav-curtain"></div>`
     const nav = toFragment`
       <div class="gnav-wrapper">
@@ -61,8 +63,69 @@ class Gnav {
         </nav>
         ${this.decorateBreadcrumbs()}
       </div>
-    ` 
+    `
+    this.el.addEventListener("click", this.loadDelayed)
+    setTimeout(() => this.loadDelayed(), 3000);
     this.el.append(this.curtain, nav);
+  };
+
+  loadStyles(path) {
+    const { codeRoot } = getConfig();
+    return new Promise((resolve) => {
+      loadStyle(`${codeRoot}/blocks/global-navigation/blocks/${path}`, resolve);
+    })
+  }
+  
+  loadBlock = (path) => {
+    return import(path)
+    .then(module => module.default)
+  }
+
+  loadDelayed = async () => {
+    this.ready = this.ready || new Promise(async (resolve) => {
+      this.el.removeEventListener("click", this.loadDelayed)
+      const [
+        {MenuControls},
+        {decorateMenu, decorateLargeMenu},
+        {appLauncher},
+        {profile}
+      ] = await Promise.all([
+        this.loadBlock("./delayed-utilities.js"),
+        this.loadBlock('./blocks/navMenu/menu.js'),
+        this.loadBlock("./blocks/appLauncher/appLauncher.js"),
+        this.loadBlock("./blocks/profile/profile.js"),
+        this.loadStyles("navMenu/menu.css")
+      ])
+      this.menuControls = new MenuControls()
+      this.decorateMenu = decorateMenu
+      this.decorateLargeMenu = decorateLargeMenu
+      this.appLauncher = appLauncher
+      this.profile = profile
+      await this.imsReady
+        .then((blockEl, profileEl) => {
+        this.decorateProfile(blockEl, profileEl)
+      })
+      resolve()
+    })
+    return this.ready
+  }
+  
+  decorateProfileMenu = async (blockEl, profileEl) => {
+    const accessToken = window.adobeIMS.getAccessToken();
+    if (accessToken) {
+      const { env } = getConfig();
+      const ioResp = await fetch(`https://${env.adobeIO}/profile`, { headers: new Headers({ Authorization: `Bearer ${accessToken.token}` }) });
+
+      if (ioResp.status === 200) {
+        this.profile(blockEl, profileEl, this.menuControls.toggleMenu, ioResp);
+        const appLauncherBlock = this.body.querySelector('.app-launcher');
+        if(appLauncherBlock) this.appLauncher(profileEl, appLauncherBlock, this.menuControls.toggleMenu);
+      } else {
+        this.decorateSignIn(blockEl, profileEl);
+      }
+    } else {
+      this.decorateSignIn(blockEl, profileEl);
+    }
   };
 
   loadSearch = async () => {
@@ -128,13 +191,6 @@ class Gnav {
     return mainNav;
   };
 
-  loadMenu = async () => {
-    if(this.menusLoaded) return this.menusLoaded
-    this.menusLoaded = import('./blocks/navMenu/menu.js')
-    .then(module => module.default)
-    return this.menusLoaded
-  }
-
   navLink = (navLink, idx) => {
     navLink.href = makeRelative(navLink.href, true);
     const navBlock = navLink.closest('.large-menu');
@@ -159,18 +215,29 @@ class Gnav {
         ${navLink}
       </div>
     `
-
-    // TODO remove/improve the setTimeout
-    // links should NOT be interactable until this resolved
-    // also loadMenu faster onClick
-    setTimeout(async () => {
-      const {decorateMenu, decorateLargeMenu} = await this.loadMenu()
+    
+    let decorated
+    const decorate = async (event) => {
+      if(decorated) return
+      decorated = true
+      if(event) event.preventDefault()
+      await this.loadDelayed()
       // Small and medium menu types
-      if (menu.childElementCount > 0) navItem.appendChild(decorateMenu(navItem, navLink, menu))
-      
+      if (menu.childElementCount > 0) navItem.appendChild(this.decorateMenu(navItem, navLink, menu, this.menuControls))
+
       // Large Menus & Section Nav
-      if (navBlock) decorateLargeMenu(navLink, navItem, menu)
-    }, 2000);
+      if (navBlock) await this.decorateLargeMenu(navLink, navItem, menu, this.menuControls)
+
+      navLink.removeEventListener("click", decorate)
+      if(event) navLink.click()
+    }
+
+    // Load the menu as fast as possible if it has been clicked
+    if(menu.childElementCount > 0 || navBlock) {
+      navLink.addEventListener("click", decorate)
+      setTimeout(decorate, 3000);
+    }
+
     return navItem
   }
 
@@ -216,9 +283,10 @@ class Gnav {
         },
         SEARCH_ICON,
       );
-      searchButton.addEventListener('click', () => {
-        this.loadSearch();
-        this.toggleMenu(searchEl);
+      searchButton.addEventListener('click', async () => {
+        this.loadSearch()
+        await this.loadDelayed();
+        this.menuControls.toggleMenu(searchEl);
       });
       searchEl.append(searchButton, searchBar);
       return searchEl;
@@ -254,15 +322,6 @@ class Gnav {
     return searchBar;
   };
 
-  /* c8 ignore start */
-  getAppLauncher = async (profileEl) => {
-    const appLauncherBlock = this.body.querySelector('.app-launcher');
-    if (!appLauncherBlock) return;
-
-    const { default: appLauncher } = await import('./gnav-appLauncher.js');
-    appLauncher(profileEl, appLauncherBlock, this.toggleMenu);
-  };
-  
   decorateProfile = () => {
     const blockEl = this.body.querySelector('.profile');
     if (!blockEl) return null;
@@ -278,28 +337,10 @@ class Gnav {
       autoValidateToken: true,
       environment: env.ims,
       useLocalStorage: false,
-      onReady: () => { this.imsReady(blockEl, profileEl); },
+      onReady: () => { this.resolveIms(blockEl, profileEl)},
     };
     loadScript('https://auth.services.adobe.com/imslib/imslib.min.js');
     return profileEl;
-  };
-
-  imsReady = async (blockEl, profileEl) => {
-    const accessToken = window.adobeIMS.getAccessToken();
-    if (accessToken) {
-      const { env } = getConfig();
-      const ioResp = await fetch(`https://${env.adobeIO}/profile`, { headers: new Headers({ Authorization: `Bearer ${accessToken.token}` }) });
-
-      if (ioResp.status === 200) {
-        const profile = await import('./gnav-profile.js');
-        profile.default(blockEl, profileEl, this.toggleMenu, ioResp);
-        this.getAppLauncher(profileEl);
-      } else {
-        this.decorateSignIn(blockEl, profileEl);
-      }
-    } else {
-      this.decorateSignIn(blockEl, profileEl);
-    }
   };
 
   decorateSignIn = (blockEl, profileEl) => {
