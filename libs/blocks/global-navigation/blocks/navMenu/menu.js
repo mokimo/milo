@@ -5,7 +5,7 @@ import {
 import {
   createTag,
   decorateSVG,
-  makeRelative,
+  localizeLink,
 } from '../../../../utils/utils.js';
 
 const isHeading = (el) => el?.nodeName.startsWith('H');
@@ -30,7 +30,7 @@ const decorateLinkGroups = (menu) => {
     const subtitle = linkGroup.querySelector('p:last-of-type') || '';
     const titleWrapper = createTag('div');
     titleWrapper.className = 'link-group-title';
-    anchor.href = makeRelative(anchor.href, true);
+    anchor.href = localizeLink(anchor.href);
     const link = createTag('a', { class: 'link-block', href: anchor.href });
 
     linkGroup.replaceChildren();
@@ -109,7 +109,7 @@ const decorateMenu = (navItem, navLink, menu, menuControls) => {
 
 const decorateLargeMenu = async (navLink, navItem, menu, menuControls) => {
   let path = navLink.href;
-  path = makeRelative(path, true);
+  path = localizeLink(path);
   const res = await fetch(`${path}.plain.html`);
   if (res.status !== 200) return;
 

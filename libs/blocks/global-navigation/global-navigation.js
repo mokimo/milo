@@ -3,7 +3,7 @@ import {
   getConfig,
   getMetadata,
   loadScript,
-  makeRelative,
+  localizeLink,
   loadStyle,
 } from '../../utils/utils.js';
 import { analyticsGetLabel } from '../../martech/attributes.js';
@@ -200,7 +200,7 @@ class Gnav {
   };
 
   navLink = (navLink, idx) => {
-    navLink.href = makeRelative(navLink.href, true);
+    navLink.href = localizeLink(navLink.href);
     const navBlock = navLink.closest('.large-menu');
     const menu = navLink.closest('div');
     menu.querySelector('h2').remove();
