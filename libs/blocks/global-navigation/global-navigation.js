@@ -109,8 +109,8 @@ class Gnav {
       this.profile = profile;
 
       this.imsReady
-        .then((blockEl, profileEl) => {
-          this.decorateProfile(blockEl, profileEl);
+        .then(({ blockEl, profileEl }) => {
+          this.decorateProfileMenu(blockEl, profileEl);
         });
       resolve();
     });
@@ -225,11 +225,11 @@ class Gnav {
       </div>
     `;
 
-    let decorated;
+    let decorating;
     const decorate = async (event) => {
-      if (decorated) return;
-      decorated = true;
       if (event) event.preventDefault();
+      if (decorating) return;
+      decorating = true;
       await this.loadDelayed();
       // Small and medium menu types
       if (menu.childElementCount > 0) {
@@ -340,7 +340,7 @@ class Gnav {
       autoValidateToken: true,
       environment: env.ims,
       useLocalStorage: false,
-      onReady: () => this.resolveIms(blockEl, profileEl),
+      onReady: () => this.resolveIms({ blockEl, profileEl }),
     };
     loadScript('https://auth.services.adobe.com/imslib/imslib.min.js');
     return profileEl;
@@ -357,7 +357,6 @@ class Gnav {
 
     if (dropDown) {
       const id = `navmenu-${blockEl.className}`;
-
       dropDown.id = id;
       profileEl.classList.add('gnav-navitem');
       profileEl.insertAdjacentElement('beforeend', dropDown);
