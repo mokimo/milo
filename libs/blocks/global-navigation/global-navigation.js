@@ -54,7 +54,6 @@ const setNavLinkAttributes = (id, navLink) => {
 class Gnav {
   constructor(body, el) {
     this.imsReady = new Promise((resolve) => { this.resolveIms = resolve; });
-
     this.blocks = {};
     this.el = el;
     this.body = body;
