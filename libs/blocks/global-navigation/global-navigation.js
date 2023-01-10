@@ -415,6 +415,9 @@ export default async function init(header) {
   if (!html) return null;
   try {
     const gnav = new Gnav(new DOMParser().parseFromString(html, 'text/html').body, header);
+    // TODO remove header.classList.add('gnav') as global-navigation gets renamed to gnav
+    // or rename the classes to global-navigation
+    header.classList.add('gnav');
     gnav.init();
     header.setAttribute('daa-im', 'true');
     header.setAttribute('daa-lh', `gnav${imsClientId ? `|${imsClientId}` : ''}`);
