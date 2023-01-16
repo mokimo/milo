@@ -44,7 +44,7 @@ class Gnav {
   constructor(body, el) {
     this.blocks = {
       profile: {
-        el: body.querySelector('.profile'),
+        blockEl: body.querySelector('.profile'),
         decoratedEl: toFragment`<div class="gnav-profile"></div>`,
       },
       search: {},
@@ -69,7 +69,7 @@ class Gnav {
             ${this.decorateMainNav()}
             ${this.decorateSearch()}
           </div>
-          ${this.blocks.profile.el && this.blocks.profile.decoratedEl}
+          ${this.blocks.profile.blockEl && this.blocks.profile.decoratedEl}
           ${this.decorateLogo()}
         </nav>
         ${this.decorateBreadcrumbs()}
@@ -129,49 +129,67 @@ class Gnav {
   };
 
   decorateProfile = async () => {
-    if (!this.blocks.profile.el) return null;
-    if (this.blocks.profile.el.children.length > 1) this.blocks.profile.decoratedEl.classList.add('has-menu');
+    const { blockEl, decoratedEl } = this.blocks.profile;
+    if (!blockEl) return null;
+
     const accessToken = window.adobeIMS.getAccessToken();
-    if (!accessToken) return this.decorateSignIn();
     const { env } = getConfig();
-    const profileRes = await fetch(`https://${env.adobeIO}/profile`, { headers: new Headers({ Authorization: `Bearer ${accessToken.token}` }) });
-    if (!profileRes.status === 200) return this.decorateSignIn;
+    const profileRes = accessToken
+      ? await fetch(`https://${env.adobeIO}/profile`, { headers: new Headers({ Authorization: `Bearer ${accessToken.token}` }) })
+      : {};
+    if (profileRes.status !== 200) return this.decorateSignIn();
+
+    if (blockEl.children.length > 1) decoratedEl.classList.add('has-menu');
+    decoratedEl.closest('nav.gnav').classList.add('signed-in');
     const { sections, user: { avatar } } = await profileRes.json();
     const avatarImg = toFragment`<img class="gnav-profile-img" src="${avatar}"></img>`;
     const profileButton = toFragment`
         <button 
           class="gnav-profile-button" 
-          aria-label="${this.displayName}" 
           aria-expanded="false" 
           aria-controls="gnav-profile-menu"
+          aria-label="Profile button"
         > 
         ${avatarImg}
         </button>
       `;
-    profileButton.addEventListener('click', async () => {
-      // TODO this creates a new profile on every click
-      // TODO the css is not working
+    this.decorateProfileMenu({ avatarImg, sections, profileRes, profileButton });
+    decoratedEl.append(profileButton);
+    return null;
+  };
+
+  decorateProfileMenu = ({ avatarImg, sections, profileRes, profileButton }) => {
+    const { blockEl, decoratedEl } = this.blocks.profile;
+    let decorating;
+    const decorate = async (event) => {
+      if (decorating) return;
+      decorating = true;
       await this.loadDelayed();
+      if (event) {
+        decoratedEl.addEventListener('gnav-profile-loaded', () => decoratedEl.click(), { once: true });
+      }
       this.blocks.profile.instance = new this.Profile({
-        blockEl: this.blocks.profile.el,
-        profileEl: this.blocks.profile.decoratedEl,
-        toggle: this.menuControls.toggleMenu,
+        blockEl,
+        decoratedEl,
+        toggleMenu: this.menuControls.toggleMenu,
         avatarImg,
         sections,
         profileRes,
+        profileButton,
       });
       const appLauncherBlock = this.body.querySelector('.app-launcher');
       if (appLauncherBlock) {
         this.appLauncher(
-          this.blocks.profile.decoratedEl,
+          decoratedEl,
           appLauncherBlock,
           this.menuControls.toggleMenu,
         );
       }
-      this.menuControls.toggleMenu(this.blocks.profile.decoratedEl);
-    });
-    this.blocks.profile.decoratedEl.append(profileButton);
-    return null;
+      decoratedEl.removeEventListener('click', decorate);
+    };
+
+    decoratedEl.addEventListener('click', decorate);
+    setTimeout(decorate, 3000);
   };
 
   loadSearch = () => {
@@ -337,29 +355,26 @@ class Gnav {
     return searchEl;
   };
 
-  decorateSignIn = (blockEl, profileEl) => {
+  decorateSignIn = () => {
+    const { blockEl, decoratedEl } = this.blocks.profile;
     const dropDown = blockEl.querySelector(':scope > div:nth-child(2)');
     const signIn = blockEl.querySelector('a');
-
     signIn.classList.add('gnav-signin');
     signIn.setAttribute('daa-ll', 'Sign In');
-
-    const signInEl = dropDown?.querySelector('li:last-of-type a') || profileEl;
-
     if (dropDown) {
       const id = `navmenu-${blockEl.className}`;
       dropDown.id = id;
-      profileEl.classList.add('gnav-navitem');
-      profileEl.insertAdjacentElement('beforeend', dropDown);
-
-      this.decorateMenu(profileEl, signIn, dropDown);
+      decoratedEl.classList.add('gnav-navitem');
+      decoratedEl.insertAdjacentElement('beforeend', dropDown);
+      this.decorateMenu(decoratedEl, signIn, dropDown);
       setNavLinkAttributes(id, signIn);
     }
+    const signInEl = dropDown?.querySelector('li:last-of-type a') || decoratedEl;
     signInEl.addEventListener('click', (e) => {
       e.preventDefault();
       window.adobeIMS.signIn();
     });
-    profileEl.append(signIn);
+    decoratedEl.append(signIn);
   };
 
   setBreadcrumbSEO = () => {

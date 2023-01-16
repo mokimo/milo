@@ -36,22 +36,28 @@ const decorateAction = ({ child, blockEl }) => {
 };
 
 class Profile {
-  constructor({ blockEl, profileEl, avatarImg, sections }) {
-    const gnav = profileEl.closest('nav.gnav');
-    gnav.classList.add('signed-in');
-    this.init({ blockEl, profileEl, avatarImg, sections });
+  constructor({
+    blockEl, decoratedEl, avatarImg, sections, toggleMenu, profileButton,
+  }) {
+    this.init({
+      blockEl, decoratedEl, avatarImg, sections, toggleMenu, profileButton,
+    });
   }
 
-  async init({ blockEl, profileEl, avatarImg, sections }) {
+  async init({
+    blockEl, decoratedEl, avatarImg, sections, toggleMenu, profileButton,
+  }) {
     const { displayName, email } = await window.adobeIMS.getProfile();
     this.blockEl = blockEl;
-    this.profileEl = profileEl;
     this.displayName = displayName;
+    profileButton.setAttribute('aria-label', displayName);
     this.email = email;
     this.sections = sections;
     this.avatarImg = avatarImg;
     this.accountLink = this.blockEl.querySelector('div > div > p:nth-child(2) a');
-    this.profileEl.append(this.menu());
+    decoratedEl.append(this.menu());
+    decoratedEl.addEventListener('click', () => toggleMenu(decoratedEl));
+    decoratedEl.dispatchEvent(new Event('gnav-profile-loaded'));
   }
 
   menu() {
