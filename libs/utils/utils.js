@@ -57,7 +57,11 @@ const AUTO_BLOCKS = [
 ];
 const ENVS = {
   local: {
-    name: 'local',
+    name: 'stage',
+    ims: 'stg1',
+    adobeIO: 'cc-collab-stage.adobe.io',
+    adminconsole: 'stage.adminconsole.adobe.com',
+    account: 'stage.account.adobe.com',
     edgeConfigId: '8d2805dd-85bf-4748-82eb-f99fdad117a6',
     pdfViewerClientId: '600a4521c23d4c7eb9c7b039bee534a0',
   },
@@ -654,14 +658,12 @@ export function loadLana(options = {}) {
   if (window.lana) return;
 
   const lanaError = (e) => {
-    window.lana.log(e.reason || e.error || e.message, {
-      errorType: 'i',
-    });
-  }
+    window.lana.log(e.reason || e.error || e.message, { errorType: 'i' });
+  };
 
   window.lana = {
     log: async (...args) => {
-      await import('../utils/lana.js');
+      await import('./lana.js');
       window.removeEventListener('error', lanaError);
       window.removeEventListener('unhandledrejection', lanaError);
       return window.lana.log(...args);
