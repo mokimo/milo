@@ -45,6 +45,18 @@ const setNavLinkAttributes = (id, navLink) => {
   navLink.setAttribute('aria-haspopup', true);
 };
 
+
+async function loadPrivacy () {
+  // TODO the footer link should not be clickable until privacy loaded
+  window.fedsConfig = {
+    privacy: {
+      otDomainId: '7a5eb705-95ed-4cc4-a11d-0cc5760e93db',
+      footerLinkSelector: '[href="https://www.adobe.com/#openPrivacy"]',
+    },
+  };
+  loadScript('http://localhost:6456/build/privacy-standalone.js', null, "defer");
+}
+
 class Gnav {
   constructor(body, el) {
     this.blocks = {
@@ -93,6 +105,7 @@ class Gnav {
     `;
     this.el.addEventListener('click', this.loadDelayed);
     setTimeout(() => this.loadDelayed(), 3000);
+    loadPrivacy()
     this.loadIMS();
     this.el.append(this.curtain, this.nav);
   };
@@ -145,7 +158,7 @@ class Gnav {
     };
     const imsScript = document.querySelector('script[src$="/imslib.min.js"]') instanceof HTMLElement;
     if (!imsScript && !window.adobeIMS) {
-      loadScript('https://auth.services.adobe.com/imslib/imslib.min.js');
+      loadScript('https://auth.services.adobe.com/imslib/imslib.min.js', null, "defer");
     }
     return null;
   };

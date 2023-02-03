@@ -276,12 +276,15 @@ export function appendHtmlPostfix(area = document) {
   });
 }
 
-export const loadScript = (url, type) => new Promise((resolve, reject) => {
+export const loadScript = (url, type, defer) => new Promise((resolve, reject) => {
   let script = document.querySelector(`head > script[src="${url}"]`);
   if (!script) {
     const { head } = document;
     script = document.createElement('script');
     script.setAttribute('src', url);
+    if (defer) {
+      script.setAttribute("defer", "")
+    }
     if (type) {
       script.setAttribute('type', type);
     }
@@ -571,16 +574,6 @@ export async function loadDeferred(area, blocks, config) {
   });
 }
 
-function loadPrivacy() {
-  window.fedsConfig = {
-    privacy: {
-      otDomainId: '7a5eb705-95ed-4cc4-a11d-0cc5760e93db',
-      footerLinkSelector: '[href="https://www.adobe.com/#openPrivacy"]',
-    },
-  };
-  loadScript('https://www.adobe.com/etc.clientlibs/globalnav/clientlibs/base/privacy-standalone.js');
-}
-
 function initSidekick() {
   const initPlugins = async () => {
     const { default: init } = await import('./sidekick.js');
@@ -660,7 +653,6 @@ export async function loadArea(area = document) {
 export function loadDelayed(delay = 3000) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      loadPrivacy();
       if (getMetadata('interlinks') === 'on') {
         const path = `${getConfig().locale.contentRoot}/keywords.json`;
         import('../features/interlinks.js').then((mod) => { mod.default(path); resolve(mod); });
