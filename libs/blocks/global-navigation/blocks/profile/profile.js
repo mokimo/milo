@@ -21,35 +21,23 @@ const decorateProfileLink = (href, service) => {
   return url.href;
 };
 
-const decorateAction = (actionEl) => {
-  if (!actionEl) return '';
-  actionEl.href = decorateProfileLink(actionEl.href, 'adminconsole');
-  return toFragment`<li class="feds-profile-action">${actionEl}</li>`;
-};
+const decorateAction = (label, href) => toFragment`<li class="feds-profile-action"><a href="${decorateProfileLink(href, 'adminconsole')}">${label}</a></li>`;
 
 class Profile {
   constructor({
     decoratedEl,
-    avatarImgEl,
+    avatar,
     sections,
-    toggleMenu,
     profileButtonEl,
-    accountLinkEl,
-    signOutEl,
-    manageTeamsEl,
-    manageEnterpriseEl,
     localMenu,
+    labels,
   }) {
     this.sections = sections;
-    this.avatarImgEl = avatarImgEl;
-    this.accountLinkEl = accountLinkEl;
-    this.signOutEl = signOutEl;
-    this.manageTeamsEl = manageTeamsEl;
-    this.manageEnterpriseEl = manageEnterpriseEl;
-    this.toggleMenu = toggleMenu;
+    this.avatar = avatar;
     this.profileButtonEl = profileButtonEl;
     this.decoratedEl = decoratedEl;
     this.localMenu = localMenu;
+    this.labels = labels;
     if (localMenu) {
       localMenu.classList.add('feds-local-menu');
     }
@@ -64,20 +52,18 @@ class Profile {
     this.displayName = displayName;
     this.email = email;
     this.decoratedEl.append(this.menu());
-    this.decoratedEl.addEventListener('click', () => this.toggleMenu(this.decoratedEl));
-    this.decoratedEl.dispatchEvent(new Event('feds:events:profileReady'));
   }
 
   decorateSignOut() {
-    // TODO integrate the placeholders here
     const signOutLink = toFragment`
       <li>
-        <a class="feds-profile-action" daa-ll="Sign Out">Sign Out</a>
+        <a class="feds-profile-action" daa-ll="${this.labels.signOut}">${this.labels.signOut}</a>
       </li>
     `;
+
+    // TODO consumers might want to execute their own logic before a sign out
+    // we might want to provide them a way to do so here
     signOutLink.addEventListener('click', (e) => {
-      // TODO consumers might want to execute their own logic before a sign out
-      // we might want to provide them a way to do so here
       e.preventDefault();
       window.adobeIMS.signOut();
     });
@@ -85,31 +71,31 @@ class Profile {
   }
 
   menu() {
-    // TODO integrate placerholders here, for the view account // and profile actions
     // TODO the account name and email might need a bit of adaptive behaviour
     // historically we shrunk the fontsize and displayed the account name on two lines
     // the email had some special logic as well
     // we took a simpler approach ("Some very long name, very l...") for MVP
-    // also TODO, TAKE A GOOD LOOK AT THE TEMPLATE WHEN DOING THE PLACEHOLDERS.
+
+    // TODO label link authoring, manage team and manage enterprise do not work // miss the href
     return toFragment`
       <div id="feds-profile-menu" class="feds-profile-menu">
         <a 
           href="${decorateProfileLink('https://account.adobe.com/', 'account')}" 
           class="feds-profile-header"
-          daa-ll="View Account"
+          daa-ll="${this.labels.viewAccount}"
           aria-label="${this.accountLinkText}"
         >
-          ${this.avatarImgEl.cloneNode(true)}
+          <img class="feds-profile-img" src="${this.avatar}"></img>
           <div class="feds-profile-details">
             <p class="feds-profile-name">${this.displayName}</p>
             <p class="feds-profile-email">${decorateEmail(this.email)}</p>
-            <p class="feds-profile-account">View Account</p>
+            <p class="feds-profile-account">${this.labels.viewAccount}</p>
           </div>
         </a>
         ${this.localMenu}
         <ul class="feds-profile-actions">
-          ${this.sections.manage.items.team?.id ? decorateAction(this.manageTeamsEl) : ''}
-          ${this.sections.manage.items.enterprise?.id ? decorateAction(this.manageEnterpriseEl) : ''}
+          ${this.sections.manage.items.team?.id ? decorateAction(this.labels.manageTeams, '// TODO HREF') : ''}
+          ${this.sections.manage.items.enterprise?.id ? decorateAction(this.manageEnterprise, '// TODO HREF') : ''}
           ${this.decorateSignOut()}
         </ul>
       </div>
