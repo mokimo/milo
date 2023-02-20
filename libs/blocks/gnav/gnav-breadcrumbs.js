@@ -1,4 +1,6 @@
-import { createTag, getMetadata } from '../../utils/utils.js';
+import { createTag, getConfig, getMetadata } from '../../utils/utils.js';
+
+const BREADCRUMBS_HIDE_LAST = 'breadcrumbs-hide-last';
 
 function getParent(path) {
   if (!path || path.length === 0 || path === '/') {
@@ -34,7 +36,7 @@ async function getItem(path) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   if (!doc) return defaultItem;
   const hideInNav = getMetadata('breadcrumbs-hide-page', doc) === 'on';
-  const hideLastPage = getMetadata('breadcrumbs-hide-last', doc) === 'on';
+  const hideLastPage = getMetadata(BREADCRUMBS_HIDE_LAST, doc) === 'on';
   return {
     path,
     title: getItemTitle(doc, defaultTitle),
@@ -109,13 +111,11 @@ async function getBreadcrumbsFromFile() {
   const breadcrumbs = getBreadcrumbsFromPageBlock(doc);
   if (!breadcrumbs) return null;
   // add the breadcrumbs item for the current page
-  const hideLastPage = getMetadata('breadcrumbs-hide-last') === 'on';
+  const hideLastPage = getMetadata(BREADCRUMBS_HIDE_LAST) === 'on';
   if (!hideLastPage) {
     const ul = breadcrumbs.querySelector(':scope ul');
     if (!ul) return null;
-    const li = createTag('li');
-    li.textContent = title;
-    li.setAttribute('aria-current', 'page');
+    const li = createTag('li', { 'aria-current': 'page' }, title);
     ul.append(li);
   }
   return breadcrumbs;
@@ -142,15 +142,23 @@ function setBreadcrumbSEO(breadcrumbs) {
 
 async function getBreadcrumbs(element) {
   if (!element) return null;
-  const noBreadcrumbs = getMetadata('breadcrumbs') === 'off';
-  if (noBreadcrumbs) return null;
-  let breadcrumbs;
-  breadcrumbs = getBreadcrumbsFromPageBlock(element);
+  const breadcrumbs = getBreadcrumbsFromPageBlock(element);
   if (breadcrumbs) return breadcrumbs;
-  breadcrumbs = await getBreadcrumbsFromFile();
-  if (breadcrumbs) return breadcrumbs;
-  breadcrumbs = await getBreadcrumbsFromUrl(document.location.pathname);
-  if (breadcrumbs) return breadcrumbs;
+  const breadcrumbsMetadata = getMetadata('breadcrumbs')?.toLowerCase();
+  if (breadcrumbsMetadata === 'on' || breadcrumbsMetadata === 'true') {
+    return await getBreadcrumbsFromFile()
+      || await getBreadcrumbsFromUrl(document.location.pathname)
+      || null;
+  }
+  if (breadcrumbsMetadata === 'off' || breadcrumbsMetadata === 'false') {
+    return null;
+  }
+  const breadcrumbsConf = getConfig().breadcrumbs;
+  if (breadcrumbsConf === 'on' || breadcrumbsConf === 'true') {
+    return await getBreadcrumbsFromFile()
+      || await getBreadcrumbsFromUrl(document.location.pathname)
+      || null;
+  }
   return null;
 }
 
@@ -160,4 +168,3 @@ export default async function addBreadcrumbs(element, wrapper) {
   wrapper.append(breadcrumbs);
   setBreadcrumbSEO(breadcrumbs);
 }
-
