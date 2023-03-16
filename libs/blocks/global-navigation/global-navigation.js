@@ -7,6 +7,7 @@ import {
 } from '../../utils/utils.js';
 import { toFragment, getFedsPlaceholderConfig, getAnalyticsValue, decorateCta } from './utilities/utilities.js';
 import { replaceKey } from '../../features/placeholders.js';
+import KeyboardNavigation from './utilities/keyboardNavigation/index.js';
 
 const CONFIG = {
   icons: {
@@ -37,6 +38,9 @@ const loadBlock = (path) => import(path)
 
 class Gnav {
   constructor(body, el) {
+    // TODO move keyboard navigation to loadDelayed
+    // eslint-disable-next-line no-new
+    new KeyboardNavigation();
     this.blocks = {
       profile: {
         blockEl: body.querySelector('.profile'),

@@ -1,0 +1,110 @@
+<html>
+  <head>
+    <script type="importmap">
+        {
+          "imports": {
+            "../../../../libs/features/placeholders.js": "./mocks/replaceKey.js"
+          }
+        }
+      </script>
+  </head>
+  <body>
+    <script type="module">
+      import { expect } from '@esm-bundle/chai';
+      import { runTests } from '@web/test-runner-mocha';
+      import { toFragment } from '../../../../libs/blocks/global-navigation/utilities/utilities.js';
+
+
+      const menuEl = (dropdown) => toFragment`<div class="menu">TODO menu</div>`;
+
+      runTests(() => {
+        describe('keyboard navigation', () => {
+
+          describe('main navigation', () => {
+            test('focus each element', () => {
+              // Focus logo, main nav links, cta, search, profile, app launcher
+            })
+
+            test('interaction with the logo', () => {
+              // Enter - redirect to link
+              // Space - does nothing
+              // Arrow keys - nothing
+            })
+
+            test('interaction with a navItem with dropdown', () => {
+              // Space: Similar to click, open, close
+              // Arrow down: open dropdown and focus 1st element
+              // Arrow up, close dropdown if open and focussed OR move to the left
+              // Left: go to left nav item if available, else nothing
+              // Left: close dropdown if open
+              // right: go to right nav item if available, else nothing
+              // right: close dropdown if open
+            })
+
+            test('interaction with a navItem without dropdown', () => {
+              // Space/Enter: similar to click, do the action
+              // Up/Left: focus navItem to the left
+              // down/Right: focus navItem to the right or nothing
+            })
+
+            test('left and right arrow keys only work within the feds-nav', () => {
+              // At the end of the left/right boundaries,
+              // left/up and right/down keys do nothing
+            })
+          })
+
+          describe('navLink popup', () => {
+            describe('shift', () => {
+              // goes through all interactive elements
+            })
+
+            describe('left', () => {
+              // Goes into the start of a popup section
+              // if there are no popup sections, goes back to the navLink
+            })
+            desribe('right', () => {
+              // Goes to the start of a popup section
+              // if there are no popup sections left, goes back to the navLink
+            })
+            describe('down', () => {
+              // goes to the next interactive popup item
+              // if no item is left, close the popup and go to the next navLink
+            })
+            describe('up', () => {
+              // go to the next interactive popup item 
+              // if no item is left, go to the navLink but don't close the popup
+            })
+          })
+
+          describe('profile', () => {
+            test('interacting with the profile', () => {
+              // Space: open/close
+              // Enter: open/close
+              // Arrow-up: close if open
+              // Arrow-down: open if closed
+            })
+            test('interacting with the profile dropdown', () => {
+              // Up/down focus the clickable links
+            })
+          })
+
+          describe('search', () => {
+            test('interacting with search', () => {
+              // Arrow keys: nothing
+              // Enter: Open and focus the search input, or close the search
+              // Space: nothing
+            })
+            test('tab and shift+tab do not leave the navigation when the search is open', () => {
+
+            })
+          })
+
+          describe('appLauncher', () => {
+            
+          })
+        });
+
+      });
+    </script>
+  </body>
+</html>

@@ -71,7 +71,11 @@ const AUTO_BLOCKS = [
 ];
 const ENVS = {
   local: {
-    name: 'local',
+    name: 'stage',
+    ims: 'stg1',
+    adobeIO: 'cc-collab-stage.adobe.io',
+    adminconsole: 'stage.adminconsole.adobe.com',
+    account: 'stage.account.adobe.com',
     edgeConfigId: '8d2805dd-85bf-4748-82eb-f99fdad117a6',
     pdfViewerClientId: '600a4521c23d4c7eb9c7b039bee534a0',
   },
@@ -276,12 +280,15 @@ export function appendHtmlPostfix(area = document) {
   });
 }
 
-export const loadScript = (url, type) => new Promise((resolve, reject) => {
+export const loadScript = (url, type, async) => new Promise((resolve, reject) => {
   let script = document.querySelector(`head > script[src="${url}"]`);
   if (!script) {
     const { head } = document;
     script = document.createElement('script');
     script.setAttribute('src', url);
+    if (async) {
+      script.setAttribute('async', '');
+    }
     if (type) {
       script.setAttribute('type', type);
     }
@@ -571,16 +578,6 @@ export async function loadDeferred(area, blocks, config) {
   });
 }
 
-function loadPrivacy() {
-  window.fedsConfig = {
-    privacy: {
-      otDomainId: '7a5eb705-95ed-4cc4-a11d-0cc5760e93db',
-      footerLinkSelector: '[href="https://www.adobe.com/#openPrivacy"]',
-    },
-  };
-  loadScript('https://www.adobe.com/etc.clientlibs/globalnav/clientlibs/base/privacy-standalone.js');
-}
-
 function initSidekick() {
   const initPlugins = async () => {
     const { default: init } = await import('./sidekick.js');
@@ -660,7 +657,6 @@ export async function loadArea(area = document) {
 export function loadDelayed(delay = 3000) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      loadPrivacy();
       if (getMetadata('interlinks') === 'on') {
         const path = `${getConfig().locale.contentRoot}/keywords.json`;
         import('../features/interlinks.js').then((mod) => { mod.default(path); resolve(mod); });
@@ -701,14 +697,12 @@ export function loadLana(options = {}) {
   if (window.lana) return;
 
   const lanaError = (e) => {
-    window.lana.log(e.reason || e.error || e.message, {
-      errorType: 'i',
-    });
-  }
+    window.lana.log(e.reason || e.error || e.message, { errorType: 'i' });
+  };
 
   window.lana = {
     log: async (...args) => {
-      await import('../utils/lana.js');
+      await import('./lana.js');
       window.removeEventListener('error', lanaError);
       window.removeEventListener('unhandledrejection', lanaError);
       return window.lana.log(...args);
