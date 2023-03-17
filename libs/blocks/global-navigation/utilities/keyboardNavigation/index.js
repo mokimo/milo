@@ -28,12 +28,11 @@ class KeyboardNavigation {
       if (this.prev === -1 || this.next === -1) return;
 
       if (e.shiftKey && e.code === 'Tab') {
-        if (this.prev === -1) return;
         const open = document.querySelector(selectors.openPopup);
-        this.focusPrevNavItem();
         if (open) {
+          e.preventDefault();
+          this.focusPrevNavItem();
           this.openPopup({ focus: 'last' });
-          return;
         }
         return;
       }
@@ -117,7 +116,7 @@ class KeyboardNavigation {
 
   openPopup = ({ focus } = {}) => {
     const trigger = this.mainNavItems[this.currMain];
-    if (!trigger) return;
+    if (!trigger || !trigger.hasAttribute('aria-haspopup')) return;
     this.closePopup();
     trigger.setAttribute('aria-expanded', 'true');
     trigger.setAttribute('daa-lh', 'header|Close');

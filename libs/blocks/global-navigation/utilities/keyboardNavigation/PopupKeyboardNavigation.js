@@ -18,8 +18,12 @@ class Popup {
     const last = getPreviousVisibleItem(popupItems.length, popupItems);
     if (first === -1) return;
 
-    if (focus === 'first') popupItems[first].focus();
-    if (focus === 'last') popupItems[last].focus();
+    if (focus === 'first') {
+      popupItems[first].focus();
+    }
+    if (focus === 'last') {
+      popupItems[last].focus();
+    }
 
     this.handleKeydown = (e) => {
       e.preventDefault();
@@ -27,13 +31,13 @@ class Popup {
       const curr = popupItems.findIndex((el) => el === e.target);
       const prev = getPreviousVisibleItem(curr, popupItems);
       const next = getNextVisibleItem(curr, popupItems);
-
       if (e.shiftKey && e.code === 'Tab') {
         if (prev === -1) {
           keyboardNavigation.mainNavItems[keyboardNavigation.currMain].focus();
           return;
         }
         popupItems[prev].focus();
+        return;
       }
 
       switch (e.code) {
