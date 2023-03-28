@@ -5,7 +5,7 @@ import {
 } from './utils.js';
 
 class Popup {
-  constructor({ popupEl, focus, keyboardNavigation }) {
+  constructor({ popupEl, focus, mainNav }) {
     if (!popupEl) return;
     const popupItems = [
       ...popupEl.querySelectorAll(`
@@ -33,7 +33,7 @@ class Popup {
       const next = getNextVisibleItem(curr, popupItems);
       if (e.shiftKey && e.code === 'Tab') {
         if (prev === -1) {
-          keyboardNavigation.mainNavItems[keyboardNavigation.currMain].focus();
+          mainNav.items[mainNav.curr].focus();
           return;
         }
         popupItems[prev].focus();
@@ -43,8 +43,8 @@ class Popup {
       switch (e.code) {
         case 'Tab': {
           if (next === -1) {
-            keyboardNavigation.focusNextNavItem();
-            keyboardNavigation.openPopup({});
+            mainNav.focusNext();
+            mainNav.open({});
             break;
           }
           popupItems[next].focus();
@@ -55,8 +55,8 @@ class Popup {
           break;
         }
         case 'Escape': {
-          keyboardNavigation.closePopup();
-          keyboardNavigation.mainNavItems[keyboardNavigation.currMain].focus();
+          mainNav.close();
+          mainNav.items[mainNav.cur].focus();
           break;
         }
         case 'Space': {
@@ -68,8 +68,9 @@ class Popup {
           break;
         }
         case 'ArrowUp': {
+          console.log(mainNav);
           if (prev === -1) {
-            keyboardNavigation.mainNavItems[keyboardNavigation.currMain].focus();
+            mainNav.items[mainNav.curr].focus();
             break;
           }
           popupItems[prev].focus();
@@ -80,8 +81,8 @@ class Popup {
         }
         case 'ArrowDown': {
           if (next === -1) {
-            keyboardNavigation.focusNextNavItem();
-            keyboardNavigation.openPopup({});
+            mainNav.focusNext();
+            mainNav.open({});
             break;
           }
           popupItems[next].focus();

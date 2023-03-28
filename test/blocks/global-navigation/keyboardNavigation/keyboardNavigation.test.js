@@ -63,8 +63,8 @@ describe('keyboard navigation', () => {
       const triggerOne = mainNavItems[0];
       const triggerTwo = mainNavItems[1];
       triggerOne.focus();
-      keyboardNavigation.setActiveMainNavItems(triggerOne);
-      keyboardNavigation.openPopup();
+      keyboardNavigation.mainNav.setActive(triggerOne);
+      keyboardNavigation.mainNav.open();
       expect(isOpen(triggerOne)).to.equal(true);
       dispatch({ element: triggerOne, code: 'ArrowRight' });
       expect(isClosed(triggerOne)).to.equal(true);
@@ -75,8 +75,8 @@ describe('keyboard navigation', () => {
       const triggerTwo = mainNavItems[1];
       const triggerPrimaryCTA = mainNavItems[2];
       triggerTwo.focus();
-      keyboardNavigation.setActiveMainNavItems(triggerTwo);
-      keyboardNavigation.openPopup();
+      keyboardNavigation.mainNav.setActive(triggerTwo);
+      keyboardNavigation.mainNav.open();
       dispatch({ element: triggerTwo, code: 'ArrowRight' });
       expect(isClosed(triggerTwo)).to.equal(true);
       expect(isOpen(triggerPrimaryCTA)).to.equal(false);
@@ -108,8 +108,8 @@ describe('keyboard navigation', () => {
       const triggerOne = mainNavItems[0];
       const triggerTwo = mainNavItems[1];
       triggerTwo.focus();
-      keyboardNavigation.setActiveMainNavItems(triggerTwo);
-      keyboardNavigation.openPopup();
+      keyboardNavigation.mainNav.setActive(triggerTwo);
+      keyboardNavigation.mainNav.open();
       expect(isOpen(triggerTwo)).to.equal(true);
       dispatch({ element: triggerTwo, code: 'ArrowLeft' });
       expect(isClosed(triggerTwo)).to.equal(true);
@@ -149,8 +149,8 @@ describe('keyboard navigation', () => {
     it('on the first navLinks with an open popup, will close the popup', () => {
       const triggerOne = mainNavItems[0];
       triggerOne.focus();
-      keyboardNavigation.setActiveMainNavItems(triggerOne);
-      keyboardNavigation.openPopup();
+      keyboardNavigation.mainNav.setActive(triggerOne);
+      keyboardNavigation.mainNav.open();
       expect(isOpen(triggerOne)).to.equal(true);
       dispatch({ element: triggerOne, code: 'ArrowUp' });
       expect(isClosed(triggerOne)).to.equal(true);
@@ -160,8 +160,8 @@ describe('keyboard navigation', () => {
       const triggerOne = mainNavItems[0];
       const triggerTwo = mainNavItems[1];
       triggerTwo.focus();
-      keyboardNavigation.setActiveMainNavItems(triggerTwo);
-      keyboardNavigation.openPopup();
+      keyboardNavigation.mainNav.setActive(triggerTwo);
+      keyboardNavigation.mainNav.open();
       expect(isOpen(triggerTwo)).to.equal(true);
       dispatch({ element: triggerTwo, code: 'ArrowUp' });
       expect(isClosed(triggerTwo)).to.equal(true);
@@ -173,8 +173,8 @@ describe('keyboard navigation', () => {
       const triggerOne = mainNavItems[0];
       const triggerTwo = mainNavItems[1];
       triggerTwo.focus();
-      keyboardNavigation.setActiveMainNavItems(triggerTwo);
-      keyboardNavigation.openPopup();
+      keyboardNavigation.mainNav.setActive(triggerTwo);
+      keyboardNavigation.mainNav.open();
       dispatch({ element: triggerTwo, code: 'ArrowUp' });
       const navLinks = [...triggerOne.parentElement.querySelectorAll(`
         ${selectors.navLink}, 
