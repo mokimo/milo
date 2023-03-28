@@ -55,10 +55,17 @@ class KeyboardNavigation {
         }
         // TODO popup navigation logic.
         case 'ArrowLeft': {
+          if (!e.target.closest(selectors.fedsNav)) break;
+          const open = document.querySelector(selectors.openPopup);
           this.focusPrevNavItem();
+          if (open) {
+            this.openPopup();
+          }
+
           break;
         }
         case 'ArrowUp': {
+          if (!e.target.closest(selectors.fedsNav)) break;
           const open = document.querySelector(selectors.openPopup);
           this.focusPrevNavItem();
           if (open) {
@@ -67,10 +74,16 @@ class KeyboardNavigation {
           break;
         }
         case 'ArrowRight': {
+          if (!e.target.closest(selectors.fedsNav)) break;
+          const open = document.querySelector(selectors.openPopup);
           this.focusNextNavItem();
+          if (open) {
+            this.openPopup();
+          }
           break;
         }
         case 'ArrowDown': {
+          if (!e.target.closest(selectors.fedsNav)) break;
           if (this.mainNavItems[this.currMain] && this.mainNavItems[this.currMain].hasAttribute('aria-haspopup')) {
             this.openPopup({ focus: 'first' });
             return;
@@ -122,11 +135,17 @@ class KeyboardNavigation {
     trigger.setAttribute('aria-expanded', 'true');
     trigger.setAttribute('daa-lh', 'header|Close');
     const navItem = trigger.parentElement;
-    const popupEl = navItem.querySelector('.feds-popup');
+    const popupEl = navItem.querySelector(selectors.fedsPopup);
+    // Async popup, such as a large menu
     if (!popupEl) {
       const observer = new MutationObserver(() => {
         observer.disconnect();
-        this.popup = new Popup({ popupEl: navItem.querySelector('.feds-popup'), trigger, keyboardNavigation: this, focus });
+        this.popup = new Popup({
+          popupEl: navItem.querySelector(selectors.fedsPopup),
+          trigger,
+          keyboardNavigation: this,
+          focus,
+        });
       });
       observer.observe(navItem, { childList: true });
       return;

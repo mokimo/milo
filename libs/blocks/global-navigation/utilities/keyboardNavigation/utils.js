@@ -13,6 +13,8 @@ const selectors = {
   navLink: '.feds-navLink',
   promoLink: '.feds-promo-link',
   imagePromo: 'a.feds-promo-image',
+  fedsNav: '.feds-nav',
+  fedsPopup: '.feds-popup',
 };
 
 const isElementVisible = (elem) => !!(
