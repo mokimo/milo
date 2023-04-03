@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { getConfig } from '../../../utils/utils.js';
 
 const API_WAIT_TIMEOUT = '10000';
@@ -36,8 +37,75 @@ const getQueryParameters = (params) => {
   return result;
 };
 
+const emptyEntitlements = () => ({
+  clouds: {},
+  arrangment_codes: {},
+  fulfilled_codes: {},
+  offer_families: {},
+  list: { fulfilled_codes: [] },
+});
+const CREATIVE_CLOUD = 'creative_cloud';
+const DOCUMENT_CLOUD = 'document_cloud';
+const EXPERIENCE_CLOUD = 'experience_cloud';
+
+/**
+ * Breaks JIL offers(subscriptions) into easily addressable flate data structure.
+ * @param {*} offers
+ */
+const mapSubscriptionCodes = (offers) => {
+  if (!Array.isArray(offers)) {
+    console.warn('mapSubscriptionCodes: data is not an array', offers);
+    return emptyEntitlements();
+  }
+
+  const {
+    clouds,
+    arrangment_codes,
+    fulfilled_codes,
+    offer_families,
+    list,
+  } = emptyEntitlements();
+
+  offers.forEach(({ fulfilled_items, offer = {} }) => {
+    const cloud = offer.product_arrangement?.cloud;
+    clouds[CREATIVE_CLOUD] = clouds[CREATIVE_CLOUD] || cloud === 'CREATIVE';
+    clouds[DOCUMENT_CLOUD] = clouds[DOCUMENT_CLOUD] || cloud === 'DOCUMENT';
+    clouds[EXPERIENCE_CLOUD] = clouds[EXPERIENCE_CLOUD] || cloud === 'EXPERIENCE';
+
+    const family = offer?.product_arrangement?.family;
+    if (family) {
+      offer_families[family.toLowerCase()] = true;
+    }
+
+    if (offer.product_arrangement_code) {
+      arrangment_codes[offer.product_arrangement_code] = true;
+    }
+
+    if (Array.isArray(fulfilled_items)) {
+      fulfilled_items.forEach(({ code }) => {
+        if (code) {
+          fulfilled_codes[code] = true;
+          // Avoid duplicates
+          if (list.fulfilled_codes.indexOf(code) === -1) {
+            list.fulfilled_codes.push(code);
+          }
+        }
+      });
+    }
+  });
+
+  return {
+    clouds,
+    arrangment_codes,
+    fulfilled_codes,
+    offer_families,
+    list,
+  };
+};
+
 const getSubscriptions = async ({ queryParams, locale }) => {
   const profile = await window.adobeIMS.getProfile();
+  // TODO remove the demo 'true' before you commit
   const apiUrl = getConfig().env.name === 'prod'
     ? `https://www.adobe.com/aos-api/users/${profile.userId}/subscriptions`
     : `https://www.stage.adobe.com/aos-api/users/${profile.userId}/subscriptions`;
@@ -63,27 +131,37 @@ const getSubscriptions = async ({ queryParams, locale }) => {
  * @param {object} object required params
  * @param {array} object.params array of name value query parameters [{name: 'Q', value: 'PARAM'}]
  * @param {object} object.locale {country: 'CH', language: 'de'}
+ * @param {string} object.format format function, raw or default
  * @returns {object} JIL Entitlements
  */
-const getUserEntitlements = async ({ params, locale } = {}) => {
-  if (!window.adobeIMS?.isSignedInUser()) return Promise.reject(new Error('User not signed in'));
+const getUserEntitlements = async ({ params, locale, format } = {}) => {
+  if (!window.adobeIMS?.isSignedInUser()) return Promise.resolve(emptyEntitlements());
 
   const queryParams = getQueryParameters(params);
-  if (entitlements[queryParams]) return entitlements[queryParams];
+  if (entitlements[queryParams]) {
+    return format === 'raw'
+      ? entitlements[queryParams]
+      : entitlements[queryParams]
+        .then((res) => mapSubscriptionCodes(res));
+  }
 
   let resolve;
-  let reject;
   entitlements[queryParams] = entitlements[queryParams]
-    || new Promise((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
-  setTimeout(() => reject('Subscriptions API Call timeout'), API_WAIT_TIMEOUT);
+   || new Promise((_resolve) => { resolve = _resolve; });
+
+  setTimeout(() => resolve(emptyEntitlements()), API_WAIT_TIMEOUT);
   // TODO we might need to format data for analytics
-  const data = await getSubscriptions({ queryParams, locale });
+  const data = await getSubscriptions({ queryParams, locale })
+    .finally((res) => res || emptyEntitlements());
+
   if (data) resolve(data);
-  reject('No response from the aos-api');
-  return entitlements[queryParams];
+  else resolve(emptyEntitlements());
+
+  return format === 'raw'
+    ? entitlements[queryParams]
+    : entitlements[queryParams]
+      .then((res) => mapSubscriptionCodes(res))
+      .catch(() => emptyEntitlements());
 };
 
 export default getUserEntitlements;
