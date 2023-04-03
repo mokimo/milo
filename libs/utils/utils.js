@@ -80,7 +80,11 @@ const AUTO_BLOCKS = [
 ];
 const ENVS = {
   local: {
-    name: 'local',
+    name: 'stage',
+    ims: 'stg1',
+    adobeIO: 'cc-collab-stage.adobe.io',
+    adminconsole: 'stage.adminconsole.adobe.com',
+    account: 'stage.account.adobe.com',
     edgeConfigId: '8d2805dd-85bf-4748-82eb-f99fdad117a6',
     pdfViewerClientId: '600a4521c23d4c7eb9c7b039bee534a0',
   },
@@ -254,7 +258,7 @@ export function appendHtmlPostfix(area = document) {
   const shouldNotConvert = (href) => {
     let url = { pathname: href };
 
-    try { url = new URL(href, pageUrl) } catch (e) {}
+    try { url = new URL(href, pageUrl); } catch (e) {}
 
     if (!(href.startsWith('/') || href.startsWith(pageUrl.origin))
       || url.pathname?.endsWith('/')
@@ -743,7 +747,7 @@ export async function loadArea(area = document) {
 export function loadDelayed(delay = 3000) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      loadPrivacy();
+      // loadPrivacy();
       if (getMetadata('interlinks') === 'on') {
         const path = `${getConfig().locale.contentRoot}/keywords.json`;
         import('../features/interlinks.js').then((mod) => { mod.default(path); resolve(mod); });

@@ -7,6 +7,7 @@ import {
 } from '../../utils/utils.js';
 import { toFragment, getFedsPlaceholderConfig, getAnalyticsValue, decorateCta } from './utilities/utilities.js';
 import { replaceKey } from '../../features/placeholders.js';
+import KeyboardNavigation from './utilities/keyboardNavigation/index.js';
 
 const CONFIG = {
   icons: {
@@ -84,7 +85,7 @@ class Gnav {
       </div>`;
 
     this.el.addEventListener('click', this.loadDelayed);
-    setTimeout(() => this.loadDelayed(), 3000);
+    setTimeout(() => this.loadDelayed(), 6000);
     this.loadIMS();
     this.el.append(this.elements.curtain, this.elements.topnavWrapper);
 
@@ -116,6 +117,7 @@ class Gnav {
         }
       }
     });
+    new KeyboardNavigation();
   };
 
   loadDelayed = async () => {
@@ -233,7 +235,7 @@ class Gnav {
     };
 
     this.blocks.profile.buttonElem.addEventListener('click', decorateDropdown);
-    decorationTimeout = setTimeout(decorateDropdown, 3000);
+    decorationTimeout = setTimeout(decorateDropdown, 6000);
   };
 
   decorateAppLauncher = () => {
@@ -388,7 +390,7 @@ class Gnav {
       };
 
       template.addEventListener('click', decorateDropdown);
-      decorationTimeout = setTimeout(decorateDropdown, 3000);
+      decorationTimeout = setTimeout(decorateDropdown, 6000);
     };
 
     // Decorate item based on its type

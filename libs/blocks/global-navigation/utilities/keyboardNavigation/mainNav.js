@@ -17,8 +17,7 @@ class MainNavItem {
         const open = document.querySelector(selectors.expandedPopupTrigger);
         if (open) {
           e.preventDefault();
-          this.focusPrev();
-          this.open({ focus: 'last' });
+          this.focusPrev({ focus: 'last' });
         }
         return;
       }
@@ -41,26 +40,17 @@ class MainNavItem {
         }
         // TODO popup navigation logic.
         case 'ArrowLeft': {
-          if (!e.target.closest(selectors.fedsNav)) break;
-          const open = document.querySelector(selectors.expandedPopupTrigger);
-          this.focusPrev();
-          if (open) {
-            this.open();
-          }
+          if (this.prev === -1) break;
+          this.focusPrev({ focus: null });
 
           break;
         }
         case 'ArrowUp': {
-          if (!e.target.closest(selectors.fedsNav)) break;
-          const open = document.querySelector(selectors.expandedPopupTrigger);
-          this.focusPrev();
-          if (open) {
-            this.open({ focus: 'last' });
-          }
+          this.focusPrev({ focus: 'last' });
           break;
         }
         case 'ArrowRight': {
-          if (!e.target.closest(selectors.fedsNav)) break;
+          if (this.next === -1) break;
           const open = document.querySelector(selectors.expandedPopupTrigger);
           this.focusNext();
           if (open) {
@@ -69,7 +59,6 @@ class MainNavItem {
           break;
         }
         case 'ArrowDown': {
-          if (!e.target.closest(selectors.fedsNav)) break;
           if (this.items[this.curr] && this.items[this.curr].hasAttribute('aria-haspopup')) {
             this.open({ focus: 'first' });
             return;
@@ -91,11 +80,15 @@ class MainNavItem {
     this.next = getNextVisibleItem(this.curr, this.items);
   };
 
-  focusPrev = () => {
-    if (this.prev === -1) return;
+  focusPrev = ({ focus } = {}) => {
+    const open = document.querySelector(selectors.expandedPopupTrigger);
     this.close();
+    if (this.prev === -1) return;
     this.items[this.prev].focus();
     this.setActive(this.items[this.prev]);
+    if (open) {
+      this.open({ focus });
+    }
   };
 
   focusNext = () => {
