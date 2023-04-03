@@ -84,7 +84,7 @@ class Gnav {
       </div>`;
 
     this.el.addEventListener('click', this.loadDelayed);
-    setTimeout(() => this.loadDelayed(), 100);
+    setTimeout(() => this.loadDelayed(), 10000);
     this.loadIMS();
     this.el.append(this.elements.curtain, this.elements.topnavWrapper);
 
@@ -233,7 +233,7 @@ class Gnav {
     };
 
     this.blocks.profile.buttonElem.addEventListener('click', decorateDropdown);
-    decorationTimeout = setTimeout(decorateDropdown, 100);
+    decorationTimeout = setTimeout(decorateDropdown, 10000);
   };
 
   decorateAppLauncher = () => {
@@ -388,7 +388,7 @@ class Gnav {
       };
 
       template.addEventListener('click', decorateDropdown);
-      decorationTimeout = setTimeout(decorateDropdown, 100);
+      decorationTimeout = setTimeout(decorateDropdown, 10000);
     };
 
     // Decorate item based on its type
