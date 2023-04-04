@@ -38,7 +38,7 @@ class Popup {
     }
   }
 
-  openMobileHeadline = ({ focus, headline } = {}) => {
+  openMobileHeadline = ({ curr, popupItems, headline } = {}) => {
     const open = [...document.querySelectorAll('.feds-popup-headline[aria-expanded="true"]')];
     open.forEach((el) => el.setAttribute('aria-expanded', 'false'));
 
@@ -53,17 +53,26 @@ class Popup {
     const section = document.activeElement.closest('.feds-popup-section');
     const allSections = [...this.getOpenPopup().querySelectorAll('.feds-popup-section')];
     const curr = allSections.findIndex((node) => node.isEqualNode(section));
-    return { allSections, curr, prev: curr - 1, next: curr + 1 };
+    const first = allSections[0];
+    const last = allSections[allSections.length - 1];
+    return {
+      allSections,
+      currentSection: curr,
+      previousSection: curr === -1 ? -1 : curr - 1,
+      nextSection: curr === -1 ? -1 : curr + 1,
+      first,
+      last,
+    };
   };
 
   mobileArrowDown = ({ curr, popupItems, focus } = {}) => {
     // continue here with this scuffed code.. TODO TODO TODO
     if (curr + 1 < popupItems.length) {
-      const { allSections, curr, next, prev } = this.getSections();
-      if (next === -1) return this.mainNav.items[this.mainNav.curr].focus();
-      const nextSection = allSections[next];
-      const headline = nextSection.querySelector('.feds-popup-headline');
-      this.openMobileHeadline({ focus, headline });
+      const { allSections, currentSection, nextSection, previousSection } = this.getSections();
+      if (nextSection === -1) return this.mainNav.items[this.mainNav.current].focus();
+      const next = allSections[currentSection];
+      const headline = next.querySelector('.feds-popup-headline');
+      this.openMobileHeadline({ headline, popupItems, curr });
     }
   };
 
@@ -155,18 +164,20 @@ class Popup {
         // has columns & sections
         case 'ArrowDown': {
           if (!this.desktop.matches) {
+            const nextElementIsVisible = curr === next - 1;
+            if (nextElementIsVisible) {
+              popupItems[next].focus();
+              break;
+            }
             this.mobileArrowDown({ curr, popupItems });
             break;
           }
+
           if (next === -1) {
             this.mainNav.focusNext();
             this.mainNav.open({ focus: 'first' });
             break;
           }
-          // const index = popupItems.findIndex((el) => el === document.activeElement);
-          // const nextItem = getNextVisibleItem(index, popupItems);
-          // console.log({ index, popupItems, nextItem });
-          // if (nextItem === -1) break;
           popupItems[next].focus();
           break;
         }
