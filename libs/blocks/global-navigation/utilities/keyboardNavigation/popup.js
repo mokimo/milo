@@ -24,9 +24,7 @@ class Popup {
   open({ focus }) {
     const popupEl = this.getOpenPopup();
     if (!popupEl) return;
-    const popupItems = [
-      ...popupEl.querySelectorAll(itemSelector),
-    ];
+    const popupItems = [...popupEl.querySelectorAll(itemSelector)];
     const first = getNextVisibleItem(-1, popupItems);
     if (first === -1) return;
 
@@ -53,24 +51,15 @@ class Popup {
     open.forEach((el) => el.setAttribute('aria-expanded', 'false'));
   };
 
-  openHeadline = ({ curr, popupItems, headline, focus } = {}) => {
+  openHeadline = ({ headline, focus } = {}) => {
     this.closeHeadline();
     if (headline.getAttribute('aria-haspopup') === 'true') {
       headline.setAttribute('aria-expanded', 'true');
-
-      const nextItem = getNextVisibleItem(curr, popupItems);
-      const prevItem = getPreviousVisibleItem(curr, popupItems);
-      if ((focus === 'first' && nextItem === -1)) {
-        this.mainNav.focusNext();
-        this.mainNav.open({ focus });
-        return;
-      }
-      if (focus === 'first') {
-        popupItems[nextItem].focus();
-      }
-      if (focus === 'last') {
-        popupItems[prevItem].focus();
-      }
+      const section = headline.closest(selectors.fedsPopupSection);
+      const items = [...section.querySelectorAll(itemSelector)]
+        .filter((el) => el.offsetHeight && el.offsetWidth);
+      if (focus === 'first') items[0].focus();
+      if (focus === 'last') items[items.length - 1].focus();
     }
   };
 
@@ -143,13 +132,21 @@ class Popup {
     this.openHeadline({ headline, popupItems, curr, focus: 'first' });
   };
 
+  setActive = ({ curr }) => {
+    this.popupItems = [this.getOpenPopup().querySelectorAll(itemSelector)];
+    // TODO should this be document.activeElement? I think so.
+    this.curr = this.popupItems.findIndex((el) => el === curr || document.activeElement);
+    this.prev = getPreviousVisibleItem(this.curr, this.popupItems);
+    this.next = getNextVisibleItem(this.curr, this.popupItems);
+  };
+
   listenToChanges = () => {
     document.addEventListener('keydown', (e) => {
       const popupEl = this.getOpenPopup();
       if (!e.target.closest(selectors.fedsPopup) || !popupEl) return;
       e.preventDefault();
       e.stopPropagation();
-
+      this.setActive({ curr: e.target, popupEl });
       const popupItems = [...popupEl.querySelectorAll(itemSelector)];
       const curr = popupItems.findIndex((el) => el === e.target);
       const prev = getPreviousVisibleItem(curr, popupItems);
@@ -198,6 +195,35 @@ class Popup {
           break;
         }
         case 'ArrowLeft': {
+          if (!this.desktop.matches) {
+            const { visibleSections, previousSection } = this.getSections();
+            // if the next element is not visible, we check if it has a headline
+            const headline = visibleSections[previousSection]
+              ?.querySelector(selectors.fedsPopupHeadline);
+
+            // if there is no headline, we move onto the next nav item
+            if (!headline) {
+              this.closeHeadline();
+
+              const section = document.activeElement.closest(selectors.fedsPopupSection);
+              const isLastNavItem = visibleSections.findIndex((node) => node.isEqualNode(section));
+
+              if (isLastNavItem <= 1) {
+                this.mainNav.items[this.mainNav.curr].focus();
+                break;
+              }
+
+              this.mainNav.focusPrev();
+              this.mainNav.open();
+              return;
+            }
+
+            // TODO talk to rares, headlines are not focussable anymore.
+            // IMO this is fine
+            this.openHeadline({ headline, popupItems, curr, focus: 'last' });
+            break;
+          }
+
           // TODO, arrowLeft and arrowRight might not always work and lead to JS errors.
           // CHECK the medium menu.
           if (prev === -1) {
@@ -229,10 +255,30 @@ class Popup {
           break;
         }
         case 'ArrowRight': {
+          if (!this.desktop.matches) {
+            const { visibleSections, nextSection } = this.getSections();
+            // if the next element is not visible, we check if it has a headline
+            const headline = visibleSections[nextSection]
+              ?.querySelector(selectors.fedsPopupHeadline);
+
+            // if there is no headline, we can just move on
+            if (!headline) {
+              this.closeHeadline();
+              this.mainNav.focusNext();
+              this.mainNav.open();
+              break;
+            }
+            // TODO talk to rares, headlines are not focussable anymore.
+            // IMO this is fine
+            this.openHeadline({ headline, popupItems, curr, focus: 'first' });
+            break;
+          }
+
           if (next === -1) {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
+
           const section = document.activeElement.closest(selectors.fedsPopupSection);
           const visibleSections = [...this.getOpenPopup().querySelectorAll(selectors.fedsPopupSection)];
           const index = visibleSections.findIndex((node) => node.isEqualNode(section));

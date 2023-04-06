@@ -539,7 +539,7 @@ describe('keyboard navigation', () => {
     });
 
     describe('ArrowRight', () => {
-      it.only('shifts focus to the next section', async () => {
+      it('shifts focus to the next section', async () => {
         expect(document.activeElement.innerText).to.equal('first-column-first-section-first-item');
         await sendKeys({ press: 'ArrowRight' });
         expect(document.activeElement.innerText).to.equal('first-column-second-section-first-item');
@@ -547,25 +547,25 @@ describe('keyboard navigation', () => {
         expect(document.activeElement.innerText).to.equal('second-column-first-section-first-item');
       });
 
-      it('shifts focus from the last popup item back to the trigger', async () => {
+      it('shifts focus from the last popup item to the next trigger', async () => {
         const section = navLinks[navLinks.length - 2].closest(selectors.fedsPopupSection);
         const headline = section.querySelector(selectors.fedsPopupHeadline);
         headline.setAttribute('aria-expanded', true)
         navLinks[navLinks.length - 2].focus();
         await sendKeys({ press: 'ArrowRight' });
-        expect(document.activeElement).to.equal(trigger);
+        expect(document.activeElement).to.equal(triggerTwo);
       });
     });
 
-    describe.skip('ArrowLeft', () => {
+    describe('ArrowLeft', () => {
       it('shifts focus to the previous section', async () => {
         await sendKeys({ press: 'ArrowRight' });
         await sendKeys({ press: 'ArrowRight' });
         expect(document.activeElement.innerText).to.equal('second-column-first-section-first-item');
         await sendKeys({ press: 'ArrowLeft' });
-        expect(document.activeElement.innerText).to.equal('first-column-second-section-first-item');
+        expect(document.activeElement.innerText).to.equal('first-column-first-section-last-item');
         await sendKeys({ press: 'ArrowLeft' });
-        expect(document.activeElement.innerText).to.equal('first-column-first-section-first-item');
+        expect(document.activeElement).to.equal(trigger);
       });
 
       it('shifts focus from the first popup item back to the trigger', async () => {
