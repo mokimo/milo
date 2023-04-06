@@ -16,8 +16,12 @@ class MainNavItem {
       if (e.shiftKey && e.code === 'Tab') {
         const open = document.querySelector(selectors.expandedPopupTrigger);
         if (open) {
-          e.preventDefault();
-          this.focusPrev({ focus: 'last' });
+          if (this.prev === -1) {
+            this.close();
+          } else {
+            e.preventDefault();
+            this.focusPrev({ focus: 'last' });
+          }
         }
         return;
       }

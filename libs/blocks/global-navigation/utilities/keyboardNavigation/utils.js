@@ -15,6 +15,8 @@ const selectors = {
   imagePromo: 'a.feds-promo-image',
   fedsNav: '.feds-nav',
   fedsPopup: '.feds-popup',
+  fedsPopupHeadline: '.feds-popup-headline',
+  fedsPopupSection: '.feds-popup-section',
 };
 
 const isElementVisible = (elem) => !!(
@@ -25,26 +27,17 @@ const isElementVisible = (elem) => !!(
 );
 
 const getNextVisibleItem = (position, items) => {
-  let newPosition = position;
-  do {
-    newPosition += 1;
-    if (newPosition >= items.length) {
-      return -1;
-    }
-  } while (!isElementVisible(items[newPosition]));
-  return newPosition;
+  for (let newPosition = position + 1; newPosition < items.length; newPosition += 1) {
+    if (isElementVisible(items[newPosition])) return newPosition;
+  }
+  return -1;
 };
 
 const getPreviousVisibleItem = (position, items) => {
-  let newPosition = position;
-  do {
-    newPosition -= 1;
-    if (newPosition < 0) {
-      return -1;
-    }
-  } while (!isElementVisible(items[newPosition]));
-
-  return newPosition;
+  for (let newPosition = position - 1; newPosition >= 0; newPosition -= 1) {
+    if (isElementVisible(items[newPosition])) return newPosition;
+  }
+  return -1;
 };
 
-export { getNextVisibleItem, getPreviousVisibleItem, selectors };
+export { isElementVisible, getNextVisibleItem, getPreviousVisibleItem, selectors };
