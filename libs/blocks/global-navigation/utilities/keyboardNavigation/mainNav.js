@@ -1,10 +1,13 @@
 /* eslint-disable class-methods-use-this */
 import { selectors, getNextVisibleItem, getPreviousVisibleItem } from './utils.js';
 import Popup from './popup.js';
+import MobilePopup from './mobilePopup.js';
 
 class MainNavItem {
   constructor() {
+    this.desktop = window.matchMedia('(min-width: 900px)');
     this.popup = new Popup({ mainNav: this });
+    this.mobilePopup = new MobilePopup({ mainNav: this });
     this.listenToChanges();
   }
 
@@ -118,14 +121,22 @@ class MainNavItem {
     const navItem = trigger.parentElement;
     const popupEl = navItem.querySelector(selectors.fedsPopup);
     if (popupEl) {
-      this.popup.open({ focus });
+      if (this.desktop.matches) {
+        this.popup.open({ focus });
+      } else {
+        this.mobilePopup.open({ focus });
+      }
       return;
     }
 
     // We need to wait for the popup to be added to the DOM before we can open it.
     const observer = new MutationObserver(() => {
       observer.disconnect();
-      this.popup.open({ focus });
+      if (this.desktop.matches) {
+        this.popup.open({ focus });
+      } else {
+        this.mobilePopup.open({ focus });
+      }
     });
     observer.observe(navItem, { childList: true });
   };
