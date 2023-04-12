@@ -12,6 +12,16 @@ class MainNavItem {
   }
 
   listenToChanges() {
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.fedsPopup)) return;
+      const open = document.querySelector(selectors.expandedPopupTrigger);
+      if (open) {
+        this.close();
+      } else {
+        this.open({ triggerEl: e.target });
+      }
+    });
+
     document.addEventListener('keydown', (e) => {
       if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.fedsPopup)) return;
       this.setActive(e.target);
@@ -30,19 +40,13 @@ class MainNavItem {
       }
 
       switch (e.code) {
-        case 'Tab': {
-          console.log('Tab');
-          break;
-        }
-        case 'Enter': {
-          console.log('Enter');
-          break;
-        }
         case 'Escape': {
+          this.close();
           break;
         }
         case 'Space': {
-          console.log('Space');
+          e.preventDefault();
+          e.target.click();
           break;
         }
         // TODO popup navigation logic.
@@ -105,16 +109,21 @@ class MainNavItem {
     this.setActive(this.items[this.next]);
   };
 
-  close = () => {
-    const trigger = document.querySelector(selectors.expandedPopupTrigger);
-    if (!trigger) return;
-    trigger.setAttribute('aria-expanded', 'false');
-    trigger.setAttribute('daa-lh', 'header|Open');
+  close = ({ e } = {}) => {
+    const openElements = document.querySelectorAll("header [aria-expanded='true']");
+    if (!openElements) return;
+    if (e) e.preventDefault();
+    [...openElements].forEach((el) => {
+      el.setAttribute('aria-expanded', 'false');
+      el.setAttribute('daa-lh', 'header|Open');
+    });
+    document.querySelector('.feds-curtain').classList.remove('is-open');
   };
 
-  open = ({ focus } = {}) => {
-    const trigger = this.items[this.curr];
+  open = ({ focus, triggerEl, e } = {}) => {
+    const trigger = triggerEl || this.items[this.curr];
     if (!trigger || !trigger.hasAttribute('aria-haspopup')) return;
+    if (e) e.preventDefault();
     this.close();
     trigger.setAttribute('aria-expanded', 'true');
     trigger.setAttribute('daa-lh', 'header|Close');

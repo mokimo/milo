@@ -17,6 +17,7 @@ const selectors = {
   fedsPopup: '.feds-popup',
   fedsPopupHeadline: '.feds-popup-headline',
   fedsPopupSection: '.feds-popup-section',
+  fedsPopupColumn: '.feds-popup-column',
 };
 
 const isElementVisible = (elem) => !!(

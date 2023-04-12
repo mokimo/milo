@@ -167,7 +167,8 @@ class Popup {
           break;
         }
         case 'Enter': {
-          console.log('Enter');
+          e.preventDefault();
+          e.target.click();
           break;
         }
         case 'Escape': {
@@ -176,7 +177,8 @@ class Popup {
           break;
         }
         case 'Space': {
-          console.log('Space');
+          e.preventDefault();
+          e.target.click();
           break;
         }
         case 'ArrowLeft': {

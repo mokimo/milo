@@ -8,7 +8,6 @@ import searchCss from '../../../../libs/blocks/global-navigation/blocks/search/g
 import signInCss from '../../../../libs/blocks/global-navigation/blocks/profile/signIn.css' assert { type: 'css' };
 import buttonCss from '../../../../libs/blocks/global-navigation/blocks/profile/button.css' assert { type: 'css' };
 import dropdownCss from '../../../../libs/blocks/global-navigation/blocks/profile/dropdown.css' assert { type: 'css' };
-import navMenuCss from '../../../../libs/blocks/global-navigation/blocks/navMenu/menu.css' assert { type: 'css' };
 import navDropdownCss from '../../../../libs/blocks/global-navigation/blocks/navDropdown/dropdown.css' assert { type: 'css' };
 import { setViewport } from '@web/test-runner-commands';
 import { isElementVisible } from '../../../../libs/blocks/global-navigation/utilities/keyboardNavigation/utils.js';
@@ -25,7 +24,7 @@ let keyboardNavigation;
 let allNavItems;
 describe('keyboard navigation', () => {
   before(() => {
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, searchCss, signInCss, buttonCss, dropdownCss, navMenuCss, navDropdownCss]
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, searchCss, signInCss, buttonCss, dropdownCss, navDropdownCss]
     keyboardNavigation = new KeyboardNavigation();
   });
 
@@ -256,6 +255,60 @@ describe('keyboard navigation', () => {
         expect(firstPopupItem).to.equal(document.activeElement);
       });
     });
+
+    describe('Space', () => {
+      it('opens and closes a popup', async () => {
+        const trigger = mainNavItems[0];
+        trigger.focus();
+        await sendKeys({ press: 'Space' });
+        expect(isOpen(trigger)).to.equal(true);
+        await sendKeys({ press: 'Space' });
+        expect(isClosed(trigger)).to.equal(true);
+      });
+
+      it("emits a click event on links and CTAs", (done) => {
+        const cta = mainNavItems[2]
+        cta.focus()
+        cta.addEventListener('click', (e) => {
+          e.preventDefault()
+          done()
+        })
+        sendKeys({ press: 'Space' });
+      })  
+    })
+
+    describe('Enter', () => {
+      it('opens and closes a popup', async () => {
+        const trigger = mainNavItems[0];
+        trigger.focus();
+        await sendKeys({ press: 'Enter' });
+        expect(isOpen(trigger)).to.equal(true);
+        await sendKeys({ press: 'Enter' });
+        expect(isClosed(trigger)).to.equal(true);
+      });
+
+      it("emits a click event on links and CTAs", (done) => {
+        const cta = mainNavItems[2]
+        cta.focus()
+        cta.addEventListener('click', (e) => {
+          e.preventDefault()
+          done()
+        })
+        sendKeys({ press: 'Enter' });
+      })  
+    })
+
+    describe('Escape', () => {
+      it('closes a popup', async () => {
+        const trigger = mainNavItems[0];
+        trigger.focus();
+        keyboardNavigation.mainNav.setActive(trigger);
+        keyboardNavigation.mainNav.open();
+        expect(isOpen(trigger)).to.equal(true);
+        await sendKeys({ press: 'Escape' });
+        expect(isClosed(trigger)).to.equal(true);
+      })
+    })
   });
 
   describe('navigation that is not mainNav or popup', () => {
@@ -309,13 +362,14 @@ describe('keyboard navigation', () => {
     let navLinks;
     let trigger;
     let triggerTwo;
+    let firstPopupItem
     beforeEach(async () => {
       [trigger, triggerTwo] = mainNavItems;
       trigger.focus();
       keyboardNavigation.mainNav.setActive(trigger);
       keyboardNavigation.mainNav.open();
       navLinks = getNavLinks(trigger);
-      const firstPopupItem = navLinks[0];
+      firstPopupItem = navLinks[0];
       firstPopupItem.focus();
     });
 
@@ -359,10 +413,8 @@ describe('keyboard navigation', () => {
     });
 
     describe('ArrowRight', () => {
-      it('shifts focus to the next section', async () => {
+      it('shifts focus to the next column', async () => {
         expect(document.activeElement.innerText).to.equal('first-column-first-section-first-item');
-        await sendKeys({ press: 'ArrowRight' });
-        expect(document.activeElement.innerText).to.equal('first-column-second-section-first-item');
         await sendKeys({ press: 'ArrowRight' });
         expect(document.activeElement.innerText).to.equal('second-column-first-section-first-item');
       });
@@ -375,12 +427,9 @@ describe('keyboard navigation', () => {
     });
 
     describe('ArrowLeft', () => {
-      it('shifts focus to the previous section', async () => {
-        await sendKeys({ press: 'ArrowRight' });
+      it('shifts focus to the previous column', async () => {
         await sendKeys({ press: 'ArrowRight' });
         expect(document.activeElement.innerText).to.equal('second-column-first-section-first-item');
-        await sendKeys({ press: 'ArrowLeft' });
-        expect(document.activeElement.innerText).to.equal('first-column-second-section-first-item');
         await sendKeys({ press: 'ArrowLeft' });
         expect(document.activeElement.innerText).to.equal('first-column-first-section-first-item');
       });
@@ -436,12 +485,41 @@ describe('keyboard navigation', () => {
         expect(document.activeElement.innerText).to.equal('Primary');
       });
     });
+
+    describe('Escape', () => {
+      it('closes the popup', async () => {
+        expect(isOpen(trigger)).to.equal(true);
+        await sendKeys({ press: 'Escape' });
+        expect(isClosed(trigger)).to.equal(true);
+      });
+    })
+
+    describe('Enter', () => {
+      it('Emits a click event when pressing space', (done) => {
+        firstPopupItem.addEventListener('click', (e) => {
+          e.preventDefault()
+          done()
+        })
+        sendKeys({ press: 'Enter' })
+      });
+    })
+
+    describe('Space', () => {
+      it('Emits a click event when pressing space', (done) => {
+        firstPopupItem.addEventListener('click', (e) => {
+          e.preventDefault()
+          done()
+        })
+        sendKeys({ press: 'Space' })
+      });
+    })
   });
 
   describe('mobile', () => {
     let navLinks;
     let trigger;
     let triggerTwo;
+    let firstPopupItem
     beforeEach(async () => {
       setViewport({ width: 600, height: 600 })
       document.body.innerHTML = await readFile({ path: './mocks/global-nav-mobile.html' });
@@ -477,7 +555,7 @@ describe('keyboard navigation', () => {
       keyboardNavigation.mainNav.setActive(trigger);
       keyboardNavigation.mainNav.open();
       navLinks = getNavLinks(trigger);
-      const firstPopupItem = navLinks[0];
+      firstPopupItem = navLinks[0];
       firstPopupItem.focus();
     });
 
@@ -630,6 +708,41 @@ describe('keyboard navigation', () => {
         expect(document.activeElement.innerText).to.equal('Primary');
       });
     });
+
+    describe('Space', () => {
+      it('opens a popup', async () => {
+        trigger.focus()
+        await sendKeys({ press: 'Space' }); 
+        expect(trigger.attributes['aria-expanded'].value).to.equal('false');
+        await sendKeys({ press: 'Space' }); 
+        expect(trigger.attributes['aria-expanded'].value).to.equal('true');
+      });
+
+
+      it("emits a click event on links and CTAs", (done) => {
+        firstPopupItem.addEventListener('click', (e) => {
+          e.preventDefault()
+          done()
+        })
+        sendKeys({ press: 'Space' });
+      }) 
+    })
+
+    describe('Enter', () => {
+      it("emits a click event on links and CTAs", (done) => {
+        firstPopupItem.addEventListener('click', (e) => {
+          e.preventDefault()
+          done()
+        })
+        sendKeys({ press: 'Enter' });
+      }) 
+    })
+
+    describe('Escape', async () => {
+      expect(isOpen(trigger)).to.equal(true);
+      await sendKeys({ press: 'Escape' });
+      expect(isClosed(trigger)).to.equal(true);
+    })
   });
 
   // describe('main navigation', () => {

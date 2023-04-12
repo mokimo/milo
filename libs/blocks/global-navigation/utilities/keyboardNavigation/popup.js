@@ -69,16 +69,16 @@ class Popup {
           break;
         }
         case 'Enter': {
-          console.log('Enter');
+          e.target.click();
           break;
         }
         case 'Escape': {
           this.mainNav.close();
-          this.mainNav.items[this.mainNav.cur].focus();
+          this.mainNav.items[this.mainNav.curr].focus();
           break;
         }
         case 'Space': {
-          console.log('Space');
+          e.target.click();
           break;
         }
         case 'ArrowLeft': {
@@ -88,15 +88,15 @@ class Popup {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-          const section = document.activeElement.closest(selectors.fedsPopupSection);
-          const visibleSections = [...this.getOpenPopup().querySelectorAll(selectors.fedsPopupSection)];
-          const index = visibleSections.findIndex((node) => node.isEqualNode(section));
+          const column = document.activeElement.closest(selectors.fedsPopupColumn);
+          const visibleCol = [...this.getOpenPopup().querySelectorAll(selectors.fedsPopupColumn)];
+          const index = visibleCol.findIndex((node) => node.isEqualNode(column));
           if (index <= 0) {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-          const nextSection = visibleSections[index - 1];
-          nextSection.querySelector(itemSelector).focus();
+          const nextCol = visibleCol[index - 1];
+          nextCol.querySelector(itemSelector).focus();
           break;
         }
         case 'ArrowUp': {
@@ -113,15 +113,15 @@ class Popup {
             break;
           }
 
-          const section = document.activeElement.closest(selectors.fedsPopupSection);
-          const visibleSections = [...this.getOpenPopup().querySelectorAll(selectors.fedsPopupSection)];
-          const index = visibleSections.findIndex((node) => node.isEqualNode(section));
-          if (index === visibleSections.length - 1) {
+          const column = document.activeElement.closest(selectors.fedsPopupColumn);
+          const visibleCol = [...this.getOpenPopup().querySelectorAll(selectors.fedsPopupColumn)];
+          const index = visibleCol.findIndex((node) => node.isEqualNode(column));
+          if (index === visibleCol.length - 1) {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-          const nextSection = visibleSections[index + 1];
-          nextSection.querySelector(itemSelector).focus();
+          const nextCol = visibleCol[index + 1];
+          nextCol.querySelector(itemSelector).focus();
           break;
         }
         // each popup
