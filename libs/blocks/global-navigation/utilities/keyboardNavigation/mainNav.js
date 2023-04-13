@@ -25,7 +25,6 @@ class MainNavItem {
     document.querySelector('header').addEventListener('keydown', (e) => {
       if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.popup)) return;
       this.setActive(e.target);
-
       if (e.shiftKey && e.code === 'Tab') {
         const open = document.querySelector(selectors.expandedPopupTrigger);
         if (open) {
@@ -51,9 +50,13 @@ class MainNavItem {
         }
         // TODO popup navigation logic.
         case 'ArrowLeft': {
-          if (this.prev === -1) break;
-          this.focusPrev({ focus: null });
-
+          if (document.dir === 'ltr') {
+            if (this.prev === -1) break;
+            this.focusPrev({ focus: null });
+          } else {
+            if (this.next === -1) break;
+            this.focusNext({ focus: null });
+          }
           break;
         }
         case 'ArrowUp': {
@@ -61,9 +64,14 @@ class MainNavItem {
           break;
         }
         case 'ArrowRight': {
-          if (this.next === -1) break;
           const open = document.querySelector(selectors.expandedPopupTrigger);
-          this.focusNext();
+          if (document.dir === 'ltr') {
+            if (this.next === -1) break;
+            this.focusNext();
+          } else {
+            if (this.prev === -1) break;
+            this.focusPrev({ focus: null });
+          }
           if (open) {
             this.open();
           }

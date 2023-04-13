@@ -26,7 +26,7 @@ const openHeadline = ({ headline, focus } = {}) => {
 
 const getState = () => {
   const popupEl = getOpenPopup();
-  if (!popupEl) return {};
+  if (!popupEl) return { popupItems: [] };
   const popupItems = [...popupEl.querySelectorAll(selectors.popupItems)];
   // In the markup either a section OR column can contain a expandable headline
   // which is what we are interested in - so we can treat them both as sections.
@@ -72,20 +72,15 @@ class Popup {
       headline.setAttribute('aria-expanded', 'true');
     }
 
-    if (focus === 'first') {
-      const first = getNextVisibleItem(-1, popupItems);
-      popupItems[first].focus();
-    }
-
-    if (focus === 'last') {
-      const last = getPreviousVisibleItem(popupItems.length, popupItems);
-      popupItems[last].focus();
-    }
+    const first = getNextVisibleItem(-1, popupItems);
+    const last = getPreviousVisibleItem(popupItems.length, popupItems);
+    if (focus === 'first') popupItems[first].focus();
+    if (focus === 'last') popupItems[last].focus();
   }
 
-  mobileArrowUp = ({ prev }) => {
+  mobileArrowUp = ({ prev, curr }) => {
     // Case 1:  Move focus to the previous item
-    if (prev !== -1) {
+    if (prev !== -1 && curr - 1 === prev) {
       const { currentSection, popupItems } = getState();
       popupItems[prev].focus();
       if (currentSection !== getState().currentSection) closeHeadline();
@@ -132,15 +127,16 @@ class Popup {
       e.stopPropagation();
       const popupItems = [...popupEl.querySelectorAll(selectors.popupItems)];
       const curr = popupItems.findIndex((el) => el === e.target);
-
+      const prev = getPreviousVisibleItem(curr, popupItems);
+      const next = getNextVisibleItem(curr, popupItems);
       if (e.shiftKey && e.code === 'Tab') {
-        this.mobileArrowUp({ prev: getPreviousVisibleItem(curr, popupItems) });
+        this.mobileArrowUp({ prev, curr });
         return;
       }
 
       switch (e.code) {
         case 'Tab': {
-          this.mobileArrowDown({ next: getNextVisibleItem(curr, popupItems) });
+          this.mobileArrowDown({ next });
           break;
         }
         case 'Enter': {
@@ -159,32 +155,43 @@ class Popup {
           break;
         }
         case 'ArrowLeft': {
-          const { prevHeadline } = getState();
-          if (!prevHeadline) {
+          const { prevHeadline, nextHeadline } = getState();
+          const headline = document.dir === 'ltr' ? prevHeadline : nextHeadline;
+          if (!headline) {
             closeHeadline();
-            this.mainNav.items[this.mainNav.curr].focus();
+            if (document.dir === 'ltr') {
+              this.mainNav.items[this.mainNav.curr].focus();
+            } else {
+              this.mainNav.focusNext();
+              this.mainNav.open();
+            }
             break;
           }
-          openHeadline({ headline: prevHeadline, focus: 'first' });
+          openHeadline({ headline, focus: 'first' });
           break;
         }
         case 'ArrowUp': {
-          this.mobileArrowUp({ prev: getPreviousVisibleItem(curr, popupItems) });
+          this.mobileArrowUp({ prev, curr });
           break;
         }
         case 'ArrowRight': {
-          const { nextHeadline } = getState();
-          if (!nextHeadline) {
+          const { prevHeadline, nextHeadline } = getState();
+          const headline = document.dir === 'ltr' ? nextHeadline : prevHeadline;
+          if (!headline) {
             closeHeadline();
-            this.mainNav.focusNext();
-            this.mainNav.open();
+            if (document.dir === 'ltr') {
+              this.mainNav.focusNext();
+              this.mainNav.open();
+            } else {
+              this.mainNav.items[this.mainNav.curr].focus();
+            }
             break;
           }
-          openHeadline({ headline: nextHeadline, focus: 'first' });
+          openHeadline({ headline, focus: 'first' });
           break;
         }
         case 'ArrowDown': {
-          this.mobileArrowDown({ next: getNextVisibleItem(curr, popupItems) });
+          this.mobileArrowDown({ next });
           break;
         }
         default:

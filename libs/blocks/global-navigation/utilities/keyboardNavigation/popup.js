@@ -13,12 +13,12 @@ const getState = ({ e } = {}) => {
   const curr = popupItems.findIndex((el) => el === e.target);
   const prev = getPreviousVisibleItem(curr, popupItems);
   const next = getNextVisibleItem(curr, popupItems);
-
   const column = document.activeElement.closest(selectors.column);
   const visibleColumns = [...popupEl.querySelectorAll(selectors.column)];
   const currentColumn = visibleColumns.findIndex((node) => node.isEqualNode(column));
   const prevColumn = visibleColumns[currentColumn - 1] || -1;
   const nextColumn = visibleColumns[currentColumn + 1] || -1;
+
   return {
     popupItems,
     curr,
@@ -38,16 +38,10 @@ class Popup {
   open({ focus } = {}) {
     const popupItems = [...(getOpenPopup()?.querySelectorAll(selectors.popupItems) || [])];
     if (!popupItems.length) return;
-
-    if (focus === 'first') {
-      const first = getNextVisibleItem(-1, popupItems);
-      popupItems[first].focus();
-    }
-
-    if (focus === 'last') {
-      const last = getPreviousVisibleItem(popupItems.length, popupItems);
-      popupItems[last].focus();
-    }
+    const first = getNextVisibleItem(-1, popupItems);
+    const last = getPreviousVisibleItem(popupItems.length, popupItems);
+    if (focus === 'first') popupItems[first].focus();
+    if (focus === 'last') popupItems[last].focus();
   }
 
   listenToChanges = () => {
@@ -91,15 +85,17 @@ class Popup {
           break;
         }
         case 'ArrowLeft': {
-          if (prev === -1) {
+          const noPrev = (document.dir === 'ltr' && prevColumn === -1);
+          const noNext = (document.dir === 'rtl' && nextColumn === -1);
+          if (noPrev || noNext) {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-          if (prevColumn === -1) {
-            this.mainNav.items[this.mainNav.curr].focus();
-            break;
+          if (document.dir === 'ltr') {
+            prevColumn.querySelector(selectors.popupItems).focus();
+          } else {
+            nextColumn.querySelector(selectors.popupItems).focus();
           }
-          prevColumn.querySelector(selectors.popupItems).focus();
           break;
         }
         case 'ArrowUp': {
@@ -111,15 +107,17 @@ class Popup {
           break;
         }
         case 'ArrowRight': {
-          if (next === -1) {
+          const noNext = document.dir === 'ltr' && nextColumn === -1;
+          const noPrev = document.dir === 'rtl' && prevColumn === -1;
+          if (noNext || noPrev) {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-          if (nextColumn === -1) {
-            this.mainNav.items[this.mainNav.curr].focus();
-            break;
+          if (document.dir === 'ltr') {
+            nextColumn.querySelector(selectors.popupItems).focus();
+          } else {
+            prevColumn.querySelector(selectors.popupItems).focus();
           }
-          nextColumn.querySelector(selectors.popupItems).focus();
           break;
         }
         case 'ArrowDown': {

@@ -58,7 +58,6 @@ class Gnav {
 
   init = () => {
     this.elements.curtain = toFragment`<div class="feds-curtain"></div>`;
-
     this.elements.navWrapper = toFragment`
       <div class="feds-nav-wrapper">
         ${this.isDesktop.matches ? '' : this.decorateBreadcrumbs()}

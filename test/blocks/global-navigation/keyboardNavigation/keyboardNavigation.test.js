@@ -28,6 +28,7 @@ describe('keyboard navigation', () => {
   });
 
   beforeEach(async () => {
+    document.dir ="ltr"
     setViewport({ width: 1500, height: 1500 })
     document.body.innerHTML = await readFile({ path: './mocks/global-nav.html' });
     keyboardNavigation = new KeyboardNavigation();
@@ -111,6 +112,22 @@ describe('keyboard navigation', () => {
         expect(document.activeElement).to.equal(mainNavItems[mainNavItems.length - 1]);
       });
 
+      it('shifts focus with rtl', async () => {
+        document.dir = "rtl"
+        mainNavItems[mainNavItems.length - 1].focus();
+        const reversedMainNavItems = mainNavItems
+          .slice()
+          .reverse();
+        for await (const element of reversedMainNavItems) {
+          expect(document.activeElement).to.equal(element);
+          await sendKeys({ press: 'ArrowRight' });
+          expect(element.attributes['aria-expanded']?.value || 'false').to.equal('false');
+        }
+        // does not go further to the left on the first element
+        await sendKeys({ press: 'ArrowRight' });
+        expect(document.activeElement).to.equal(mainNavItems[0]);
+      });
+      
       it('if a popup is open, it opens the next popup', async () => {
         const triggerOne = mainNavItems[0];
         const triggerTwo = mainNavItems[1];
@@ -150,6 +167,19 @@ describe('keyboard navigation', () => {
         await sendKeys({ press: 'ArrowLeft' });
         expect(document.activeElement).to.equal(mainNavItems[0]);
       });
+
+      it('shifts focus with rtl',async () => {
+        document.dir = "rtl"
+        mainNavItems[0].focus();
+        for await (const element of mainNavItems) {
+          expect(document.activeElement).to.equal(element);
+          await sendKeys({ press: 'ArrowLeft' });
+          expect(element.attributes['aria-expanded']?.value || 'false').to.equal('false');
+        }
+        // does not go further to the right on the last element
+        await sendKeys({ press: 'ArrowLeft' });
+        expect(document.activeElement).to.equal(mainNavItems[mainNavItems.length - 1]);
+      })
 
       it('if a popup is open, it opens the previous popup', async () => {
         const triggerOne = mainNavItems[0];
@@ -424,6 +454,31 @@ describe('keyboard navigation', () => {
         await sendKeys({ press: 'ArrowRight' });
         expect(document.activeElement).to.equal(trigger);
       });
+
+      it('shifts focus to the previous column on RTL', async () => {
+        document.dir = "rtl"
+        await sendKeys({ press: 'ArrowLeft' });
+        expect(document.activeElement.innerText).to.equal('second-column-first-section-first-item');
+        await sendKeys({ press: 'ArrowRight' });
+        expect(document.activeElement.innerText).to.equal('first-column-first-section-first-item');
+      });
+
+      it('shifts focus from the first popup item back to the trigger on RTL', async () => {
+        document.dir = "rtl"
+        await sendKeys({ press: 'ArrowRight' });
+        expect(document.activeElement).to.equal(trigger);
+      });
+
+      it('shifts focus from the second popup item back to the trigger on RTL', async () => {
+        document.dir = "rtl"
+        triggerTwo.focus();
+        keyboardNavigation.mainNav.setActive(triggerTwo);
+        keyboardNavigation.mainNav.open();
+        const navLinksTwo = getNavLinks(triggerTwo);
+        navLinksTwo[1].focus();
+        await sendKeys({ press: 'ArrowRight' });
+        expect(document.activeElement).to.equal(triggerTwo);
+      });
     });
 
     describe('ArrowLeft', () => {
@@ -447,6 +502,20 @@ describe('keyboard navigation', () => {
         navLinksTwo[1].focus();
         await sendKeys({ press: 'ArrowLeft' });
         expect(document.activeElement).to.equal(triggerTwo);
+      });
+
+      it('shifts focus to the next column on RTL', async () => {
+        document.dir = "rtl"
+        expect(document.activeElement.innerText).to.equal('first-column-first-section-first-item');
+        await sendKeys({ press: 'ArrowLeft' });
+        expect(document.activeElement.innerText).to.equal('second-column-first-section-first-item');
+      });
+
+      it('shifts focus from the last popup item back to the trigger on RTL', async () => {
+        document.dir = "rtl"
+        navLinks[navLinks.length - 1].focus();
+        await sendKeys({ press: 'ArrowLeft' });
+        expect(document.activeElement).to.equal(trigger);
       });
     });
 
@@ -634,6 +703,34 @@ describe('keyboard navigation', () => {
         await sendKeys({ press: 'ArrowRight' });
         expect(document.activeElement).to.equal(triggerTwo);
       });
+
+      it('shifts focus to the previous section', async () => {
+        document.dir = 'rtl';
+        await sendKeys({ press: 'ArrowLeft' });
+        await sendKeys({ press: 'ArrowLeft' });
+        expect(document.activeElement.innerText).to.equal('second-column-first-section-first-item');
+        await sendKeys({ press: 'ArrowRight' });
+        expect(document.activeElement.innerText).to.equal('first-column-second-section-first-item');
+        await sendKeys({ press: 'ArrowRight' });
+        expect(document.activeElement).to.equal(trigger);
+      });
+
+      it('shifts focus from the first popup item back to the trigger', async () => {
+        document.dir = 'rtl';
+        await sendKeys({ press: 'ArrowRight' });
+        expect(document.activeElement).to.equal(trigger);
+      });
+
+      it('shifts focus from the second popup item back to the trigger', async () => {
+        document.dir = 'rtl';
+        triggerTwo.focus();
+        keyboardNavigation.mainNav.setActive(triggerTwo);
+        keyboardNavigation.mainNav.open();
+        const navLinksTwo = getNavLinks(triggerTwo);
+        navLinksTwo[1].focus();
+        await sendKeys({ press: 'ArrowRight' });
+        expect(document.activeElement).to.equal(triggerTwo);
+      });
     });
 
     describe('ArrowLeft', () => {
@@ -658,6 +755,25 @@ describe('keyboard navigation', () => {
         keyboardNavigation.mainNav.open();
         const navLinksTwo = getNavLinks(triggerTwo);
         navLinksTwo[1].focus();
+        await sendKeys({ press: 'ArrowLeft' });
+        expect(document.activeElement).to.equal(triggerTwo);
+      });
+
+      it('shifts focus to the next section', async () => {
+        document.dir = 'rtl';
+        expect(document.activeElement.innerText).to.equal('first-column-first-section-first-item');
+        await sendKeys({ press: 'ArrowLeft' });
+        expect(document.activeElement.innerText).to.equal('first-column-second-section-first-item');
+        await sendKeys({ press: 'ArrowLeft' });
+        expect(document.activeElement.innerText).to.equal('second-column-first-section-first-item');
+      });
+
+      it('shifts focus from the last popup item to the next trigger', async () => {
+        document.dir = 'rtl';
+        const section = navLinks[navLinks.length - 2].closest(selectors.section);
+        const headline = section.querySelector(selectors.headline);
+        headline.setAttribute('aria-expanded', true)
+        navLinks[navLinks.length - 2].focus();
         await sendKeys({ press: 'ArrowLeft' });
         expect(document.activeElement).to.equal(triggerTwo);
       });
@@ -755,86 +871,4 @@ describe('keyboard navigation', () => {
     })
   });
 
-  // describe('main navigation', () => {
-  //   test('focus each element', () => {
-  //     // Focus logo, main nav links, cta, search, profile, app launcher
-  //   });
-
-  //   test('interaction with the logo', () => {
-  //     // Enter - redirect to link
-  //     // Space - does nothing
-  //     // Arrow keys - nothing
-  //   });
-
-  //   test('interaction with a navItem with dropdown', () => {
-  //     // Space: Similar to click, open, close
-  //     // Arrow down: open dropdown and focus 1st element
-  //     // Arrow up, close dropdown if open and focussed OR move to the left
-  //     // Left: go to left nav item if available, else nothing
-  //     // Left: close dropdown if open
-  //     // right: go to right nav item if available, else nothing
-  //     // right: close dropdown if open
-  //   });
-
-  //   test('interaction with a navItem without dropdown', () => {
-  //     // Space/Enter: similar to click, do the action
-  //     // Up/Left: focus navItem to the left
-  //     // down/Right: focus navItem to the right or nothing
-  //   });
-
-  //   test('left and right arrow keys only work within the feds-nav', () => {
-  //     // At the end of the left/right boundaries,
-  //     // left/up and right/down keys do nothing
-  //   });
-  // });
-
-  // describe('navLink popup', () => {
-  //   describe('shift', () => {
-  //     // goes through all interactive elements
-  //   });
-
-  //   describe('left', () => {
-  //     // Goes into the start of a popup section
-  //     // if there are no popup sections, goes back to the navLink
-  //   });
-  //   desribe('right', () => {
-  //     // Goes to the start of a popup section
-  //     // if there are no popup sections left, goes back to the navLink
-  //   });
-  //   describe('down', () => {
-  //     // goes to the next interactive popup item
-  //     // if no item is left, close the popup and go to the next navLink
-  //   });
-  //   describe('up', () => {
-  //     // go to the next interactive popup item
-  //     // if no item is left, go to the navLink but don't close the popup
-  //   });
-  // });
-
-  // describe('profile', () => {
-  //   test('interacting with the profile', () => {
-  //     // Space: open/close
-  //     // Enter: open/close
-  //     // Arrow-up: close if open
-  //     // Arrow-down: open if closed
-  //   });
-  //   test('interacting with the profile dropdown', () => {
-  //     // Up/down focus the clickable links
-  //   });
-  // });
-
-  // describe('search', () => {
-  //   test('interacting with search', () => {
-  //     // Arrow keys: nothing
-  //     // Enter: Open and focus the search input, or close the search
-  //     // Space: nothing
-  //   });
-  //   test('tab and shift+tab do not leave the navigation when the search is open', () => {
-
-  //   });
-  // });
-
-  // describe('appLauncher', () => {
-
-  // });
 });
