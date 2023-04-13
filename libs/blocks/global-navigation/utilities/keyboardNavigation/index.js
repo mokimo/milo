@@ -9,9 +9,7 @@ class KeyboardNavigation {
   }
 
   listenToChanges = () => {
-    document.addEventListener('keydown', (e) => {
-      if (!e.target.closest('header')) return;
-
+    document.querySelector('header').addEventListener('keydown', (e) => {
       this.navItems = [
         ...document.querySelectorAll(`
       ${selectors.brand}, 

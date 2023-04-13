@@ -51,7 +51,7 @@ class Popup {
   }
 
   listenToChanges = () => {
-    document.addEventListener('keydown', (e) => {
+    document.querySelector('header').addEventListener('keydown', (e) => {
       const popupEl = getOpenPopup();
       if (!e.target.closest(selectors.popup) || !popupEl || !this.desktop.matches) return;
       e.preventDefault();

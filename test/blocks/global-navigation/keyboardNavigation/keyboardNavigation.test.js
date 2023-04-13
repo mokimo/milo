@@ -25,12 +25,12 @@ let allNavItems;
 describe('keyboard navigation', () => {
   before(() => {
     document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, searchCss, signInCss, buttonCss, dropdownCss, navDropdownCss]
-    keyboardNavigation = new KeyboardNavigation();
   });
 
   beforeEach(async () => {
     setViewport({ width: 1500, height: 1500 })
     document.body.innerHTML = await readFile({ path: './mocks/global-nav.html' });
+    keyboardNavigation = new KeyboardNavigation();
     allNavItems = [
       ...document.querySelectorAll(`
      ${selectors.brand}, 
@@ -523,6 +523,7 @@ describe('keyboard navigation', () => {
     beforeEach(async () => {
       setViewport({ width: 600, height: 600 })
       document.body.innerHTML = await readFile({ path: './mocks/global-nav-mobile.html' });
+      keyboardNavigation = new KeyboardNavigation();
       allNavItems = [
         ...document.querySelectorAll(`
        ${selectors.brand}, 

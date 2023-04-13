@@ -12,7 +12,7 @@ class MainNavItem {
   }
 
   listenToChanges() {
-    document.addEventListener('click', (e) => {
+    document.querySelector('header').addEventListener('click', (e) => {
       if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.popup)) return;
       const open = document.querySelector(selectors.expandedPopupTrigger);
       if (open) {
@@ -22,7 +22,7 @@ class MainNavItem {
       }
     });
 
-    document.addEventListener('keydown', (e) => {
+    document.querySelector('header').addEventListener('keydown', (e) => {
       if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.popup)) return;
       this.setActive(e.target);
 
