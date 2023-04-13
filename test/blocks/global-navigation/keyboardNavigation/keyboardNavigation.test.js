@@ -16,7 +16,7 @@ const isOpen = (element) => element.getAttribute('aria-expanded') === 'true'
   && element.hasAttribute('daa-lh', 'header|Close');
 const isClosed = (element) => element.getAttribute('aria-expanded') === 'false'
   && element.hasAttribute('daa-lh', 'header|Open');
-const getPopup = (element) => element.parentElement.querySelector(selectors.fedsPopup);
+const getPopup = (element) => element.parentElement.querySelector(selectors.popup);
 const getNavLinks = (trigger) => [...getPopup(trigger).querySelectorAll(`${selectors.navLink}, ${selectors.promoLink}, ${selectors.imagePromo}`)];
 let mainNavItems;
 let otherNavItems;
@@ -588,8 +588,8 @@ describe('keyboard navigation', () => {
       });
 
       it('shifts focus from the last popup item, to the next trigger', async () => {
-        const section = navLinks[navLinks.length - 2].closest(selectors.fedsPopupSection);
-        const headline = section.querySelector(selectors.fedsPopupHeadline);
+        const section = navLinks[navLinks.length - 2].closest(selectors.section);
+        const headline = section.querySelector(selectors.headline);
         headline.setAttribute('aria-expanded', true)
         navLinks[navLinks.length - 2].focus();
         await sendKeys({ press: 'Tab' });
@@ -610,8 +610,8 @@ describe('keyboard navigation', () => {
         await sendKeys({ press: 'Tab' });
         await sendKeys({ press: 'Tab' });
         expect(document.activeElement.innerText).to.equal('first-column-second-section-first-item');
-        const section = document.activeElement.closest(selectors.fedsPopupSection);
-        const headline = section.querySelector(selectors.fedsPopupHeadline);
+        const section = document.activeElement.closest(selectors.section);
+        const headline = section.querySelector(selectors.headline);
         expect(headline.getAttribute('aria-expanded')).to.equal('true');
       });
     });
@@ -626,8 +626,8 @@ describe('keyboard navigation', () => {
       });
 
       it('shifts focus from the last popup item to the next trigger', async () => {
-        const section = navLinks[navLinks.length - 2].closest(selectors.fedsPopupSection);
-        const headline = section.querySelector(selectors.fedsPopupHeadline);
+        const section = navLinks[navLinks.length - 2].closest(selectors.section);
+        const headline = section.querySelector(selectors.headline);
         headline.setAttribute('aria-expanded', true)
         navLinks[navLinks.length - 2].focus();
         await sendKeys({ press: 'ArrowRight' });
@@ -641,7 +641,7 @@ describe('keyboard navigation', () => {
         await sendKeys({ press: 'ArrowRight' });
         expect(document.activeElement.innerText).to.equal('second-column-first-section-first-item');
         await sendKeys({ press: 'ArrowLeft' });
-        expect(document.activeElement.innerText).to.equal('first-column-first-section-last-item');
+        expect(document.activeElement.innerText).to.equal('first-column-second-section-first-item');
         await sendKeys({ press: 'ArrowLeft' });
         expect(document.activeElement).to.equal(trigger);
       });
@@ -690,8 +690,8 @@ describe('keyboard navigation', () => {
       });
 
       it('shifts focus from the last popup item, to the next trigger', async () => {
-        const section = navLinks[navLinks.length - 2].closest(selectors.fedsPopupSection);
-        const headline = section.querySelector(selectors.fedsPopupHeadline);
+        const section = navLinks[navLinks.length - 2].closest(selectors.section);
+        const headline = section.querySelector(selectors.headline);
         headline.setAttribute('aria-expanded', true)
         navLinks[navLinks.length - 2].focus();
         await sendKeys({ press: 'ArrowDown' });
@@ -718,7 +718,6 @@ describe('keyboard navigation', () => {
         expect(trigger.attributes['aria-expanded'].value).to.equal('true');
       });
 
-
       it("emits a click event on links and CTAs", (done) => {
         firstPopupItem.addEventListener('click', (e) => {
           e.preventDefault()
@@ -729,6 +728,14 @@ describe('keyboard navigation', () => {
     })
 
     describe('Enter', () => {
+      it('opens a popup', async () => {
+        trigger.focus()
+        await sendKeys({ press: 'Enter' }); 
+        expect(trigger.attributes['aria-expanded'].value).to.equal('false');
+        await sendKeys({ press: 'Enter' }); 
+        expect(trigger.attributes['aria-expanded'].value).to.equal('true');
+      });
+
       it("emits a click event on links and CTAs", (done) => {
         firstPopupItem.addEventListener('click', (e) => {
           e.preventDefault()
@@ -739,9 +746,11 @@ describe('keyboard navigation', () => {
     })
 
     describe('Escape', async () => {
-      expect(isOpen(trigger)).to.equal(true);
-      await sendKeys({ press: 'Escape' });
-      expect(isClosed(trigger)).to.equal(true);
+      it("closes the popup", async () => {
+        expect(isOpen(trigger)).to.equal(true)
+        await sendKeys({ press: 'Escape' });
+        expect(isClosed(trigger)).to.equal(true)
+      })
     })
   });
 

@@ -13,7 +13,7 @@ class MainNavItem {
 
   listenToChanges() {
     document.addEventListener('click', (e) => {
-      if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.fedsPopup)) return;
+      if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.popup)) return;
       const open = document.querySelector(selectors.expandedPopupTrigger);
       if (open) {
         this.close();
@@ -23,7 +23,7 @@ class MainNavItem {
     });
 
     document.addEventListener('keydown', (e) => {
-      if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.fedsPopup)) return;
+      if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.popup)) return;
       this.setActive(e.target);
 
       if (e.shiftKey && e.code === 'Tab') {
@@ -117,7 +117,7 @@ class MainNavItem {
       el.setAttribute('aria-expanded', 'false');
       el.setAttribute('daa-lh', 'header|Open');
     });
-    document.querySelector('.feds-curtain').classList.remove('is-open');
+    document.querySelector(selectors.curtain).classList.remove('is-open');
   };
 
   open = ({ focus, triggerEl, e } = {}) => {
@@ -128,7 +128,7 @@ class MainNavItem {
     trigger.setAttribute('aria-expanded', 'true');
     trigger.setAttribute('daa-lh', 'header|Close');
     const navItem = trigger.parentElement;
-    const popupEl = navItem.querySelector(selectors.fedsPopup);
+    const popupEl = navItem.querySelector(selectors.popup);
     if (popupEl) {
       if (this.desktop.matches) {
         this.popup.open({ focus });

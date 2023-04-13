@@ -33,18 +33,15 @@ class KeyboardNavigation {
 
       switch (e.code) {
         case 'Tab': {
-          console.log('Tab');
           break;
         }
         case 'Enter': {
-          console.log('Enter');
           break;
         }
         case 'Escape': {
           break;
         }
         case 'Space': {
-          console.log('Space');
           break;
         }
         case 'ArrowDown': {

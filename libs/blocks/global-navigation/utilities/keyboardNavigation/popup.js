@@ -2,15 +2,32 @@
 import {
   getNextVisibleItem,
   getPreviousVisibleItem,
-
+  getOpenPopup,
   selectors,
 } from './utils.js';
 
-const itemSelector = `
-  ${selectors.navLink}, 
-  ${selectors.promoLink},
-  ${selectors.imagePromo}
-`;
+const getState = ({ e } = {}) => {
+  const popupEl = getOpenPopup();
+  if (!popupEl) return {};
+  const popupItems = [...popupEl.querySelectorAll(selectors.popupItems)];
+  const curr = popupItems.findIndex((el) => el === e.target);
+  const prev = getPreviousVisibleItem(curr, popupItems);
+  const next = getNextVisibleItem(curr, popupItems);
+
+  const column = document.activeElement.closest(selectors.column);
+  const visibleColumns = [...popupEl.querySelectorAll(selectors.column)];
+  const currentColumn = visibleColumns.findIndex((node) => node.isEqualNode(column));
+  const prevColumn = visibleColumns[currentColumn - 1] || -1;
+  const nextColumn = visibleColumns[currentColumn + 1] || -1;
+  return {
+    popupItems,
+    curr,
+    prev,
+    next,
+    prevColumn,
+    nextColumn,
+  };
+};
 class Popup {
   constructor({ mainNav }) {
     this.mainNav = mainNav;
@@ -18,17 +35,12 @@ class Popup {
     this.desktop = window.matchMedia('(min-width: 900px)');
   }
 
-  getOpenPopup = () => document.querySelector(selectors.expandedPopupTrigger)
-    ?.parentElement.querySelector(selectors.fedsPopup);
-
-  open({ focus }) {
-    const popupEl = this.getOpenPopup();
-    if (!popupEl) return;
-    const popupItems = [...popupEl.querySelectorAll(itemSelector)];
-    const first = getNextVisibleItem(-1, popupItems);
-    if (first === -1) return;
+  open({ focus } = {}) {
+    const popupItems = [...(getOpenPopup()?.querySelectorAll(selectors.popupItems) || [])];
+    if (!popupItems.length) return;
 
     if (focus === 'first') {
+      const first = getNextVisibleItem(-1, popupItems);
       popupItems[first].focus();
     }
 
@@ -40,14 +52,11 @@ class Popup {
 
   listenToChanges = () => {
     document.addEventListener('keydown', (e) => {
-      const popupEl = this.getOpenPopup();
-      if (!e.target.closest(selectors.fedsPopup) || !popupEl || !this.desktop.matches) return;
+      const popupEl = getOpenPopup();
+      if (!e.target.closest(selectors.popup) || !popupEl || !this.desktop.matches) return;
       e.preventDefault();
       e.stopPropagation();
-      const popupItems = [...popupEl.querySelectorAll(itemSelector)];
-      const curr = popupItems.findIndex((el) => el === e.target);
-      const prev = getPreviousVisibleItem(curr, popupItems);
-      const next = getNextVisibleItem(curr, popupItems);
+      const { popupItems, prev, next, prevColumn, nextColumn } = getState({ e });
 
       if (e.shiftKey && e.code === 'Tab') {
         if (prev === -1) {
@@ -82,21 +91,15 @@ class Popup {
           break;
         }
         case 'ArrowLeft': {
-          // TODO, arrowLeft and arrowRight might not always work and lead to JS errors.
-          // CHECK the medium menu.
           if (prev === -1) {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-          const column = document.activeElement.closest(selectors.fedsPopupColumn);
-          const visibleCol = [...this.getOpenPopup().querySelectorAll(selectors.fedsPopupColumn)];
-          const index = visibleCol.findIndex((node) => node.isEqualNode(column));
-          if (index <= 0) {
+          if (prevColumn === -1) {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-          const nextCol = visibleCol[index - 1];
-          nextCol.querySelector(itemSelector).focus();
+          prevColumn.querySelector(selectors.popupItems).focus();
           break;
         }
         case 'ArrowUp': {
@@ -112,27 +115,19 @@ class Popup {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-
-          const column = document.activeElement.closest(selectors.fedsPopupColumn);
-          const visibleCol = [...this.getOpenPopup().querySelectorAll(selectors.fedsPopupColumn)];
-          const index = visibleCol.findIndex((node) => node.isEqualNode(column));
-          if (index === visibleCol.length - 1) {
+          if (nextColumn === -1) {
             this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-          const nextCol = visibleCol[index + 1];
-          nextCol.querySelector(itemSelector).focus();
+          nextColumn.querySelector(selectors.popupItems).focus();
           break;
         }
-        // each popup
-        // has columns & sections
         case 'ArrowDown': {
           if (next === -1) {
             this.mainNav.focusNext();
             this.mainNav.open();
             break;
           }
-
           popupItems[next].focus();
           break;
         }

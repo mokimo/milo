@@ -2,15 +2,58 @@
 import {
   getNextVisibleItem,
   getPreviousVisibleItem,
-
+  getOpenPopup,
   selectors,
 } from './utils.js';
 
-const itemSelector = `
-  ${selectors.navLink}, 
-  ${selectors.promoLink},
-  ${selectors.imagePromo}
-`;
+const closeHeadline = () => {
+  const open = [...document.querySelectorAll(`${selectors.headline}[aria-expanded="true"]`)];
+  open.forEach((el) => el.setAttribute('aria-expanded', 'false'));
+};
+
+const openHeadline = ({ headline, focus } = {}) => {
+  closeHeadline();
+  if (headline.getAttribute('aria-haspopup') === 'true') {
+    headline.setAttribute('aria-expanded', 'true');
+    const section = headline.closest(selectors.section)
+      || headline.closest(selectors.column);
+    const items = [...section.querySelectorAll(selectors.popupItems)]
+      .filter((el) => el.offsetHeight && el.offsetWidth);
+    if (focus === 'first') items[0].focus();
+    if (focus === 'last') items[items.length - 1].focus();
+  }
+};
+
+const getState = () => {
+  const popupEl = getOpenPopup();
+  if (!popupEl) return {};
+  const popupItems = [...popupEl.querySelectorAll(selectors.popupItems)];
+  // In the markup either a section OR column can contain a expandable headline
+  // which is what we are interested in - so we can treat them both as sections.
+  const section = document.activeElement.closest(selectors.section)
+    || document.activeElement.closest(selectors.column);
+  let allSections = [...popupEl.querySelectorAll(selectors.section)];
+  if (!allSections.length) allSections = [...popupEl.querySelectorAll(selectors.column)];
+  const visibleSections = allSections.filter((el) => el.offsetHeight && el.offsetWidth);
+  const currentSection = visibleSections.findIndex((node) => node.isEqualNode(section));
+  const firstHeadline = visibleSections[0]?.querySelector(selectors.headline);
+  const lastHeadline = visibleSections[visibleSections.length - 1]
+    ?.querySelector(selectors.headline);
+  const prevHeadline = visibleSections[currentSection - 1]
+    ?.querySelector(selectors.headline);
+  const nextHeadline = visibleSections[currentSection + 1]
+    ?.querySelector(selectors.headline);
+  return {
+    visibleSections,
+    currentSection,
+    firstHeadline,
+    lastHeadline,
+    prevHeadline,
+    nextHeadline,
+    popupItems,
+  };
+};
+
 class Popup {
   constructor({ mainNav }) {
     this.mainNav = mainNav;
@@ -18,152 +61,86 @@ class Popup {
     this.desktop = window.matchMedia('(min-width: 900px)');
   }
 
-  getOpenPopup = () => document.querySelector(selectors.expandedPopupTrigger)
-    ?.parentElement.querySelector(selectors.fedsPopup);
+  open({ focus } = {}) {
+    const { firstHeadline, lastHeadline, popupItems } = getState();
+    if (!popupItems.length) return;
 
-  open({ focus }) {
-    const popupEl = this.getOpenPopup();
-    if (!popupEl) return;
-    const popupItems = [...popupEl.querySelectorAll(itemSelector)];
-    const first = getNextVisibleItem(-1, popupItems);
-    if (first === -1) return;
+    const headline = focus === 'last' ? lastHeadline : firstHeadline;
+
+    if (headline && headline.getAttribute('aria-haspopup') === 'true') {
+      closeHeadline();
+      headline.setAttribute('aria-expanded', 'true');
+    }
 
     if (focus === 'first') {
+      const first = getNextVisibleItem(-1, popupItems);
       popupItems[first].focus();
     }
 
     if (focus === 'last') {
-      this.setSections();
-      const headline = this.lastSection.querySelector(selectors.fedsPopupHeadline);
-      if (headline && headline.getAttribute('aria-haspopup') === 'true') {
-        this.closeHeadline();
-        headline.setAttribute('aria-expanded', 'true');
-      }
       const last = getPreviousVisibleItem(popupItems.length, popupItems);
       popupItems[last].focus();
     }
   }
 
-  closeHeadline = () => {
-    const open = [...document.querySelectorAll(`${selectors.fedsPopupHeadline}[aria-expanded="true"]`)];
-    open.forEach((el) => el.setAttribute('aria-expanded', 'false'));
-  };
-
-  openHeadline = ({ headline, focus } = {}) => {
-    this.closeHeadline();
-    if (headline.getAttribute('aria-haspopup') === 'true') {
-      headline.setAttribute('aria-expanded', 'true');
-      const section = headline.closest(selectors.fedsPopupSection);
-      const items = [...section.querySelectorAll(itemSelector)]
-        .filter((el) => el.offsetHeight && el.offsetWidth);
-      if (focus === 'first') items[0].focus();
-      if (focus === 'last') items[items.length - 1].focus();
-    }
-  };
-
-  isOpenSection = (el, sections) => {
-    const section = el.closest(selectors.fedsPopupSection);
-    return sections.includes(section);
-  };
-
-  setSections = () => {
-    const section = document.activeElement.closest(selectors.fedsPopupSection);
-    const allSections = [...this.getOpenPopup().querySelectorAll(selectors.fedsPopupSection)];
-    const visibleSections = allSections.filter((el) => el.offsetHeight && el.offsetWidth);
-    const currentSection = visibleSections.findIndex((node) => node.isEqualNode(section));
-    this.visibleSections = visibleSections;
-    this.currentSection = currentSection;
-    [this.firstSection] = visibleSections;
-    this.lastSection = visibleSections[visibleSections.length - 1];
-  };
-
-  mobileArrowUp = () => {
-    // If the previous element is visible we can just move focus to the previous item
-    const { currentSection } = this;
-    const prevElementIsVisible = this.curr === this.prev + 1;
-    if (prevElementIsVisible && this.prev !== -1) {
-      this.popupItems[this.prev].focus();
-      this.setSections();
-      // special case, we move out of the headline, thus we can close it.
-      if (currentSection !== this.currentSection) this.closeHeadline();
+  mobileArrowUp = ({ prev }) => {
+    // Case 1:  Move focus to the previous item
+    if (prev !== -1) {
+      const { currentSection, popupItems } = getState();
+      popupItems[prev].focus();
+      if (currentSection !== getState().currentSection) closeHeadline();
       return;
     }
 
-    // if the previous element is not visible, we check if it has a headline
-    const headline = this.visibleSections[this.currentSection - 1]
-      ?.querySelector(selectors.fedsPopupHeadline);
-
-    // if there is no headline, we can just move on
-    if (!headline) {
-      this.closeHeadline();
+    // Case 2: No headline + no previous item, move to the main nav
+    const { prevHeadline } = getState();
+    if (!prevHeadline) {
       this.mainNav.items[this.mainNav.curr].focus();
       return;
     }
 
-    this.openHeadline({ headline, focus: 'last' });
+    // Case 3: Open the previous headline
+    openHeadline({ headline: prevHeadline, focus: 'last' });
   };
 
-  mobileArrowDown = () => {
-    // If the next element is visible we can just move focus to the next item
-    const { currentSection } = this;
-    const nextElementIsVisible = this.curr === this.next - 1;
-    if (nextElementIsVisible && this.next !== -1) {
-      this.popupItems[this.next].focus();
-      this.setSections();
-      // special case, if we move out of a headline - we will need to close the current headline
-      if (currentSection !== this.currentSection) this.closeHeadline();
+  mobileArrowDown = ({ next }) => {
+    // Case 1: Move focus to the next item
+    if (next !== -1) {
+      const { currentSection, popupItems } = getState();
+      popupItems[next].focus();
+      if (currentSection !== getState().currentSection) closeHeadline();
       return;
     }
-
-    // if the next element is not visible, we check if it has a headline
-    const headline = this.visibleSections[this.currentSection + 1]
-      ?.querySelector(selectors.fedsPopupHeadline);
-
-    // if there is no headline, we can just move on
-    if (!headline) {
-      this.closeHeadline();
+    // Case 2: No headline + no next item, move to the main nav
+    const { nextHeadline } = getState();
+    if (!nextHeadline) {
+      closeHeadline();
       this.mainNav.focusNext();
       this.mainNav.open();
       return;
     }
 
-    this.openHeadline({ headline, focus: 'first' });
-  };
-
-  setActive = ({ curr, popupEl } = {}) => {
-    this.popupItems = [...popupEl.querySelectorAll(itemSelector)];
-    // TODO should this be document.activeElement? I think so.
-    this.curr = this.popupItems.findIndex((el) => el === (curr || document.activeElement));
-    this.prev = getPreviousVisibleItem(this.curr, this.popupItems);
-    this.next = getNextVisibleItem(this.curr, this.popupItems);
+    // Case 3: Open the next headline
+    openHeadline({ headline: nextHeadline, focus: 'first' });
   };
 
   listenToChanges = () => {
     document.addEventListener('keydown', (e) => {
-      const popupEl = this.getOpenPopup();
-      if (!e.target.closest(selectors.fedsPopup) || !popupEl || this.desktop.matches) return;
+      const popupEl = getOpenPopup();
+      if (!e.target.closest(selectors.popup) || !popupEl || this.desktop.matches) return;
       e.preventDefault();
       e.stopPropagation();
-      this.setActive({ curr: e.target, popupEl });
-      this.setSections();
+      const popupItems = [...popupEl.querySelectorAll(selectors.popupItems)];
+      const curr = popupItems.findIndex((el) => el === e.target);
 
       if (e.shiftKey && e.code === 'Tab') {
-        if (!this.desktop.matches) {
-          this.mobileArrowUp();
-          return;
-        }
-
-        if (this.prev === -1) {
-          this.mainNav.items[this.mainNav.curr].focus();
-          return;
-        }
-        this.popupItems[this.prev].focus();
+        this.mobileArrowUp({ prev: getPreviousVisibleItem(curr, popupItems) });
         return;
       }
 
       switch (e.code) {
         case 'Tab': {
-          this.mobileArrowDown();
+          this.mobileArrowDown({ next: getNextVisibleItem(curr, popupItems) });
           break;
         }
         case 'Enter': {
@@ -182,58 +159,32 @@ class Popup {
           break;
         }
         case 'ArrowLeft': {
-          // if the next element is not visible, we check if it has a headline
-          const headline = this.visibleSections[this.currentSection - 1]
-            ?.querySelector(selectors.fedsPopupHeadline);
-
-          // if there is no headline, we move onto the next nav item
-          if (!headline) {
-            this.closeHeadline();
-
-            const section = document.activeElement.closest(selectors.fedsPopupSection);
-            const isLastNavItem = this.visibleSections
-              .findIndex((node) => node.isEqualNode(section));
-
-            if (isLastNavItem <= 1) {
-              this.mainNav.items[this.mainNav.curr].focus();
-              break;
-            }
-
-            this.mainNav.focusPrev();
-            this.mainNav.open();
+          const { prevHeadline } = getState();
+          if (!prevHeadline) {
+            closeHeadline();
+            this.mainNav.items[this.mainNav.curr].focus();
             break;
           }
-
-          // TODO talk to rares, headlines are not focussable anymore.
-          // IMO this is fine
-          this.openHeadline({ headline, focus: 'last' });
+          openHeadline({ headline: prevHeadline, focus: 'first' });
           break;
         }
         case 'ArrowUp': {
-          this.mobileArrowUp();
+          this.mobileArrowUp({ prev: getPreviousVisibleItem(curr, popupItems) });
           break;
         }
         case 'ArrowRight': {
-          // if the next element is not visible, we check if it has a headline
-          const headline = this.visibleSections[this.currentSection + 1]
-            ?.querySelector(selectors.fedsPopupHeadline);
-
-          // if there is no headline, we can just move on
-          if (!headline) {
-            this.closeHeadline();
+          const { nextHeadline } = getState();
+          if (!nextHeadline) {
+            closeHeadline();
             this.mainNav.focusNext();
             this.mainNav.open();
             break;
           }
-          // TODO talk to rares, headlines are not focussable anymore.
-          // IMO this is fine
-          this.openHeadline({ headline, focus: 'first' });
+          openHeadline({ headline: nextHeadline, focus: 'first' });
           break;
         }
-        // each popup
-        // has columns & sections
         case 'ArrowDown': {
-          this.mobileArrowDown();
+          this.mobileArrowDown({ next: getNextVisibleItem(curr, popupItems) });
           break;
         }
         default:

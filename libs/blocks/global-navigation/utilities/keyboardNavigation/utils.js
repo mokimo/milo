@@ -14,11 +14,20 @@ const selectors = {
   promoLink: '.feds-promo-link',
   imagePromo: 'a.feds-promo-image',
   fedsNav: '.feds-nav',
-  fedsPopup: '.feds-popup',
-  fedsPopupHeadline: '.feds-popup-headline',
-  fedsPopupSection: '.feds-popup-section',
-  fedsPopupColumn: '.feds-popup-column',
+  popup: '.feds-popup',
+  headline: '.feds-popup-headline',
+  section: '.feds-popup-section',
+  column: '.feds-popup-column',
+  cta: '.feds-cta',
+  curtain: '.feds-curtain',
 };
+
+selectors.popupItems = `
+  ${selectors.navLink},
+  ${selectors.promoLink},
+  ${selectors.imagePromo},
+  ${selectors.cta}
+`;
 
 const isElementVisible = (elem) => !!(
   elem
@@ -41,4 +50,7 @@ const getPreviousVisibleItem = (position, items) => {
   return -1;
 };
 
-export { isElementVisible, getNextVisibleItem, getPreviousVisibleItem, selectors };
+const getOpenPopup = () => document.querySelector(selectors.expandedPopupTrigger)
+  ?.parentElement.querySelector(selectors.popup);
+
+export { isElementVisible, getNextVisibleItem, getPreviousVisibleItem, selectors, getOpenPopup };
