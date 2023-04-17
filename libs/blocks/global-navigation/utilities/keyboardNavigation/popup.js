@@ -71,17 +71,9 @@ class Popup {
           popupItems[next].focus();
           break;
         }
-        case 'Enter': {
-          e.target.click();
-          break;
-        }
         case 'Escape': {
           this.mainNav.close();
           this.mainNav.items[this.mainNav.curr].focus();
-          break;
-        }
-        case 'Space': {
-          e.target.click();
           break;
         }
         case 'ArrowLeft': {

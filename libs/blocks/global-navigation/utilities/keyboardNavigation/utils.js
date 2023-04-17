@@ -6,7 +6,7 @@ const selectors = {
   searchTrigger: '.feds-search-trigger',
   searchField: '.feds-search-input',
   signIn: '.feds-signin',
-  profileButton: '.feds-profile-button',
+  profileButton: '.feds-profile-button, .feds-signIn',
   logo: '.gnav-logo',
   breadCrumbItems: '.feds-breadcrumbs li > a',
   expandedPopupTrigger: '.feds-navLink[aria-expanded = "true"]',
@@ -20,6 +20,7 @@ const selectors = {
   column: '.feds-popup-column',
   cta: '.feds-cta',
   curtain: '.feds-curtain',
+  openSearch: '.feds-search-trigger[aria-expanded = "true"]',
 };
 
 selectors.popupItems = `

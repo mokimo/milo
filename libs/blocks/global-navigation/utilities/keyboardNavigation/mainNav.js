@@ -43,11 +43,6 @@ class MainNavItem {
           this.close();
           break;
         }
-        case 'Space': {
-          e.preventDefault();
-          e.target.click();
-          break;
-        }
         // TODO popup navigation logic.
         case 'ArrowLeft': {
           if (document.dir === 'ltr') {

@@ -139,19 +139,9 @@ class Popup {
           this.mobileArrowDown({ next });
           break;
         }
-        case 'Enter': {
-          e.preventDefault();
-          e.target.click();
-          break;
-        }
         case 'Escape': {
           this.mainNav.close();
           this.mainNav.items[this.mainNav.curr].focus();
-          break;
-        }
-        case 'Space': {
-          e.preventDefault();
-          e.target.click();
           break;
         }
         case 'ArrowLeft': {

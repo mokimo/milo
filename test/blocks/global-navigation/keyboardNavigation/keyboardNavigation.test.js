@@ -10,8 +10,7 @@ import buttonCss from '../../../../libs/blocks/global-navigation/blocks/profile/
 import dropdownCss from '../../../../libs/blocks/global-navigation/blocks/profile/dropdown.css' assert { type: 'css' };
 import navDropdownCss from '../../../../libs/blocks/global-navigation/blocks/navDropdown/dropdown.css' assert { type: 'css' };
 import { setViewport } from '@web/test-runner-commands';
-import { isElementVisible } from '../../../../libs/blocks/global-navigation/utilities/keyboardNavigation/utils.js';
-
+import { isElementVisible, getNextVisibleItem, getPreviousVisibleItem } from '../../../../libs/blocks/global-navigation/utilities/keyboardNavigation/utils.js';
 const isOpen = (element) => element.getAttribute('aria-expanded') === 'true'
   && element.hasAttribute('daa-lh', 'header|Close');
 const isClosed = (element) => element.getAttribute('aria-expanded') === 'false'
@@ -342,6 +341,58 @@ describe('keyboard navigation', () => {
   });
 
   describe('navigation that is not mainNav or popup', () => {
+    describe("Tab", () => {
+      it("cycles through the navigation if the search is open", async () => {
+        const search = document.querySelector(selectors.searchTrigger)
+        search.setAttribute('aria-expanded', 'true')
+        const withoutBreadcrumbs = [
+          ...document.querySelectorAll(`
+        ${selectors.brand}, 
+        ${selectors.mainNavToggle},
+        ${selectors.mainNavItems},
+        ${selectors.searchTrigger},
+        ${selectors.searchField},
+        ${selectors.signIn},
+        ${selectors.profileButton},
+        ${selectors.logo}
+        `),
+        ];
+        const first = getNextVisibleItem(-1, withoutBreadcrumbs);
+        const last = getPreviousVisibleItem(withoutBreadcrumbs.length, withoutBreadcrumbs);
+        
+        withoutBreadcrumbs[last].focus()
+        await sendKeys({ press: 'Tab' });
+        expect(document.activeElement).to.equal(withoutBreadcrumbs[first])
+      })
+    })
+
+    describe("Shift + Tab", () => {
+      it("cycles through the navigation if the search is open", async () => {
+        const search = document.querySelector(selectors.searchTrigger)
+        search.setAttribute('aria-expanded', 'true')
+        const withoutBreadcrumbs = [
+          ...document.querySelectorAll(`
+        ${selectors.brand}, 
+        ${selectors.mainNavToggle},
+        ${selectors.mainNavItems},
+        ${selectors.searchTrigger},
+        ${selectors.searchField},
+        ${selectors.signIn},
+        ${selectors.profileButton},
+        ${selectors.logo}
+        `),
+        ];
+        const first = getNextVisibleItem(-1, withoutBreadcrumbs);
+        const last = getPreviousVisibleItem(withoutBreadcrumbs.length, withoutBreadcrumbs);
+        
+        withoutBreadcrumbs[first].focus()
+        await sendKeys({ down: 'Shift' });
+        await sendKeys({ press: 'Tab' });
+        await sendKeys({ up: 'Shift' });
+        expect(document.activeElement).to.equal(withoutBreadcrumbs[last])
+      })
+    })
+
     describe('ArrowRight', () => {
       it('does nothing', async () => {
 
@@ -375,6 +426,7 @@ describe('keyboard navigation', () => {
         }
       });
     });
+
     describe('ArrowDown', () => {
       it('nothing', async () => {
         // TODO - it opens search and profile
@@ -386,6 +438,40 @@ describe('keyboard navigation', () => {
         }
       });
     });
+
+    describe('Space', () => {
+      it("emits a click event on links and CTAs", (done) => {
+        const search = document.querySelector(selectors.searchTrigger)
+        search.focus()
+        search.addEventListener('click', (e) => {
+          e.preventDefault()
+          done()
+        })
+        sendKeys({ press: 'Space' });
+      })  
+    })
+
+    describe('Enter', () => {
+      it("emits a click event on links and CTAs", (done) => {
+        const search = document.querySelector(selectors.searchTrigger)
+        search.focus()
+        search.addEventListener('click', (e) => {
+          e.preventDefault()
+          done()
+        })
+        sendKeys({ press: 'Enter' });
+      })  
+    })
+
+    describe('Escape', () => {
+      it('closes the profile', async () => {
+        const profile = document.querySelector(selectors.profileButton)
+        profile.setAttribute('aria-expanded', 'true')
+        profile.focus()
+        await sendKeys({ press: 'Escape' });
+        expect(profile.getAttribute('aria-expanded')).to.equal('false')
+      })
+    })
   });
 
   describe('popup', () => {
