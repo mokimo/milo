@@ -2,6 +2,7 @@
 import { selectors, getNextVisibleItem, getPreviousVisibleItem } from './utils.js';
 import Popup from './popup.js';
 import MobilePopup from './mobilePopup.js';
+import { closeAllDropdowns, openOrClose } from '../utilities.js';
 
 class MainNavItem {
   constructor() {
@@ -15,10 +16,13 @@ class MainNavItem {
     document.querySelector('header').addEventListener('click', (e) => {
       if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.popup)) return;
       const open = document.querySelector(selectors.expandedPopupTrigger);
-      if (open) {
-        this.close();
-      } else {
-        this.open({ triggerEl: e.target });
+      closeAllDropdowns();
+      if (open !== e.target) this.open({ triggerEl: e.target });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('header') || e.target.classList.contains('feds-curtain')) {
+        closeAllDropdowns();
       }
     });
 
@@ -29,7 +33,7 @@ class MainNavItem {
         const open = document.querySelector(selectors.expandedPopupTrigger);
         if (open) {
           if (this.prev === -1) {
-            this.close();
+            closeAllDropdowns();
           } else {
             e.preventDefault();
             this.focusPrev({ focus: 'last' });
@@ -40,7 +44,7 @@ class MainNavItem {
 
       switch (e.code) {
         case 'Escape': {
-          this.close();
+          closeAllDropdowns();
           break;
         }
         // TODO popup navigation logic.
@@ -96,7 +100,7 @@ class MainNavItem {
 
   focusPrev = ({ focus } = {}) => {
     const open = document.querySelector(selectors.expandedPopupTrigger);
-    this.close();
+    closeAllDropdowns();
     if (this.prev === -1) return;
     this.items[this.prev].focus();
     this.setActive(this.items[this.prev]);
@@ -107,29 +111,16 @@ class MainNavItem {
 
   focusNext = () => {
     if (this.next === -1) return;
-    this.close();
+    closeAllDropdowns();
     this.items[this.next].focus();
     this.setActive(this.items[this.next]);
-  };
-
-  close = ({ e } = {}) => {
-    const openElements = document.querySelectorAll("header [aria-expanded='true']");
-    if (!openElements) return;
-    if (e) e.preventDefault();
-    [...openElements].forEach((el) => {
-      el.setAttribute('aria-expanded', 'false');
-      el.setAttribute('daa-lh', 'header|Open');
-    });
-    document.querySelector(selectors.curtain).classList.remove('is-open');
   };
 
   open = ({ focus, triggerEl, e } = {}) => {
     const trigger = triggerEl || this.items[this.curr];
     if (!trigger || !trigger.hasAttribute('aria-haspopup')) return;
     if (e) e.preventDefault();
-    this.close();
-    trigger.setAttribute('aria-expanded', 'true');
-    trigger.setAttribute('daa-lh', 'header|Close');
+    openOrClose({ trigger });
     const navItem = trigger.parentElement;
     const popupEl = navItem.querySelector(selectors.popup);
     if (popupEl) {

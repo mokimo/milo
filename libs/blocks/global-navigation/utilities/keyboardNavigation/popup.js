@@ -5,6 +5,7 @@ import {
   getOpenPopup,
   selectors,
 } from './utils.js';
+import { closeAllDropdowns } from '../utilities.js';
 
 const getState = ({ e } = {}) => {
   const popupEl = getOpenPopup();
@@ -72,7 +73,7 @@ class Popup {
           break;
         }
         case 'Escape': {
-          this.mainNav.close();
+          closeAllDropdowns();
           this.mainNav.items[this.mainNav.curr].focus();
           break;
         }

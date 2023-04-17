@@ -39,10 +39,6 @@ class KeyboardNavigation {
       switch (e.code) {
         case 'Tab': {
           cycleOnOpenSearch({ e, isDesktop: this.desktop.matches });
-          // if (!this.desktop.matches && curr === -1) {
-          //   document.querySelector('.feds-curtain').classList.remove('is-open');
-          //   document.querySelector('.global-navigation').classList.remove('is-open');
-          // }
           break;
         }
         case 'Enter': {

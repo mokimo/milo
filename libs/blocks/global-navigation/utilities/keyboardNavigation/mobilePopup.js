@@ -5,6 +5,7 @@ import {
   getOpenPopup,
   selectors,
 } from './utils.js';
+import { closeAllDropdowns } from '../utilities.js';
 
 const closeHeadline = () => {
   const open = [...document.querySelectorAll(`${selectors.headline}[aria-expanded="true"]`)];
@@ -140,7 +141,7 @@ class Popup {
           break;
         }
         case 'Escape': {
-          this.mainNav.close();
+          closeAllDropdowns();
           this.mainNav.items[this.mainNav.curr].focus();
           break;
         }
