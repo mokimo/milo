@@ -1,5 +1,7 @@
 import { getConfig, localizeLink } from '../../../utils/utils.js';
 
+const curtainSelector = '.feds-curtain';
+
 export function toFragment(htmlStrings, ...values) {
   const templateStr = htmlStrings.reduce((acc, htmlString, index) => {
     if (values[index] instanceof HTMLElement) {
@@ -77,4 +79,22 @@ export function decorateCta({ elem, type = 'primaryCta', index } = {}) {
           ${elem.textContent}
       </a>
     </div>`;
+}
+
+export function closeAllDropdowns({ e } = {}) {
+  const openElements = document.querySelectorAll("header [aria-expanded='true']");
+  if (!openElements) return;
+  if (e) e.preventDefault();
+  [...openElements].forEach((el) => {
+    el.setAttribute('aria-expanded', 'false');
+    el.setAttribute('daa-lh', 'header|Open');
+  });
+  document.querySelector(curtainSelector)?.classList.remove('is-open');
+}
+
+export function openOrClose({ trigger } = {}) {
+  if (!trigger) return;
+  const wasClosed = trigger.getAttribute('aria-expanded') === 'false';
+  closeAllDropdowns();
+  if (wasClosed) trigger.setAttribute('aria-expanded', 'true');
 }

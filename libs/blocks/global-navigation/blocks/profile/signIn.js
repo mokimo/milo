@@ -1,4 +1,4 @@
-import { toFragment, getFedsPlaceholderConfig } from '../../utilities/utilities.js';
+import { toFragment, getFedsPlaceholderConfig, openOrClose } from '../../utilities/utilities.js';
 import { replaceKey } from '../../../../features/placeholders.js';
 
 const signIn = () => {
@@ -23,13 +23,7 @@ const decorateSignIn = async ({ rawElem, decoratedElem }) => {
     signInElem = toFragment`<a href="#" daa-ll="${signInLabel}" class="feds-signIn" role="button" aria-expanded="false" aria-haspopup="true">${signInLabel}</a>`;
 
     signInElem.addEventListener('click', () => {
-      const isOpen = signInElem.getAttribute('aria-expanded') === 'true';
-
-      if (isOpen) {
-        signInElem.setAttribute('aria-expanded', 'false');
-      } else {
-        signInElem.setAttribute('aria-expanded', 'true');
-      }
+      openOrClose({ trigger: signInElem });
     });
 
     dropdownElem.classList.add('feds-signIn-dropdown');

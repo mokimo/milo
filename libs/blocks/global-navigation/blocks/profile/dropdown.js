@@ -1,5 +1,5 @@
 import { getConfig } from '../../../../utils/utils.js';
-import { toFragment, getFedsPlaceholderConfig } from '../../utilities/utilities.js';
+import { toFragment, getFedsPlaceholderConfig, openOrClose } from '../../utilities/utilities.js';
 import { replaceKeyArray } from '../../../../features/placeholders.js';
 
 const getLanguage = (ietfLocale) => {
@@ -63,7 +63,7 @@ class ProfileDropdown {
     this.dropdown = this.decorateDropdown();
     this.addEventListeners();
 
-    if (this.openOnInit) this.toggleDropdown();
+    if (this.openOnInit) openOrClose({ trigger: this.buttonElem });
 
     this.decoratedElem.append(this.dropdown);
   }
@@ -170,13 +170,8 @@ class ProfileDropdown {
 
   addEventListeners() {
     this.buttonElem.addEventListener('click', () => {
-      this.toggleDropdown();
+      openOrClose({ trigger: this.buttonElem });
     });
-  }
-
-  toggleDropdown() {
-    const currentState = this.buttonElem.getAttribute('aria-expanded');
-    this.buttonElem.setAttribute('aria-expanded', currentState === 'false');
   }
 }
 

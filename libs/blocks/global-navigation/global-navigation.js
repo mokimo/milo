@@ -57,7 +57,6 @@ class Gnav {
 
   init = () => {
     this.elements.curtain = toFragment`<div class="feds-curtain"></div>`;
-
     this.elements.navWrapper = toFragment`
       <div class="feds-nav-wrapper">
         ${this.isDesktop.matches ? '' : this.decorateBreadcrumbs()}
@@ -123,26 +122,26 @@ class Gnav {
     this.ready = this.ready || new Promise(async (resolve) => {
       this.el.removeEventListener('click', this.loadDelayed);
       const [
-        { MenuControls },
         decorateDropdown,
         { appLauncher },
         ProfileDropdown,
         Search,
+        KeyboardNavigation,
       ] = await Promise.all([
-        loadBlock('./utilities/delayed-utilities.js'),
         loadBlock('./blocks/navDropdown/dropdown.js'),
         loadBlock('./blocks/appLauncher/appLauncher.js'),
         loadBlock('./blocks/profile/dropdown.js'),
         loadBlock('./blocks/search/gnav-search.js'),
+        loadBlock('./utilities/keyboard/index.js'),
         loadStyles('./blocks/profile/dropdown.css'),
         loadStyles('./blocks/navDropdown/dropdown.css'),
         loadStyles('./blocks/search/gnav-search.css'),
       ]);
-      this.menuControls = new MenuControls(this.curtain);
       this.decorateDropdown = decorateDropdown;
       this.ProfileDropdown = ProfileDropdown;
       this.appLauncher = appLauncher;
       this.Search = Search;
+      this.keyboardNavigation = new KeyboardNavigation();
       resolve();
     });
     return this.ready;
@@ -411,28 +410,6 @@ class Gnav {
           <div class="feds-navItem${isSectionMenu ? ' feds-navItem--section' : ''}">
             ${dropdownTrigger}
           </div>`;
-        // TODO: move proper logic to accessibility,
-        // this is just for demo functionality purposes
-        dropdownTrigger.addEventListener('click', (e) => {
-          e.preventDefault();
-
-          const openPopup = document.querySelector('.feds-navLink[aria-expanded = "true"]');
-
-          if (openPopup && openPopup !== dropdownTrigger) {
-            openPopup.setAttribute('aria-expanded', 'false');
-            openPopup.setAttribute('daa-lh', 'header|Open');
-          }
-
-          const currentState = dropdownTrigger.getAttribute('aria-expanded');
-
-          if (currentState === 'false') {
-            dropdownTrigger.setAttribute('aria-expanded', 'true');
-            dropdownTrigger.setAttribute('daa-lh', 'header|Close');
-          } else {
-            dropdownTrigger.setAttribute('aria-expanded', 'false');
-            dropdownTrigger.setAttribute('daa-lh', 'header|Open');
-          }
-        });
         delayDropdownDecoration(triggerTemplate);
         return triggerTemplate;
       }

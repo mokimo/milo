@@ -4,6 +4,8 @@ import {
   getLocale,
   getCountry,
   getFedsPlaceholderConfig,
+  openOrClose,
+  closeAllDropdowns,
 } from '../../utilities/utilities.js';
 import { replaceKeyArray } from '../../../../features/placeholders.js';
 import { getConfig } from '../../../../utils/utils.js';
@@ -84,7 +86,8 @@ class Search {
         if (this.input.value.length) {
           this.clearSearchForm();
         } else if (this.isDesktop.matches) {
-          this.closeDropdown();
+          this.clearSearchForm();
+          closeAllDropdowns();
           this.trigger.focus();
         }
       }
@@ -106,7 +109,7 @@ class Search {
     // Switching between a mobile and a desktop view
     // should close the search dropdown
     this.isDesktop.addEventListener('change', () => {
-      this.closeDropdown();
+      closeAllDropdowns();
     });
 
     // TODO: search menu should close on scroll, but this should happen from the general Menu logic
@@ -252,27 +255,18 @@ class Search {
     </li>`;
   }
 
-  closeDropdown() {
-    this.clearSearchForm();
-    this.trigger.setAttribute('aria-expanded', 'false');
-    this.curtain.classList.remove('is-open');
-  }
-
-  openDropdown() {
-    this.trigger.setAttribute('aria-expanded', 'true');
-    this.curtain.classList.add('is-open');
+  focusInput() {
     if (this.isDesktop.matches) {
       this.input.focus();
     }
   }
 
   toggleDropdown() {
-    const isOpen = this.trigger.getAttribute('aria-expanded') === 'true';
-
-    if (isOpen) {
-      this.closeDropdown();
-    } else {
-      this.openDropdown();
+    const wasClosed = this.trigger.getAttribute('aria-expanded') === 'false';
+    openOrClose({ trigger: this.trigger });
+    if (wasClosed) {
+      this.curtain.classList.add('is-open');
+      this.focusInput();
     }
   }
 
