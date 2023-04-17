@@ -1,6 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import { getNextVisibleItem, getPreviousVisibleItem, selectors } from './utils.js';
 import MainNav from './mainNav.js';
+import { closeAllDropdowns } from '../utilities.js';
 
 const cycleOnOpenSearch = ({ e, isDesktop }) => {
   const withoutBreadcrumbs = [
@@ -23,14 +24,26 @@ const cycleOnOpenSearch = ({ e, isDesktop }) => {
     withoutBreadcrumbs[e.shiftKey ? last : first].focus();
   }
 };
+
+const closeOnClickOutside = (e) => {
+  if (
+    !e.target.closest('header')
+    || e.target.classList.contains(selectors.curtain.replace('.', ''))
+  ) {
+    closeAllDropdowns();
+  }
+};
+
 class KeyboardNavigation {
   constructor() {
-    this.listenToChanges();
+    this.addEventListeners();
     this.mainNav = new MainNav();
     this.desktop = window.matchMedia('(min-width: 900px)');
   }
 
-  listenToChanges = () => {
+  addEventListeners = () => {
+    document.addEventListener('click', (e) => closeOnClickOutside(e));
+
     document.querySelector('header').addEventListener('keydown', (e) => {
       if (e.shiftKey && e.code === 'Tab') {
         cycleOnOpenSearch({ e, isDesktop: this.desktop.matches });

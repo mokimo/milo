@@ -9,21 +9,15 @@ class MainNavItem {
     this.desktop = window.matchMedia('(min-width: 900px)');
     this.popup = new Popup({ mainNav: this });
     this.mobilePopup = new MobilePopup({ mainNav: this });
-    this.listenToChanges();
+    this.addEventListeners();
   }
 
-  listenToChanges() {
+  addEventListeners() {
     document.querySelector('header').addEventListener('click', (e) => {
       if (!e.target.closest(selectors.fedsNav) || e.target.closest(selectors.popup)) return;
       const open = document.querySelector(selectors.expandedPopupTrigger);
       closeAllDropdowns();
       if (open !== e.target) this.open({ triggerEl: e.target });
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('header') || e.target.classList.contains('feds-curtain')) {
-        closeAllDropdowns();
-      }
     });
 
     document.querySelector('header').addEventListener('keydown', (e) => {

@@ -58,7 +58,7 @@ const getState = () => {
 class Popup {
   constructor({ mainNav }) {
     this.mainNav = mainNav;
-    this.listenToChanges();
+    this.addEventListeners();
     this.desktop = window.matchMedia('(min-width: 900px)');
   }
 
@@ -120,7 +120,7 @@ class Popup {
     openHeadline({ headline: nextHeadline, focus: 'first' });
   };
 
-  listenToChanges = () => {
+  addEventListeners = () => {
     document.querySelector('header').addEventListener('keydown', (e) => {
       const popupEl = getOpenPopup();
       if (!e.target.closest(selectors.popup) || !popupEl || this.desktop.matches) return;

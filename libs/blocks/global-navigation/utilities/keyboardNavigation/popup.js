@@ -32,7 +32,7 @@ const getState = ({ e } = {}) => {
 class Popup {
   constructor({ mainNav }) {
     this.mainNav = mainNav;
-    this.listenToChanges();
+    this.addEventListeners();
     this.desktop = window.matchMedia('(min-width: 900px)');
   }
 
@@ -45,7 +45,7 @@ class Popup {
     if (focus === 'last') popupItems[last].focus();
   }
 
-  listenToChanges = () => {
+  addEventListeners = () => {
     document.querySelector('header').addEventListener('keydown', (e) => {
       const popupEl = getOpenPopup();
       if (!e.target.closest(selectors.popup) || !popupEl || !this.desktop.matches) return;
