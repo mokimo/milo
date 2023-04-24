@@ -197,7 +197,7 @@ class Gnav {
       this.el.removeEventListener('click', this.loadDelayed);
       const [
         decorateDropdown,
-        { appLauncher },
+        appLauncher,
         ProfileDropdown,
         Search,
       ] = await Promise.all([
@@ -208,6 +208,7 @@ class Gnav {
         loadStyles('./blocks/profile/dropdown.css'),
         loadStyles('./blocks/navDropdown/dropdown.css'),
         loadStyles('./blocks/search/gnav-search.css'),
+        loadStyles('./blocks/appLauncher/appLauncher.css'),
       ]);
       this.decorateDropdown = decorateDropdown;
       this.ProfileDropdown = ProfileDropdown;
@@ -233,7 +234,6 @@ class Gnav {
       useLocalStorage: false,
       onReady: () => {
         this.decorateProfile();
-        this.decorateAppLauncher();
       },
     };
     const imsScript = document.querySelector('script[src$="/imslib.min.js"]') instanceof HTMLElement;
@@ -252,6 +252,7 @@ class Gnav {
     // If user is not signed in, decorate the 'Sign In' element
     if (!isSignedInUser) {
       decorateSignIn({ rawElem, decoratedElem });
+      this.decorateAppLauncher(decoratedElem);
       return;
     }
 
@@ -293,15 +294,12 @@ class Gnav {
     decorationTimeout = setTimeout(decorateDropdown, 3000);
   };
 
-  decorateAppLauncher = () => {
+  decorateAppLauncher = async (decoratedElem) => {
     // TODO: review App Launcher component
     // const appLauncherBlock = this.body.querySelector('.app-launcher');
     // if (appLauncherBlock) {
-    //   await this.loadDelayed();
-    //   this.appLauncher(
-    //     decoratedElem,
-    //     appLauncherBlock,
-    //   );
+    await this.loadDelayed();
+    this.appLauncher(decoratedElem);
     // }
   };
 

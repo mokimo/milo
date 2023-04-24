@@ -1,0 +1,155 @@
+:root {
+  --feds-color-profile-heading: #707070;
+  --feds-color-profile: #4b4b4b;
+  --feds-color-profile--emphasis: #2c2c2c;
+  --feds-border-applauncher: 1px solid #e1e1e1;
+}
+
+.feds-applauncher {
+  display: flex;
+  position: relative;
+}
+
+.feds-applauncher-trigger {
+  border: none;
+  padding: 5px var(--feds-gutter);
+}
+
+.feds-applauncher-trigger svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.5;
+}
+
+.feds-applauncher-trigger:hover svg {
+  opacity: 1;
+}
+
+.feds-applauncher-wrapper {
+  position: absolute;
+  display: none;
+  right: 0;
+  top: 100%;
+  z-index: 1;
+}
+
+.feds-applauncher-popup {
+  border: var(--feds-border-applauncher);
+  border-radius: 0 0 4px 4px;
+  background: var(--color-white);
+  box-shadow: 0 2px 6px -1px rgb(0 0 0 / 10%);
+  line-height: 1;
+  white-space: nowrap;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+[dir = "rtl"] .feds-applauncher-wrapper {
+  right: initial;
+  left: 0;
+}
+
+.feds-applauncher-trigger[aria-expanded = "true"] + .feds-applauncher-wrapper {
+  display: block;
+}
+
+.feds-applauncher-list {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  box-sizing: border-box;
+  width: 21rem;
+}
+
+.feds-applauncher-list li {
+  flex-basis: calc(33.333%);
+}
+
+.feds-applauncher-list li > a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--feds-color-profile);
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  padding-left: 3px;
+  padding-right: 3px;
+  height: 4.688rem;
+  font-size: 14px;
+  font-weight: 400;
+  word-wrap: break-word;
+  white-space: normal;
+  text-align: center;
+}
+
+.feds-applauncher-list li > a:hover {
+  background-color: #f4f4f4;
+  color: var(--color-black);
+}
+
+.feds-applauncher-list li > a img {
+  width: 48px
+}
+
+.feds-applauncher-popup-header {
+  font-size: .6875rem;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  flex-wrap: nowrap;
+  color: #4b4b4b;
+  align-items: center;
+  padding: 10px;
+}
+
+.feds-applauncher-popup-header-text {
+    flex-grow: 1;
+}
+
+.feds-applauncher-popup-header-info > svg {
+  height: 0.875rem;
+  width: 0.875rem;
+}
+
+.feds-applauncher-popup-footer {
+  text-align: center;
+  font-weight: 700;
+  padding: 1rem 0.3125rem;
+  font-size: 14px;
+}
+
+.feds-applauncher-popup-footer:hover {
+  background-color: #f4f4f4;
+}
+
+.feds-applauncher-popup-infobox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  white-space: normal;
+  width: 21rem;
+}
+
+.feds-applauncher-popup-infobox-header {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.feds-applauncher-popup-infobox-description {
+  padding: 2rem;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.feds-applauncher-popup-infobox-button {
+  align-self: flex-end;
+  margin-right: 2rem;
+}
+
+.feds-applauncher-hidden {
+  display: none;
+}
