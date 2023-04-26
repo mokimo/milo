@@ -1,6 +1,6 @@
 :root {
   --feds-color-profile-heading: #707070;
-  --feds-color-profile: #4b4b4b;
+  --feds-color-applauncher-text: #4b4b4b;
   --feds-color-profile--emphasis: #2c2c2c;
   --feds-border-applauncher: 1px solid #e1e1e1;
 }
@@ -40,7 +40,7 @@
   box-shadow: 0 2px 6px -1px rgb(0 0 0 / 10%);
   line-height: 1;
   white-space: nowrap;
-  max-height: 80vh;
+  max-height: calc(100vh - var(--feds-height-nav) - 15px);
   overflow-y: auto;
 }
 
@@ -71,7 +71,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: var(--feds-color-profile);
   padding-top: 1.25rem;
   padding-bottom: 1.25rem;
   padding-left: 3px;
@@ -82,6 +81,7 @@
   word-wrap: break-word;
   white-space: normal;
   text-align: center;
+  color: #505050;
 }
 
 .feds-applauncher-list li > a:hover {
@@ -99,7 +99,7 @@
   text-align: center;
   display: flex;
   flex-wrap: nowrap;
-  color: #4b4b4b;
+  color: var(--feds-color-applauncher-text);
   align-items: center;
   padding: 10px;
 }
@@ -118,6 +118,7 @@
   font-weight: 700;
   padding: 1rem 0.3125rem;
   font-size: 14px;
+  color: var(--feds-color-applauncher-text);
 }
 
 .feds-applauncher-popup-footer:hover {
@@ -136,6 +137,7 @@
 .feds-applauncher-popup-infobox-header {
   font-size: 1.125rem;
   font-weight: 700;
+  color: var(--feds-color-applauncher-text);
 }
 
 .feds-applauncher-popup-infobox-description {
@@ -143,6 +145,7 @@
   font-size: 14px;
   line-height: 1.5;
   font-weight: 400;
+  color: var(--feds-color-applauncher-text);
 }
 
 .feds-applauncher-popup-infobox-button {

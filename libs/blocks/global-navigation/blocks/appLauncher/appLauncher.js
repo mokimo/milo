@@ -59,7 +59,7 @@ async function decorateAppsMenu(profileEl) {
             <div class="feds-applauncher-popup-infobox-button feds-cta feds-cta--secondary">OK</div>
           </span>
           <ul class="feds-applauncher-list"></ul>
-          <div class="feds-applauncher-popup-footer">MORE</div>
+          <div class="feds-applauncher-popup-footer">More</div>
         </div>
       </div>
       </div>
