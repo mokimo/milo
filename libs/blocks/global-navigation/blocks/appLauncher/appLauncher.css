@@ -25,10 +25,6 @@
   opacity: 1;
 }
 
-.feds-applauncher-wrapper {
-
-}
-
 .feds-applauncher-popup {
   border: var(--feds-border-applauncher);
   border-radius: 0 0 4px 4px;
@@ -121,7 +117,7 @@
   text-align: center;
 }
 
-.feds-applauncher-footer-more-button {
+.feds-applauncher-more-button {
   width: 100%;
   padding: 15px 0;
   font-weight: 700;
@@ -130,7 +126,7 @@
   color: var(--feds-color-applauncher-text);
 }
 
-.feds-applauncher-footer-more-button:hover {
+.feds-applauncher-more-button:hover {
   background-color: #f4f4f4;
 }
 
@@ -160,8 +156,9 @@
   align-self: flex-end;
 }
 
-.feds-applauncher-hidden {
-  display: none;
+.feds-applauncher-more-button {
+  width: fit-content;
+  font-size: 12px;
 }
 
 .feds-applauncher-more-header {
@@ -191,7 +188,6 @@
   text-align: start;
 }
 
-.feds-applauncher-more-button {
-  width: fit-content;
-  font-size: 12px;
+.feds-applauncher-hidden {
+  display: none;
 }

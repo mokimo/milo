@@ -60,7 +60,7 @@ class ApppLauncher {
         appList: appNavItems.querySelector('.feds-applauncher-list'),
         infoBox: appNavItems.querySelector('.feds-applauncher-infobox'),
         footer: appNavItems.querySelector('.feds-applauncher-footer'),
-        footerMoreButton: appNavItems.querySelector('.feds-applauncher-footer-more-button'),
+        footerMoreButton: appNavItems.querySelector('.feds-applauncher-more-button'),
         trigger: appNavItems.querySelector('.feds-applauncher-trigger'),
         infoIcon: appNavItems.querySelector('.feds-applauncher-header-info'),
         infoBoxButton: appNavItems.querySelector('.feds-applauncher-infobox-button'),
@@ -70,7 +70,7 @@ class ApppLauncher {
       this.addEventListeners();
       if (appNavItems) this.profileEl.after(appNavItems);
     } catch (error) {
-      console.log({ error });
+      window.lana?.log(`Cannot init applauncher ${e.toString()}`, { clientId: 'feds-milo' });
     }
   }
 
@@ -150,7 +150,7 @@ class ApppLauncher {
             </span>
             <ul class="feds-applauncher-list"></ul>
             <div class="feds-applauncher-footer">
-              <button class="feds-applauncher-footer-more-button">${this.labels.footer}</button>
+              <button class="feds-applauncher-more-button">${this.labels.footer}</button>
             </div>
           </div>
         </div>
