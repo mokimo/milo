@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import {
   getConfig,
   getMetadata,
@@ -12,6 +13,7 @@ import {
   decorateCta,
   trigger,
   closeAllDropdowns,
+  yieldToMain,
 } from './utilities/utilities.js';
 import { replaceKey } from '../../features/placeholders.js';
 
@@ -109,6 +111,14 @@ const decorateProfileTrigger = async ({ avatar }) => {
   return buttonElem;
 };
 
+let keyboardNav;
+const setupKeyboardNav = async () => {
+  if (keyboardNav) return;
+  keyboardNav = 'loading';
+  const KeyboardNavigation = await loadBlock('./utilities/keyboard/index.js');
+  keyboardNav = new KeyboardNavigation();
+};
+
 class Gnav {
   constructor(body, el) {
     this.blocks = {
@@ -129,39 +139,50 @@ class Gnav {
     });
   }
 
-  init = () => {
+  init = async () => {
     this.elements.curtain = toFragment`<div class="feds-curtain"></div>`;
-    this.elements.navWrapper = toFragment`
-      <div class="feds-nav-wrapper">
-        ${this.isDesktop.matches ? '' : this.decorateBreadcrumbs()}
-        ${this.isDesktop.matches ? '' : this.decorateSearch()}
-        ${this.decorateMainNav()}
-        ${this.isDesktop.matches ? this.decorateSearch() : ''}
-      </div>`;
-
-    this.elements.topnav = toFragment`
-      <nav class="feds-topnav" aria-label="Main">
-        <div class="feds-brand-container">
-          ${this.mobileToggle()}
-          ${this.decorateBrand()}
-        </div>
-        ${this.elements.navWrapper}
-        ${this.blocks.profile.rawElem ? this.blocks.profile.decoratedElem : ''}
-        ${this.decorateLogo()}
-      </nav>
-    `;
-
-    this.elements.topnavWrapper = toFragment`<div class="feds-topnav-wrapper">
-        ${this.elements.topnav}
-        ${this.isDesktop.matches ? this.decorateBreadcrumbs() : ''}
-      </div>`;
-
+    // Order is important, decorateTopnavWrapper will render the nav
+    // Ensure any critical task is executed before it
+    const tasks = [
+      this.decorateMainNav,
+      this.decorateTopNav,
+      this.decorateTopnavWrapper,
+      this.loadIMS,
+      this.addChangeEventListener,
+    ];
     this.el.addEventListener('click', this.loadDelayed);
-    this.el.addEventListener('keydown', this.loadDelayed);
-    setTimeout(() => this.loadDelayed(), 3000);
-    this.loadIMS();
-    this.el.append(this.elements.curtain, this.elements.topnavWrapper);
+    this.el.addEventListener('keydown', setupKeyboardNav);
+    setTimeout(this.loadDelayed, 3000);
+    setTimeout(setupKeyboardNav, 5000);
+    for await (const task of tasks) {
+      await yieldToMain();
+      await task();
+    }
+  };
 
+  decorateTopNav = () => {
+    this.elements.topnav = toFragment`
+    <nav class="feds-topnav" aria-label="Main">
+      <div class="feds-brand-container">
+        ${this.mobileToggle()}
+        ${this.decorateBrand()}
+      </div>
+      ${this.elements.navWrapper}
+      ${this.blocks.profile.rawElem ? this.blocks.profile.decoratedElem : ''}
+      ${this.decorateLogo()}
+    </nav>
+  `;
+  };
+
+  decorateTopnavWrapper = () => {
+    this.elements.topnavWrapper = toFragment`<div class="feds-topnav-wrapper">
+    ${this.elements.topnav}
+    ${this.isDesktop.matches ? this.decorateBreadcrumbs() : ''}
+  </div>`;
+    this.el.append(this.elements.curtain, this.elements.topnavWrapper);
+  };
+
+  addChangeEventListener = () => {
     // Ensure correct DOM order for elements between mobile and desktop
     this.isDesktop.addEventListener('change', () => {
       if (this.isDesktop.matches) {
@@ -202,13 +223,11 @@ class Gnav {
         { appLauncher },
         ProfileDropdown,
         Search,
-        KeyboardNavigation,
       ] = await Promise.all([
         loadBlock('./blocks/navDropdown/dropdown.js'),
         loadBlock('./blocks/appLauncher/appLauncher.js'),
         loadBlock('./blocks/profile/dropdown.js'),
         loadBlock('./blocks/search/gnav-search.js'),
-        loadBlock('./utilities/keyboard/index.js'),
         loadStyles('./blocks/profile/dropdown.css'),
         loadStyles('./blocks/navDropdown/dropdown.css'),
         loadStyles('./blocks/search/gnav-search.css'),
@@ -217,8 +236,6 @@ class Gnav {
       this.ProfileDropdown = ProfileDropdown;
       this.appLauncher = appLauncher;
       this.Search = Search;
-      // TODO we might only want to load the keyboard navigation on keydown when it's actually used
-      this.keyboardNavigation = new KeyboardNavigation();
       resolve();
     });
     return this.ready;
@@ -404,13 +421,21 @@ class Gnav {
     `;
   };
 
-  decorateMainNav = () => {
+  decorateMainNav = async () => {
     this.elements.mainNav = toFragment`<div class="feds-nav"></div>`;
+    this.elements.navWrapper = toFragment`
+    <div class="feds-nav-wrapper">
+      ${this.isDesktop.matches ? '' : this.decorateBreadcrumbs()}
+      ${this.isDesktop.matches ? '' : this.decorateSearch()}
+      ${this.elements.mainNav}
+      ${this.isDesktop.matches ? this.decorateSearch() : ''}
+    </div>`;
 
     const items = this.body.querySelectorAll('h2, p:only-child > strong > a, p:only-child > em > a');
-    items.forEach((item, index) => this.elements.mainNav
-      .appendChild(this.decorateMainNavItem(item, index)));
-
+    for await (const [index, item] of items.entries()) {
+      await yieldToMain();
+      this.elements.mainNav.appendChild(this.decorateMainNavItem(item, index));
+    }
     return this.elements.mainNav;
   };
 

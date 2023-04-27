@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import { getNextVisibleItemPosition, getPreviousVisibleItemPosition, selectors } from './utils.js';
 import MainNav from './mainNav.js';
-import { closeAllDropdowns } from '../utilities.js';
+import { closeAllDropdowns, yieldToMain } from '../utilities.js';
 
 const cycleOnOpenSearch = ({ e, isDesktop }) => {
   const withoutBreadcrumbs = [
@@ -36,9 +36,14 @@ const closeOnClickOutside = (e) => {
 
 class KeyboardNavigation {
   constructor() {
+    this.init();
+  }
+
+  async init() {
+    await yieldToMain();
+    this.desktop = window.matchMedia('(min-width: 900px)');
     this.addEventListeners();
     this.mainNav = new MainNav();
-    this.desktop = window.matchMedia('(min-width: 900px)');
   }
 
   addEventListeners = () => {
