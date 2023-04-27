@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 /* eslint-disable no-restricted-syntax */
 import {
   getConfig,
@@ -214,25 +215,20 @@ class Gnav {
   };
 
   loadDelayed = async () => {
-    // eslint-disable-next-line no-async-promise-executor
     this.ready = this.ready || new Promise(async (resolve) => {
       this.el.removeEventListener('click', this.loadDelayed);
       this.el.removeEventListener('keydown', this.loadDelayed);
       const [
-        decorateDropdown,
         { appLauncher },
         ProfileDropdown,
         Search,
       ] = await Promise.all([
-        loadBlock('./blocks/navDropdown/dropdown.js'),
         loadBlock('./blocks/appLauncher/appLauncher.js'),
         loadBlock('./blocks/profile/dropdown.js'),
         loadBlock('./blocks/search/gnav-search.js'),
         loadStyles('./blocks/profile/dropdown.css'),
-        loadStyles('./blocks/navDropdown/dropdown.css'),
         loadStyles('./blocks/search/gnav-search.css'),
       ]);
-      this.decorateDropdown = decorateDropdown;
       this.ProfileDropdown = ProfileDropdown;
       this.appLauncher = appLauncher;
       this.Search = Search;
@@ -254,9 +250,15 @@ class Gnav {
       autoValidateToken: true,
       environment: env.ims,
       useLocalStorage: false,
-      onReady: () => {
-        this.decorateProfile();
-        this.decorateAppLauncher();
+      onReady: async () => {
+        const tasks = [
+          this.decorateProfile,
+          this.decorateAppLauncher,
+        ];
+        for await (const task of tasks) {
+          await yieldToMain();
+          await task();
+        }
       },
     };
     const imsScript = document.querySelector('script[src$="/imslib.min.js"]') instanceof HTMLElement;
@@ -457,6 +459,18 @@ class Gnav {
     return 'link';
   };
 
+  loadDecorateDropdown = async () => {
+    this.decorateDropdownLoaded = this.decorateDropdownLoaded || new Promise(async (resolve) => {
+      const [decorateDropdown] = await Promise.all([
+        loadBlock('./blocks/navDropdown/dropdown.js'),
+        loadStyles('./blocks/navDropdown/dropdown.css'),
+      ]);
+      this.decorateDropdown = decorateDropdown;
+      resolve();
+    });
+    return this.decorateDropdownLoaded;
+  };
+
   decorateMainNavItem = (item, index) => {
     const itemType = this.getMainNavItemType(item);
 
@@ -467,7 +481,7 @@ class Gnav {
       const decorateDropdown = async () => {
         template.removeEventListener('click', decorateDropdown);
         clearTimeout(decorationTimeout);
-        await this.loadDelayed();
+        await this.loadDecorateDropdown();
         this.decorateDropdown({
           item,
           template,
@@ -476,7 +490,7 @@ class Gnav {
       };
 
       template.addEventListener('click', decorateDropdown);
-      decorationTimeout = setTimeout(decorateDropdown, 3000);
+      decorationTimeout = setTimeout(decorateDropdown, 500);
     };
 
     // Decorate item based on its type
@@ -499,6 +513,7 @@ class Gnav {
           <div class="feds-navItem${isSectionMenu ? ' feds-navItem--section' : ''}">
             ${dropdownTrigger}
           </div>`;
+        dropdownTrigger.addEventListener('click', () => trigger({ element: dropdownTrigger }));
         delayDropdownDecoration(triggerTemplate);
         return triggerTemplate;
       }
