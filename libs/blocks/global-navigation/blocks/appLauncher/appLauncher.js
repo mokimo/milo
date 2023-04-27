@@ -41,15 +41,117 @@ const fetchData = () => fetch(api)
   // do nothing
   });
 
-class ApppLauncher {
+class AppLauncher {
   constructor({ profileEl }) {
     this.profileEl = profileEl;
     this.init();
   }
 
   async init() {
+    console.log('oh');
     try {
-      const data = await fetchData();
+      // const data = await fetchData();
+      // static data for demo purposes to prevent CORS issues
+      const data = {
+        apps: [
+          {
+            name: 'Adobe Express',
+            goUrl: 'utilitynav-appmenu-aexpbeta-icon-link_stage',
+            imgKey: 'assets/cc_express_2x.png',
+            url: 'https://stage.projectx.corp.adobe.com',
+          },
+          {
+            name: 'Photoshop',
+            goUrl: 'utilitynav-appmenu-ps-icon-link_stage',
+            imgKey: 'assets/ps_appicons.png',
+            url: 'https://stage.creativecloud.adobe.com/cc/photoshop?context=home_cc',
+          },
+          {
+            name: 'Adobe Firefly',
+            goUrl: 'utilitynav-appmenu-fireflybeta-icon-link_stage',
+            imgKey: 'assets/firefly_appicon_128.png',
+            url: 'https://firefly-stage.corp.adobe.com?promoid=DZTGZSX7',
+          },
+          {
+            name: 'Lightroom',
+            goUrl: 'utilitynav-appmenu-lr-icon-link_stage',
+            imgKey: 'assets/lightroom_2x-1Bvte3Y.png',
+            url: 'https://stage.adobelr.com/',
+          },
+          {
+            name: 'Stock',
+            goUrl: 'utilitynav-appmenu-st-icon-link_stage',
+            imgKey: 'assets/stock_2x-3Tnxd6P.png',
+            url: 'https://primary.stock.stage.adobe.com/',
+          },
+          {
+            name: 'Fonts',
+            goUrl: 'utilitynav-appmenu-tk-icon-link_stage',
+            imgKey: {
+              light: 'assets/typekit_light-EtaWIYE.png',
+              dark: 'assets/typekit_dark-2YVtFWA.png',
+            },
+            url: 'https://fonts-relstage.adobe.com/',
+          },
+          {
+            name: 'Acrobat Sign',
+            goUrl: 'utilitynav-appmenu-as-icon-link_stage',
+            imgKey: 'assets/adobe_sign_2x.png',
+            url: 'https://documentsstage.adobe.com/account/homeJS',
+          },
+          {
+            name: 'Behance',
+            goUrl: 'utilitynav-appmenu-be-icon-link_stage',
+            imgKey: 'assets/behance_2x-2SU4BVj.png',
+            url: 'https://net.s2stagehance.com/',
+          },
+          {
+            name: 'Portfolio',
+            goUrl: 'utilitynav-appmenu-pf-icon-link_stage',
+            imgKey: 'assets/portfolio_2x-1N1Dojs.png',
+            url: 'https://portfolio.ccpsx.com/',
+          },
+          {
+            name: 'Substance 3D Assets',
+            goUrl: 'utilitynav-appmenu-sbs-icon-link_stage',
+            imgKey: 'assets/substance_3d_2x.png',
+            url: 'https://source-latest.dev.substance3d.io/',
+          },
+        ],
+        cloudApps: [
+          {
+            name: 'Creative Cloud',
+            goUrl: 'utilitynav-appmenu-cc-icon-link_stage',
+            imgKey: 'assets/creative_cloud_appicon-1pSQ5Fg.png',
+            url: 'https://stage.creativecloud.adobe.com/?context=home_cc',
+          },
+          {
+            name: 'Acrobat',
+            goUrl: 'utilitynav-appmenu-dc-icon-link_stage',
+            imgKey: 'assets/dc_appicon_128.png',
+            url: 'https://dc-stage.documentcloudtest.com/',
+          },
+          {
+            name: 'Experience Cloud',
+            goUrl: 'utilitynav-appmenu-ec-icon-link_stage',
+            imgKey: 'assets/experience_cloud_appicon-22AkcGx.png',
+            url: 'https://experiencecloud-stage.adobe.com/',
+          },
+        ],
+        appsCatalog: 'https://www.adobe.com/go/utilitynav-appmenu-cc-viewallapps-link_stage',
+        appsCatalogUrl: 'https://stage.creativecloud.adobe.com/apps/?context=apps_cc',
+        viewMoreAppsUrls: {
+          EC: 'utilitynav-appmenu-ec-viewallapps-link_stage',
+          DC: 'utilitynav-appmenu-dc-viewallapps-link_stage',
+          CC: 'utilitynav-appmenu-cc-viewallapps-link_stage',
+        },
+        viewMoreAppsNewUrls: {
+          EC: 'https://www.stage.adobe.com/experience-cloud/products.html',
+          DC: 'https://dc-stage.documentcloudtest.com/',
+          CC: 'https://stage.creativecloud.adobe.com/apps/?context=apps_cc',
+        },
+      };
+      console.log(data);
       if (!data) return;
       await this.getLabels();
       this.data = data;
@@ -70,7 +172,7 @@ class ApppLauncher {
       this.addEventListeners();
       if (appNavItems) this.profileEl.after(appNavItems);
     } catch (error) {
-      window.lana?.log(`Cannot init applauncher ${e.toString()}`, { clientId: 'feds-milo' });
+      window.lana?.log(`Cannot init applauncher ${error.toString()}`, { clientId: 'feds-milo' });
     }
   }
 
@@ -179,7 +281,7 @@ class ApppLauncher {
           </div>
           <a 
             href="${getUrl(this.data.viewMoreAppsUrls[entry])}" 
-            class="feds-applauncher-more-button feds-cta feds-cta--secondary">
+            class="feds-cta feds-cta--secondary">
             ${this.labels.footerButton}
           </a>
         </div>
@@ -209,7 +311,7 @@ class ApppLauncher {
 
 async function init(profileEl) {
   try {
-    return new ApppLauncher({ profileEl });
+    return new AppLauncher({ profileEl });
   } catch (e) {
     window.lana?.log(`Cannot create applauncher ${e.toString()}`, { clientId: 'feds-milo' });
     return null;

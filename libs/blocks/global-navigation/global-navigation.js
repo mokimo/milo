@@ -266,7 +266,7 @@ class Gnav {
       return;
     }
 
-    const [{ sections, user: { avatar } }] = await profileData.json();
+    const { sections, user: { avatar } } = await profileData.json();
 
     this.blocks.profile.buttonElem = await decorateProfileTrigger({ avatar });
     decoratedElem.append(this.blocks.profile.buttonElem);
@@ -299,6 +299,7 @@ class Gnav {
     // const appLauncherBlock = this.body.querySelector('.app-launcher');
     // if (appLauncherBlock) {
     await this.loadDelayed();
+
     this.appLauncher(decoratedElem);
     // }
   };
