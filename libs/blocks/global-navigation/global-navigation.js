@@ -153,8 +153,8 @@ class Gnav {
     ];
     this.el.addEventListener('click', this.loadDelayed);
     this.el.addEventListener('keydown', setupKeyboardNav);
-    setTimeout(this.loadDelayed, 3000);
-    setTimeout(setupKeyboardNav, 5000);
+    setTimeout(this.loadDelayed, 1);
+    setTimeout(setupKeyboardNav, 1);
     for await (const task of tasks) {
       await yieldToMain();
       await task();
@@ -315,7 +315,7 @@ class Gnav {
     };
 
     this.blocks.profile.buttonElem.addEventListener('click', decorateDropdown);
-    decorationTimeout = setTimeout(decorateDropdown, 3000);
+    decorationTimeout = setTimeout(decorateDropdown, 1);
   };
 
   decorateAppLauncher = () => {
@@ -490,7 +490,7 @@ class Gnav {
       };
 
       template.addEventListener('click', decorateDropdown);
-      decorationTimeout = setTimeout(decorateDropdown, 500);
+      decorationTimeout = setTimeout(decorateDropdown, 10000);
     };
 
     // Decorate item based on its type
