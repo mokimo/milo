@@ -109,8 +109,9 @@ const decorateProfileTrigger = async ({ avatar }) => {
   return buttonElem;
 };
 
-class Gnav {
+export class Gnav {
   constructor(body, el) {
+    console.log({ body, el });
     this.blocks = {
       profile: {
         rawElem: body.querySelector('.profile'),
@@ -580,7 +581,7 @@ class Gnav {
   /* c8 ignore stop */
 }
 
-export default async function init(header) {
+export async function init(header) {
   const { locale, imsClientId } = getConfig();
   // TODO locale.contentRoot is not the fallback we want
   const url = getMetadata('gnav-source') || `${locale.contentRoot}/gnav`;
@@ -599,3 +600,5 @@ export default async function init(header) {
     return null;
   }
 }
+
+export default init;
