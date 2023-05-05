@@ -1,4 +1,5 @@
-const globalNavigation = `<div>
+// Uses the franklin structure without any customizations
+export default `<div>
   <div class="gnav-brand logo">
     <div>
       <div>
@@ -282,5 +283,3 @@ const globalNavigation = `<div>
     </div>
   </div>
 </div>`;
-
-export default globalNavigation;

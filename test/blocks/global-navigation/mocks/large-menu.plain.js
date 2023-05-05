@@ -1,3 +1,4 @@
+// Uses the franklin structure without any customizations
 export default `<div>
   <div class="link-group">
     <div>
