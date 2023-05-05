@@ -1,10 +1,10 @@
-<div>
+const globalNavigation = `<div>
   <div class="gnav-brand logo">
     <div>
       <div>
         <p>
           <a href="/drafts/ramuntea/adobe-logo.svg"
-            >https://main--milo--overmyheadandbody.hlx.page/drafts/ramuntea/adobe-logo.svg</a
+            >http://localhost:2000/test/blocks/global-navigation/mocks/adobe-logo.svg</a
           >
         </p>
         <p><a href="https://www.adobe.com/">Adobe</a></p>
@@ -72,23 +72,23 @@
         <picture>
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_medium_dropdown.png"
             media="(min-width: 600px)"
           />
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_medium_dropdown.png"
           />
           <source
             type="image/png"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_medium_dropdown.png"
             media="(min-width: 600px)"
           />
           <img
             loading="lazy"
             alt=""
             type="image/png"
-            src=""
+            src="http://localhost:2000/test/blocks/global-navigation/mocks/media_medium_dropdown.png"
             width="215"
             height="121"
           />
@@ -116,23 +116,23 @@
         <picture>
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=webply&optimize=medium"
             media="(min-width: 600px)"
           />
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=webply&optimize=medium"
           />
           <source
             type="image/png"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=png&optimize=medium"
             media="(min-width: 600px)"
           />
           <img
             loading="lazy"
             alt=""
             type="image/png"
-            src=""
+            src="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=png&optimize=medium"
             width="52"
             height="51"
           />
@@ -281,4 +281,6 @@
       <div><a href="https://www.adobe.com/">Adobe</a></div>
     </div>
   </div>
-</div>
+</div>`;
+
+export default globalNavigation;

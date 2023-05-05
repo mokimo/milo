@@ -111,7 +111,6 @@ const decorateProfileTrigger = async ({ avatar }) => {
 
 export class Gnav {
   constructor(body, el) {
-    console.log({ body, el });
     this.blocks = {
       profile: {
         rawElem: body.querySelector('.profile'),
@@ -271,7 +270,6 @@ export class Gnav {
     if (profileData.status !== 200) {
       return;
     }
-
     const { sections, user: { avatar } } = await profileData.json();
 
     this.blocks.profile.buttonElem = await decorateProfileTrigger({ avatar });
@@ -435,7 +433,6 @@ export class Gnav {
 
   decorateMainNavItem = (item, index) => {
     const itemType = this.getMainNavItemType(item);
-
     // All dropdown decoration is delayed
     const delayDropdownDecoration = (template) => {
       let decorationTimeout;

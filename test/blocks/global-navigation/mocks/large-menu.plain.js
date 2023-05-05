@@ -1,27 +1,27 @@
-<div>
+export default `<div>
   <div class="link-group">
     <div>
       <div>
         <picture>
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=webply&optimize=medium"
             media="(min-width: 600px)"
           />
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=webply&optimize=medium"
           />
           <source
             type="image/png"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=png&optimize=medium"
             media="(min-width: 600px)"
           />
           <img
             loading="lazy"
             alt=""
             type="image/png"
-            src=""
+            src="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=png&optimize=medium"
             width="52"
             height="51"
           />
@@ -42,24 +42,24 @@
       <div>
         <picture>
           <source
-            type="image/webp"
-            srcset=""
-            media="(min-width: 600px)"
+          type="image/webp"
+          srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=webply&optimize=medium"
+          media="(min-width: 600px)"
           />
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=webply&optimize=medium"
           />
           <source
             type="image/png"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=png&optimize=medium"
             media="(min-width: 600px)"
           />
           <img
             loading="lazy"
             alt=""
             type="image/png"
-            src=""
+            src="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=png&optimize=medium"
             width="52"
             height="51"
           />
@@ -81,24 +81,24 @@
       <div>
         <picture>
           <source
-            type="image/webp"
-            srcset=""
-            media="(min-width: 600px)"
+          type="image/webp"
+          srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=webply&optimize=medium"
+          media="(min-width: 600px)"
           />
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=webply&optimize=medium"
           />
           <source
             type="image/png"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=png&optimize=medium"
             media="(min-width: 600px)"
           />
           <img
             loading="lazy"
             alt=""
             type="image/png"
-            src=""
+            src="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=png&optimize=medium"
             width="52"
             height="51"
           />
@@ -119,24 +119,24 @@
       <div>
         <picture>
           <source
-            type="image/webp"
-            srcset=""
-            media="(min-width: 600px)"
+          type="image/webp"
+          srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=webply&optimize=medium"
+          media="(min-width: 600px)"
           />
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=webply&optimize=medium"
           />
           <source
             type="image/png"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=png&optimize=medium"
             media="(min-width: 600px)"
           />
           <img
             loading="lazy"
             alt=""
             type="image/png"
-            src=""
+            src="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=png&optimize=medium"
             width="52"
             height="51"
           />
@@ -157,24 +157,24 @@
       <div>
         <picture>
           <source
-            type="image/webp"
-            srcset=""
-            media="(min-width: 600px)"
+          type="image/webp"
+          srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=webply&optimize=medium"
+          media="(min-width: 600px)"
           />
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=webply&optimize=medium"
           />
           <source
             type="image/png"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=png&optimize=medium"
             media="(min-width: 600px)"
           />
           <img
             loading="lazy"
             alt=""
             type="image/png"
-            src=""
+            src="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=png&optimize=medium"
             width="52"
             height="51"
           />
@@ -195,24 +195,24 @@
       <div>
         <picture>
           <source
-            type="image/webp"
-            srcset=""
-            media="(min-width: 600px)"
+          type="image/webp"
+          srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=webply&optimize=medium"
+          media="(min-width: 600px)"
           />
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=webply&optimize=medium"
           />
           <source
             type="image/png"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=2000&format=png&optimize=medium"
             media="(min-width: 600px)"
           />
           <img
             loading="lazy"
             alt=""
             type="image/png"
-            src=""
+            src="http://localhost:2000/test/blocks/global-navigation/mocks/media_linkgroup.png?width=750&format=png&optimize=medium"
             width="52"
             height="51"
           />
@@ -346,23 +346,23 @@
         <picture>
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_large_dropdown.png?width=2000&format=webply&optimize=medium"
             media="(min-width: 600px)"
           />
           <source
             type="image/webp"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_large_dropdown.png?width=750&format=webply&optimize=medium"
           />
           <source
             type="image/png"
-            srcset=""
+            srcset="http://localhost:2000/test/blocks/global-navigation/mocks/media_large_dropdown.png?width=2000&format=png&optimize=medium"
             media="(min-width: 600px)"
           />
           <img
             loading="lazy"
             alt=""
             type="image/png"
-            src=""
+            src="http://localhost:2000/test/blocks/global-navigation/mocks/media_large_dropdown.png?width=750&format=png&optimize=medium"
             width="375"
             height="514"
           />
@@ -374,3 +374,4 @@
     </div>
   </div>
 </div>
+`;
