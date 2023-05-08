@@ -4,6 +4,7 @@ import {
   loadScript,
   localizeLink,
   loadStyle,
+  loadLana,
 } from '../../utils/utils.js';
 import {
   toFragment,
@@ -15,6 +16,8 @@ import {
 } from './utilities/utilities.js';
 import { replaceKey } from '../../features/placeholders.js';
 
+loadLana();
+
 const CONFIG = {
   icons: {
     company: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 133.46 118.11"><defs><style>.cls-1{fill:#fa0f00;}</style></defs><polygon class="cls-1" points="84.13 0 133.46 0 133.46 118.11 84.13 0"/><polygon class="cls-1" points="49.37 0 0 0 0 118.11 49.37 0"/><polygon class="cls-1" points="66.75 43.53 98.18 118.11 77.58 118.11 68.18 94.36 45.18 94.36 66.75 43.53"/></svg>',
@@ -22,6 +25,8 @@ const CONFIG = {
   },
 };
 
+const clientId = 'feds-milo';
+const sampleRate = 1;
 export const IS_OPEN = 'is-open';
 
 function getBlockClasses(className) {
@@ -36,7 +41,14 @@ const loadStyles = (path) => {
   const { miloLibs, codeRoot } = getConfig();
   return new Promise((resolve) => {
     loadStyle(`${miloLibs || codeRoot}/blocks/global-navigation/${path}`, resolve);
-  });
+  })
+    .catch((e) => window.lana.log(
+      `loadStyles: Error loading ${path}: ${e}`,
+      {
+        clientId,
+        sampleRate,
+      },
+    ));
 };
 
 const loadBlock = (path) => import(path)
@@ -194,33 +206,46 @@ export class Gnav {
 
   loadDelayed = async () => {
     // eslint-disable-next-line no-async-promise-executor
-    this.ready = this.ready || new Promise(async (resolve) => {
-      this.el.removeEventListener('click', this.loadDelayed);
-      this.el.removeEventListener('keydown', this.loadDelayed);
-      const [
-        decorateDropdown,
-        { appLauncher },
-        ProfileDropdown,
-        Search,
-        KeyboardNavigation,
-      ] = await Promise.all([
-        loadBlock('./blocks/navDropdown/dropdown.js'),
-        loadBlock('./blocks/appLauncher/appLauncher.js'),
-        loadBlock('./blocks/profile/dropdown.js'),
-        loadBlock('./blocks/search/gnav-search.js'),
-        loadBlock('./utilities/keyboard/index.js'),
-        loadStyles('./blocks/profile/dropdown.css'),
-        loadStyles('./blocks/navDropdown/dropdown.css'),
-        loadStyles('./blocks/search/gnav-search.css'),
-      ]);
-      this.decorateDropdown = decorateDropdown;
-      this.ProfileDropdown = ProfileDropdown;
-      this.appLauncher = appLauncher;
-      this.Search = Search;
-      // TODO we might only want to load the keyboard navigation on keydown when it's actually used
-      this.keyboardNavigation = new KeyboardNavigation();
-      resolve();
+    this.ready = this.ready || new Promise(async (resolve, reject) => {
+      try {
+        throw new Error('foo');
+        this.el.removeEventListener('click', this.loadDelayed);
+        this.el.removeEventListener('keydown', this.loadDelayed);
+        const [
+          decorateDropdown,
+          { appLauncher },
+          ProfileDropdown,
+          Search,
+          KeyboardNavigation,
+        ] = await Promise.all([
+          loadBlock('./blocks/navDropdown/dropdown.js'),
+          loadBlock('./blocks/appLauncher/appLauncher.js'),
+          loadBlock('./blocks/profile/dropdown.js'),
+          loadBlock('./blocks/search/gnav-search.js'),
+          loadBlock('./utilities/keyboard/index.js'),
+          loadStyles('./blocks/profile/dropdown.css'),
+          loadStyles('./blocks/navDropdown/dropdown.css'),
+          loadStyles('./blocks/search/gnav-search.css'),
+        ]);
+        this.decorateDropdown = decorateDropdown;
+        this.ProfileDropdown = ProfileDropdown;
+        this.appLauncher = appLauncher;
+        this.Search = Search;
+        // TODO we might only want to load the keyboard navigation on keydown when it's actually used
+        this.keyboardNavigation = new KeyboardNavigation();
+        resolve();
+      } catch (e) {
+        window.lana.log(
+          `loadDelayed: Error loading ${e.toString()}`,
+          {
+            clientId,
+            sampleRate,
+          },
+        );
+        reject(e);
+      }
     });
+
     return this.ready;
   };
 
@@ -440,11 +465,12 @@ export class Gnav {
       const decorateDropdown = async () => {
         template.removeEventListener('click', decorateDropdown);
         clearTimeout(decorationTimeout);
-        await this.loadDelayed();
-        this.decorateDropdown({
-          item,
-          template,
-          type: itemType,
+        this.loadDelayed().then(() => {
+          this.decorateDropdown({
+            item,
+            template,
+            type: itemType,
+          });
         });
       };
 
@@ -560,6 +586,7 @@ export class Gnav {
 
   decorateBreadcrumbs = () => {
     this.setBreadcrumbSEO();
+
     const parent = this.el.querySelector('.breadcrumbs');
     if (parent) {
       const ul = parent.querySelector('ul');
@@ -592,8 +619,10 @@ export async function init(header) {
     header.setAttribute('daa-lh', `gnav${imsClientId ? `|${imsClientId}` : ''}`);
     return gnav;
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log('Could not create global navigation:', e);
+    window.lana.log(`init: Error loading the global-navigation: ${e}`, {
+      clientId,
+      sampleRate,
+    });
     return null;
   }
 }
