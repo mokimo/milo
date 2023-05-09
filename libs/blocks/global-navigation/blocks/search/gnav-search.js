@@ -39,7 +39,10 @@ class Search {
     this.parent = this.trigger.closest('.feds-nav-wrapper');
     this.curtain = config.curtain;
     this.isDesktop = window.matchMedia('(min-width: 900px)');
-
+    const observer = new MutationObserver(() => {
+      this.clearSearchForm();
+    });
+    observer.observe(this.trigger, { attributeFilter: ['aria-expanded'] });
     this.init();
   }
 
@@ -97,7 +100,6 @@ class Search {
         if (this.input.value.length) {
           this.clearSearchForm();
         } else if (this.isDesktop.matches) {
-          this.clearSearchForm();
           closeAllDropdowns();
           this.trigger.focus();
         }
@@ -157,7 +159,6 @@ class Search {
     this.getSuggestions()
       .then((data) => {
         const suggestions = data?.suggested_completions;
-
         if (!Array.isArray(suggestions)
           || !suggestions.length) {
           this.resultsList.replaceChildren(this.getNoResultsTemplate());
@@ -281,7 +282,7 @@ class Search {
   }
 
   static getHelpxLink(query) {
-    return `https://helpx.adobe.com/globalsearch.html?q=${encodeURIComponent(query.trim())}&start_index=0&country=${getCountry()}`;
+    return `https://helpx.adobe.com/globalsearch.html?q=${encodeURIComponent((query || '').trim())}&start_index=0&country=${getCountry()}`;
   }
 }
 
