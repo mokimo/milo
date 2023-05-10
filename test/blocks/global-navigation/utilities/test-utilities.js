@@ -25,9 +25,15 @@ export const selectors = {
   profileMenu: '.feds-profile-menu',
   popup: '.feds-popup',
   navItem: '.feds-navItem',
+  navLink: '.feds-navLink',
   globalNavigation: '.global-navigation',
   search: '.feds-search',
   logo: '.gnav-logo',
+  navWrapper: '.feds-nav-wrapper',
+  curtain: '.feds-curtain',
+  headline: '.feds-popup-headline',
+  popupItems: '.feds-popup-items',
+  promoImage: '.feds-promo-image',
 };
 const ogFetch = window.fetch;
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };

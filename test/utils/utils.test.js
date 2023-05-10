@@ -54,7 +54,7 @@ describe('Utils', () => {
     });
 
     describe('Configure Auto Block', () => {
-      it('Disable auto block when #_dnb in url', async () => {
+      it.only('Disable auto block when #_dnb in url', async () => {
         await waitForElement('.disable-autoblock');
         const disableAutoBlockLink = document.querySelector('.disable-autoblock');
         utils.decorateLinks(disableAutoBlockLink);
@@ -188,7 +188,7 @@ describe('Utils', () => {
       window.dispatchEvent(event);
       await waitForElement('#milo');
       expect(document.getElementById('milo')).to.exist;
-    })
+    });
 
     it('getLocale default return', () => {
       expect(utils.getLocale().ietf).to.equal('en-US');

@@ -29,14 +29,6 @@ const clientId = 'feds-milo';
 const sampleRate = 1;
 export const IS_OPEN = 'is-open';
 
-function getBlockClasses(className) {
-  const trimDashes = (str) => str.replace(/(^\s*-)|(-\s*$)/g, '');
-  const blockWithVariants = className.split('--');
-  const name = trimDashes(blockWithVariants.shift());
-  const variants = blockWithVariants.map((v) => trimDashes(v));
-  return { name, variants };
-}
-
 const loadStyles = (path) => {
   const { miloLibs, codeRoot } = getConfig();
   return new Promise((resolve) => {
@@ -135,10 +127,6 @@ export class Gnav {
     this.body = body;
     this.isDesktop = window.matchMedia('(min-width: 900px)');
     this.elements = {};
-    body.querySelectorAll('[class$="-"]').forEach((block) => {
-      const { name, variants } = getBlockClasses(block.className);
-      block.classList.add(name, ...variants);
-    });
   }
 
   init = () => {
