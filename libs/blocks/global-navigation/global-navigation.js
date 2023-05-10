@@ -208,7 +208,6 @@ export class Gnav {
     // eslint-disable-next-line no-async-promise-executor
     this.ready = this.ready || new Promise(async (resolve, reject) => {
       try {
-        throw new Error('foo');
         this.el.removeEventListener('click', this.loadDelayed);
         this.el.removeEventListener('keydown', this.loadDelayed);
         const [
