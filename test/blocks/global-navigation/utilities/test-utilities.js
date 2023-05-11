@@ -15,6 +15,7 @@ import globalNavigationMock from '../mocks/global-navigation.plain.js';
 import { isElementVisible } from '../../../../libs/blocks/global-navigation/utilities/keyboard/utils.js';
 
 export { isElementVisible };
+
 export const selectors = {
   brandContainer: '.feds-brand-container',
   brandLabel: '.feds-brand-label',
@@ -23,17 +24,27 @@ export const selectors = {
   largeMenu: '.feds-navItem--megaMenu',
   profile: '.feds-profile',
   profileMenu: '.feds-profile-menu',
+  signInDropdown: '.feds-signIn-dropdown',
+  signIn: '.feds-signIn',
   popup: '.feds-popup',
   navItem: '.feds-navItem',
   navLink: '.feds-navLink',
   globalNavigation: '.global-navigation',
   search: '.feds-search',
+  searchTrigger: '.feds-search-trigger',
+  searchDropdown: '.feds-search-dropdown',
+  searchInput: '.feds-search-input',
+  searchResults: '.feds-search-results',
+  searchResult: '.feds-search-result',
+  searchClear: '.feds-search-clear',
   logo: '.gnav-logo',
   navWrapper: '.feds-nav-wrapper',
   curtain: '.feds-curtain',
   headline: '.feds-popup-headline',
   popupItems: '.feds-popup-items',
   promoImage: '.feds-promo-image',
+  column: '.feds-popup-column',
+
 };
 const ogFetch = window.fetch;
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
@@ -60,11 +71,21 @@ export const mockRes = ({ payload, status = 200, ok = true } = {}) => new Promis
   });
 });
 
-export const waitForElement = (selector, parent) => new Promise((resolve) => (
-  parent.querySelector(selector)
-    ? resolve()
-    : new MutationObserver((mutationRecords, observer) => resolve() && observer.disconnect())
-      .observe(parent, { childList: true, subtree: true })));
+export const waitForElement = (selector, parent) => new Promise((resolve, reject) => {
+  if (parent.querySelector(selector)) {
+    resolve();
+    return;
+  }
+
+  const t = setTimeout(() => reject(new Error(`waitForElement took too long for: ${selector}`)), 200);
+
+  new MutationObserver((mutationRecords, observer) => {
+    clearTimeout(t);
+    resolve();
+    observer.disconnect();
+  })
+    .observe(parent, { childList: true, subtree: true });
+});
 
 /**
  *
@@ -73,7 +94,8 @@ export const waitForElement = (selector, parent) => new Promise((resolve) => (
  * @param {Object} param0.placeholders Supply custom placeholders - mocks/placeholders.js
  * @param {String} param0.globalNavigation Render a gnav, default mocks/global-navigation.plain.js
  * @param {Boolean} param0.signedIn Set to false to simulate a signed out user
- * @returns
+ * @description Creates a full global navigation instance. CAUTION: Search is not fully created.
+ * @returns global navigation instance
  */
 export const createFullGlobalNavigation = async ({
   viewport = 'desktop',
@@ -117,17 +139,27 @@ export const createFullGlobalNavigation = async ({
 
   const instance = await initGnav(document.body.querySelector('header'));
   window.adobeid.onReady();
-  await clock.tickAsync(10000);
+  await clock.runAllAsync();
+  // We restore the clock here, because waitForElement uses setTimeout
+  clock.restore();
+
   // I'm not 100% sure why we need to wait for the large menu, profile
   // the clock.tickAsync should call all the setTimeouts immediately
   const waitForElements = [];
   const profile = document.querySelector(selectors.profile);
+  const signIn = document.querySelector(selectors.signIn);
   const largeMenu = document.querySelector(selectors.largeMenu);
-  if (profile) waitForElements.push(waitForElement(selectors.profileMenu, profile));
-  if (largeMenu) waitForElements.push(waitForElement(selectors.popup, largeMenu));
+
+  if (largeMenu) {
+    waitForElements.push(waitForElement(selectors.popup, largeMenu));
+  }
+  // the sign in button is synchronous
+  if (profile && !signIn) {
+    waitForElements.push(waitForElement(selectors.profileMenu, profile));
+  }
+
   await Promise.all(waitForElements);
 
-  clock.restore();
   window.fetch = ogFetch;
   window.adobeIMS = undefined;
   window.adobeid = undefined;

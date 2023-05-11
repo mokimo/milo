@@ -22,4 +22,5 @@ export default {
   },
   plugins: [importMapsPlugin({})],
   files: '**/global-navigation.test.js',
+
 };

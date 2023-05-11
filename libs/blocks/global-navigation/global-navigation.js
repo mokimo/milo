@@ -589,7 +589,6 @@ export class Gnav {
 
     return null;
   };
-  /* c8 ignore stop */
 }
 
 export async function init(header) {
