@@ -72,7 +72,7 @@ export const waitForElement = (selector, parent) => new Promise((resolve, reject
     return;
   }
 
-  const timeout = setTimeout(() => reject(new Error(`waitForElement took too long for: ${selector}`)), 200);
+  const timeout = setTimeout(() => reject(new Error(`waitForElement took too long for: ${selector}`)), 1500);
 
   new MutationObserver((mutationRecords, observer) => {
     clearTimeout(timeout);

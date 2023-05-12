@@ -21,6 +21,4 @@ export default {
     ],
   },
   plugins: [importMapsPlugin({})],
-  files: '**/utilities.test.js',
-
 };
