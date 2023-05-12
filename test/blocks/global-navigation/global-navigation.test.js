@@ -1,12 +1,17 @@
 /* eslint-disable no-restricted-syntax */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { sendKeys } from '@web/test-runner-commands';
-import { createFullGlobalNavigation, selectors, isElementVisible, mockRes } from './utilities/test-utilities.js';
+import { sendKeys, setViewport } from '@web/test-runner-commands';
+import { createFullGlobalNavigation, selectors, isElementVisible, mockRes, viewports } from './test-utilities.js';
 import logoOnlyNav from './mocks/global-navigation-only-logo.plain.js';
+import brandOnlyNav from './mocks/global-navigation-only-brand.plain.js';
 
 const ogFetch = window.fetch;
-const tick = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
+// TODO
+// - test localization
+// - test breadcrumbs SEO
+
 describe('global navigation', () => {
   describe('basic sanity tests', () => {
     it('should render the navigation on desktop', async () => {
@@ -60,6 +65,27 @@ describe('global navigation', () => {
         expect(isElementVisible(brandText)).to.equal(true);
         expect(brandText.innerText).to.equal('Adobe');
       });
+
+      it('should not render the brand block if it was not authored', async () => {
+        await createFullGlobalNavigation({ globalNavigation: logoOnlyNav });
+
+        const container = document.querySelector(selectors.brandContainer);
+        const image = container.querySelector(selectors.brandImage);
+        const brandText = container.querySelector(selectors.brandLabel);
+
+        expect(isElementVisible(image)).to.equal(false);
+        expect(isElementVisible(brandText)).to.equal(false);
+      });
+
+      it('should only render the brand block', async () => {
+        await createFullGlobalNavigation({ globalNavigation: brandOnlyNav });
+
+        expect(isElementVisible(document.querySelector(selectors.brandContainer))).to.equal(true);
+        expect(isElementVisible(document.querySelector(selectors.logo))).to.equal(false);
+        expect(isElementVisible(document.querySelector(selectors.search))).to.equal(false);
+        expect(isElementVisible(document.querySelector(selectors.profile))).to.equal(false);
+        expect(document.querySelectorAll(selectors.navItem).length).to.equal(0);
+      });
     });
 
     describe('small desktop', () => {
@@ -89,17 +115,6 @@ describe('global navigation', () => {
         expect(brandText.innerText).to.equal('Adobe');
       });
     });
-
-    it('should not render the brand block if it was not authored', async () => {
-      await createFullGlobalNavigation({ globalNavigation: logoOnlyNav });
-
-      const container = document.querySelector(selectors.brandContainer);
-      const image = container.querySelector(selectors.brandImage);
-      const brandText = container.querySelector(selectors.brandLabel);
-
-      expect(isElementVisible(image)).to.equal(false);
-      expect(isElementVisible(brandText)).to.equal(false);
-    });
   });
 
   describe('Gnav-toggle', () => {
@@ -111,13 +126,22 @@ describe('global navigation', () => {
       });
     });
 
+    describe('smallDesktop', () => {
+      it('should be hidden', async () => {
+        await createFullGlobalNavigation({ viewport: 'smallDesktop' });
+
+        expect(isElementVisible(document.querySelector(selectors.gnavToggle))).to.equal(false);
+      });
+    });
+
     describe('mobile', () => {
-      it('should be visible on mobile', async () => {
+      it('should be visible', async () => {
         await createFullGlobalNavigation({ viewport: 'mobile' });
 
         expect(isElementVisible(document.querySelector(selectors.gnavToggle))).to.equal(true);
       });
-      it('should open the navigation clicked on mobile', async () => {
+
+      it('should open navigation on click', async () => {
         await createFullGlobalNavigation({ viewport: 'mobile' });
 
         const header = document.querySelector(selectors.globalNavigation);
@@ -382,6 +406,7 @@ describe('global navigation', () => {
         });
         trigger = document.querySelector(selectors.searchTrigger);
       });
+
       it('should load the search on click', async () => {
         nav.loadSearch = sinon.spy();
 
@@ -604,7 +629,7 @@ describe('global navigation', () => {
         expect(signInDropdown.querySelectorAll('li').length).to.equal(5);
       });
 
-      it('calls ims when clicking the last link of the dropdown', async () => {
+      it('calls ims when clicking a link with a special href', async () => {
         await createFullGlobalNavigation({ signedIn: false });
         const signIn = document.querySelector(selectors.signIn);
 
@@ -620,6 +645,25 @@ describe('global navigation', () => {
         expect(window.adobeIMS.signIn.callCount).to.equal(1);
 
         window.adobeIMS = undefined;
+      });
+
+      it('calls ims signOut', async () => {
+        await createFullGlobalNavigation();
+
+        const signOut = document.querySelector("[daa-ll='Sign Out']");
+        window.adobeIMS = { signOut: sinon.spy() };
+
+        signOut.click();
+
+        expect(window.adobeIMS.signOut.callCount).to.equal(1);
+        window.adobeIMS = undefined;
+      });
+    });
+
+    describe('smallDesktop', () => {
+      it('renders the profile', async () => {
+        await createFullGlobalNavigation({ viewport: 'smallDesktop' });
+        expect(isElementVisible(document.querySelector(selectors.profile))).to.equal(true);
       });
     });
 
@@ -668,22 +712,109 @@ describe('global navigation', () => {
   });
 
   describe('Gnav-logo', () => {
-    describe('desktop', () => {});
+    describe('desktop', () => {
+      it('renders the logo', async () => {
+        await createFullGlobalNavigation({ });
 
-    describe('small desktop', () => {});
+        const logo = document.querySelector(selectors.logo);
+        expect(isElementVisible(logo)).to.equal(true);
+        expect(logo.getAttribute('daa-ll')).to.equal('Logo');
+        expect(logo.getAttribute('aria-label')).to.equal('Adobe');
+      });
 
-    describe('mobile', () => {});
+      it('should only render the logo', async () => {
+        await createFullGlobalNavigation({ globalNavigation: logoOnlyNav });
 
-    // TODO write the tests
-    // https://jira.corp.adobe.com/browse/MWPW-130641
-    // it('should only render the logo', async () => {
-    //   await createFullGlobalNavigation({ globalNavigation: logoOnlyNav });
-    // });
+        expect(isElementVisible(document.querySelector(selectors.logo))).to.equal(true);
+        expect(isElementVisible(document.querySelector(selectors.brandContainer))).to.equal(false);
+        expect(isElementVisible(document.querySelector(selectors.search))).to.equal(false);
+        expect(isElementVisible(document.querySelector(selectors.profile))).to.equal(false);
+        expect(document.querySelectorAll(selectors.navItem).length).to.equal(0);
+      });
+    });
+
+    describe('small desktop', () => {
+      it('renders the logo', async () => {
+        await createFullGlobalNavigation({ viewport: 'smallDesktop' });
+
+        const logo = document.querySelector(selectors.logo);
+        expect(isElementVisible(logo)).to.equal(true);
+        expect(logo.getAttribute('daa-ll')).to.equal('Logo');
+        expect(logo.getAttribute('aria-label')).to.equal('Adobe');
+      });
+    });
+
+    describe('mobile', () => {
+      it('does not render the logo', async () => {
+        await createFullGlobalNavigation({ viewport: 'mobile' });
+
+        const logo = document.querySelector(selectors.logo);
+        expect(isElementVisible(logo)).to.equal(false);
+      });
+    });
+  });
+
+  describe('Breadcrumbs', () => {
+
   });
 
   describe('Viewport changes', () => {
-    it('should render desktop -> small desktop -> mobile', () => {
+    it('should render desktop -> small desktop -> mobile', async () => {
+      const nav = await createFullGlobalNavigation();
 
+      expect(nav).to.exist;
+      expect(isElementVisible(document.querySelector(selectors.globalNavigation))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.search))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.profile))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.logo))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.brandContainer))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.gnavToggle))).to.equal(false);
+      expect(document.querySelectorAll(selectors.navItem).length).to.equal(8);
+
+      await setViewport(viewports.smallDesktop);
+
+      expect(isElementVisible(document.querySelector(selectors.globalNavigation))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.search))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.profile))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.logo))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.brandContainer))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.gnavToggle))).to.equal(false);
+      expect(document.querySelectorAll(selectors.navItem).length).to.equal(8);
+
+      await setViewport(viewports.mobile);
+
+      expect(isElementVisible(document.querySelector(selectors.globalNavigation))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.search))).to.equal(false);
+      expect(isElementVisible(document.querySelector(selectors.profile))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.logo))).to.equal(false);
+      expect(isElementVisible(document.querySelector(selectors.brandContainer))).to.equal(true);
+      expect(isElementVisible(document.querySelector(selectors.gnavToggle))).to.equal(true);
+      expect(document.querySelectorAll(selectors.navItem).length).to.equal(8);
+    });
+
+    it('should change the DOM order to ensure correct TAB behaviour for mobile|desktop', async () => {
+      const nav = await createFullGlobalNavigation();
+
+      expect(document.querySelector(selectors.mainNav).nextElementSibling)
+        .to.equal(document.querySelector(selectors.search));
+      expect(document.querySelector(selectors.topNavWrapper).lastElementChild)
+        .to.equal(document.querySelector(selectors.breadCrumbsWrapper));
+
+      await setViewport(viewports.mobile);
+      nav.isDesktop.dispatchEvent(new Event('change'));
+
+      expect(document.querySelector(selectors.mainNav).previousElementSibling)
+        .to.equal(document.querySelector(selectors.search));
+      expect(document.querySelector(selectors.navWrapper).firstElementChild)
+        .to.equal(document.querySelector(selectors.breadCrumbsWrapper));
+
+      await setViewport(viewports.smallDesktop);
+      nav.isDesktop.dispatchEvent(new Event('change'));
+
+      expect(document.querySelector(selectors.mainNav).nextElementSibling)
+        .to.equal(document.querySelector(selectors.search));
+      expect(document.querySelector(selectors.topNavWrapper).lastElementChild)
+        .to.equal(document.querySelector(selectors.breadCrumbsWrapper));
     });
   });
 });

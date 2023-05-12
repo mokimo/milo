@@ -2,17 +2,17 @@
 /* eslint-disable import/prefer-default-export */
 import sinon, { stub } from 'sinon';
 import { setViewport } from '@web/test-runner-commands';
-import initGnav from '../../../../libs/blocks/global-navigation/global-navigation.js';
+import initGnav from '../../../libs/blocks/global-navigation/global-navigation.js';
 import {
   getLocale,
   setConfig,
   loadStyle,
-} from '../../../../libs/utils/utils.js';
-import defaultPlaceholders from '../mocks/placeholders.js';
-import defaultProfile from '../mocks/profile.js';
-import largeMenuMock from '../mocks/large-menu.plain.js';
-import globalNavigationMock from '../mocks/global-navigation.plain.js';
-import { isElementVisible } from '../../../../libs/blocks/global-navigation/utilities/keyboard/utils.js';
+} from '../../../libs/utils/utils.js';
+import defaultPlaceholders from './mocks/placeholders.js';
+import defaultProfile from './mocks/profile.js';
+import largeMenuMock from './mocks/large-menu.plain.js';
+import globalNavigationMock from './mocks/global-navigation.plain.js';
+import { isElementVisible } from '../../../libs/blocks/global-navigation/utilities/keyboard/utils.js';
 
 export { isElementVisible };
 
@@ -44,17 +44,12 @@ export const selectors = {
   popupItems: '.feds-popup-items',
   promoImage: '.feds-promo-image',
   column: '.feds-popup-column',
+  topNavWrapper: '.feds-topnav-wrapper',
+  breadCrumbsWrapper: '.feds-breadcrumbs-wrapper',
+  mainNav: '.feds-nav',
+};
 
-};
-const ogFetch = window.fetch;
-const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
-const config = {
-  imsClientId: 'milo',
-  codeRoot: '/libs',
-  contentRoot: `${window.location.origin}${getLocale(locales).prefix}`,
-  locales,
-};
-const viewports = {
+export const viewports = {
   mobile: { width: 899, height: 1024 },
   smallDesktop: { width: 901, height: 1024 },
   desktop: { width: 1200, height: 1024 },
@@ -77,15 +72,24 @@ export const waitForElement = (selector, parent) => new Promise((resolve, reject
     return;
   }
 
-  const t = setTimeout(() => reject(new Error(`waitForElement took too long for: ${selector}`)), 200);
+  const timeout = setTimeout(() => reject(new Error(`waitForElement took too long for: ${selector}`)), 200);
 
   new MutationObserver((mutationRecords, observer) => {
-    clearTimeout(t);
+    clearTimeout(timeout);
     resolve();
     observer.disconnect();
   })
     .observe(parent, { childList: true, subtree: true });
 });
+
+const ogFetch = window.fetch;
+const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
+const config = {
+  imsClientId: 'milo',
+  codeRoot: '/libs',
+  contentRoot: `${window.location.origin}${getLocale(locales).prefix}`,
+  locales,
+};
 
 /**
  *
@@ -108,7 +112,7 @@ export const createFullGlobalNavigation = async ({
     toFake: ['setTimeout'],
   });
   setConfig(config);
-  setViewport(viewports[viewport]);
+  await setViewport(viewports[viewport]);
   window.lana = { log: stub() };
   window.fetch = stub().callsFake((url) => {
     if (url.includes('profile')) { return mockRes({ payload: defaultProfile }); }
@@ -129,7 +133,21 @@ export const createFullGlobalNavigation = async ({
       }),
     ),
   };
-  document.body.innerHTML = '<header class="global-navigation has-breadcrumbs" daa-im="true" daa-lh="gnav|milo"></header>';
+  document.body.innerHTML = `
+    <header class="global-navigation has-breadcrumbs" daa-im="true" daa-lh="gnav|milo">
+      <div class="breadcrumbs">
+        <div>
+          <div>
+            <ul>
+              <li><a href="/drafts/osahin/document">Home</a></li>
+              <li><a href="https://milo.adobe.com/">Drafts</a></li>
+              <li>Marquee</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </header>`;
+
   await Promise.all([
     loadStyles('../../../../libs/styles/styles.css'),
     loadStyles(
