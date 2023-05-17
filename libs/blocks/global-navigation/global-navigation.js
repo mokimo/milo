@@ -20,6 +20,8 @@ import {
   loadBaseStyles,
   yieldToMain,
   selectors,
+  withLanaLog,
+  lanaLog,
 } from './utilities/utilities.js';
 
 import { replaceKey } from '../../features/placeholders.js';
@@ -36,14 +38,6 @@ const CONFIG = {
     keyboardNav: 8000,
   },
 };
-
-function getBlockClasses(className) {
-  const trimDashes = (str) => str.replace(/(^\s*-)|(-\s*$)/g, '');
-  const blockWithVariants = className.split('--');
-  const name = trimDashes(blockWithVariants.shift());
-  const variants = blockWithVariants.map((v) => trimDashes(v));
-  return { name, variants };
-}
 
 // signIn, decorateSignIn and decorateProfileTrigger can be removed if IMS takes over the profile
 const signIn = () => {
@@ -145,13 +139,9 @@ class Gnav {
     this.body = body;
     this.isDesktop = window.matchMedia('(min-width: 900px)');
     this.elements = {};
-    body.querySelectorAll('[class$="-"]').forEach((block) => {
-      const { name, variants } = getBlockClasses(block.className);
-      block.classList.add(name, ...variants);
-    });
   }
 
-  init = async () => {
+  init = () => withLanaLog(async () => {
     this.elements.curtain = toFragment`<div class="feds-curtain"></div>`;
 
     // Order is important, decorateTopnavWrapper will render the nav
@@ -174,7 +164,7 @@ class Gnav {
     }
 
     document.addEventListener('click', closeOnClickOutside);
-  };
+  }, 'Error in global navigation init');
 
   decorateTopNav = () => {
     this.elements.mobileToggle = this.mobileToggle();
@@ -233,23 +223,28 @@ class Gnav {
 
   loadDelayed = async () => {
     this.ready = this.ready || new Promise(async (resolve) => {
-      this.el.removeEventListener('click', this.loadDelayed);
-      this.el.removeEventListener('keydown', this.loadDelayed);
-      const [
-        { appLauncher },
-        ProfileDropdown,
-        Search,
-      ] = await Promise.all([
-        loadBlock('../features/appLauncher/appLauncher.js'),
-        loadBlock('../features/profile/dropdown.js'),
-        loadBlock('../features/search/gnav-search.js'),
-        loadStyles('features/profile/dropdown.css'),
-        loadStyles('features/search/gnav-search.css'),
-      ]);
-      this.ProfileDropdown = ProfileDropdown;
-      this.appLauncher = appLauncher;
-      this.Search = Search;
-      resolve();
+      try {
+        this.el.removeEventListener('click', this.loadDelayed);
+        this.el.removeEventListener('keydown', this.loadDelayed);
+        const [
+          { appLauncher },
+          ProfileDropdown,
+          Search,
+        ] = await Promise.all([
+          loadBlock('../features/appLauncher/appLauncher.js'),
+          loadBlock('../features/profile/dropdown.js'),
+          loadBlock('../features/search/gnav-search.js'),
+          loadStyles('features/profile/dropdown.css'),
+          loadStyles('features/search/gnav-search.css'),
+        ]);
+        this.ProfileDropdown = ProfileDropdown;
+        this.appLauncher = appLauncher;
+        this.Search = Search;
+        resolve();
+      } catch (e) {
+        lanaLog({ message: 'Error within loadDelayed', e });
+        resolve();
+      }
     });
 
     return this.ready;
@@ -273,9 +268,13 @@ class Gnav {
           this.decorateProfile,
           this.decorateAppLauncher,
         ];
-        for await (const task of tasks) {
-          await yieldToMain();
-          await task();
+        try {
+          for await (const task of tasks) {
+            await yieldToMain();
+            await task();
+          }
+        } catch (e) {
+          lanaLog({ message: 'Global Navigation, issues within onReady', e });
         }
       },
     };
@@ -294,7 +293,7 @@ class Gnav {
 
     // If user is not signed in, decorate the 'Sign In' element
     if (!isSignedInUser) {
-      decorateSignIn({ rawElem, decoratedElem });
+      await decorateSignIn({ rawElem, decoratedElem });
       return;
     }
 
@@ -317,10 +316,11 @@ class Gnav {
     // after user interacts with button or after 3s have passed
     let decorationTimeout;
 
-    const decorateDropdown = async (e) => {
+    const decorateDropdown = async (event) => {
       this.blocks.profile.buttonElem.removeEventListener('click', decorateDropdown);
       clearTimeout(decorationTimeout);
       await this.loadDelayed();
+
       this.blocks.profile.dropdownInstance = new this.ProfileDropdown({
         rawElem,
         decoratedElem,
@@ -328,7 +328,7 @@ class Gnav {
         sections,
         buttonElem: this.blocks.profile.buttonElem,
         // If the dropdown has been decorated due to a click, open it
-        openOnInit: e instanceof Event,
+        openOnInit: event instanceof Event,
       });
     };
 
@@ -378,11 +378,9 @@ class Gnav {
       }
     };
 
-    this.isDesktop.addEventListener('change', () => {
-      setHamburgerPadding();
-    });
+    this.isDesktop.addEventListener('change', () => withLanaLog(setHamburgerPadding, 'Set hamburger padding failed'));
 
-    toggle.addEventListener('click', async () => {
+    const toggleClick = async () => {
       if (this.el.classList.contains(CONFIG.selectors.isOpen)) {
         this.el.classList.remove(CONFIG.selectors.isOpen);
         this.elements.curtain.classList.remove(CONFIG.selectors.isOpen);
@@ -400,7 +398,9 @@ class Gnav {
 
         setHamburgerPadding();
       }
-    });
+    };
+
+    toggle.addEventListener('click', () => withLanaLog(toggleClick, 'Toggle click failed'));
     return toggle;
   };
 
@@ -487,7 +487,7 @@ class Gnav {
     const delayDropdownDecoration = (template) => {
       let decorationTimeout;
 
-      const decorateDropdown = async () => {
+      const decorateDropdown = () => withLanaLog(async () => {
         template.removeEventListener('click', decorateDropdown);
         clearTimeout(decorationTimeout);
 
@@ -498,7 +498,7 @@ class Gnav {
           template,
           type: itemType,
         });
-      };
+      }, 'Decorate dropdown failed');
 
       template.addEventListener('click', decorateDropdown);
       decorationTimeout = setTimeout(decorateDropdown, CONFIG.delays.mainNavDropdowns);
@@ -645,8 +645,7 @@ export default async function init(header) {
     header.setAttribute('daa-lh', `gnav|${getExperienceName()}`);
     return gnav;
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log('Could not create global navigation:', e);
+    lanaLog({ message: 'Could not create global navigation.', e });
     return null;
   }
 }
