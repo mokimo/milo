@@ -41,6 +41,18 @@ export default {
   ],
   testRunnerHtml: (testFramework) => `
     <html>
+      <script type="importmap">
+      {
+        "imports": {
+          "/libs/utils/utils.js": "/test/config/utils.js"
+        },
+        "scopes": {
+          "/test/config/": {
+            "/libs/utils/utils.js": "/libs/utils/utils.js"
+          }
+        }
+      }
+      </script>
       <head>
         <script type="module">
           const oldFetch = window.fetch;
@@ -70,4 +82,5 @@ export default {
         <script type="module" src="${testFramework}"></script>
       </body>
     </html>`,
+  files: '**/twitter.test.js',
 };

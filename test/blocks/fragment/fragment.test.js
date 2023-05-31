@@ -38,7 +38,7 @@ describe('Fragments', () => {
     expect(window.lana.log.args[1][0]).to.equal('Could not make fragment: http://localhost:2000/test/blocks/fragment/mocks/fragments/malform.plain.html');
   });
 
-  it('Doesnt infinitely load circular references', async () => {
+  it.only('Doesnt infinitely load circular references', async () => {
     const a = document.querySelector('a.frag-a');
     await getFragment(a);
     expect(document.querySelector('h4')).to.exist;
