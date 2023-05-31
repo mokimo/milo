@@ -5,6 +5,7 @@ import { sendKeys, setViewport } from '@web/test-runner-commands';
 import { createFullGlobalNavigation, selectors, isElementVisible, mockRes, viewports } from './test-utilities.js';
 import logoOnlyNav from './mocks/global-navigation-only-logo.plain.js';
 import brandOnlyNav from './mocks/global-navigation-only-brand.plain.js';
+import { getConfig } from '../../../libs/utils/utils.js';
 
 const ogFetch = window.fetch;
 
@@ -52,9 +53,10 @@ describe('global navigation', () => {
     });
   });
 
-  describe('brand', () => {
+  describe.only('brand', () => {
     describe('desktop', () => {
-      it('should render the whole block', async () => {
+      it.only('should render the whole block', async () => {
+        console.log(getConfig.toString());
         await createFullGlobalNavigation();
 
         const container = document.querySelector(selectors.brandContainer);
@@ -396,7 +398,7 @@ describe('global navigation', () => {
     let trigger;
 
     afterEach(() => {
-      clock.restore();
+      clock?.restore();
       window.fetch = ogFetch;
     });
 

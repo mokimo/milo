@@ -44,9 +44,16 @@ export default {
       <script type="importmap">
       {
         "imports": {
-          "/libs/utils/utils.js": "/test/config/utils.js"
+          "/libs/utils/utils.js": "/test/config/utils.js",
+          "/utils/utils.js": "/test/config/utils.js"
         },
         "scopes": {
+          "/test/blocks/caas/": {
+            "/libs/utils/utils.js": "/test/blocks/caas/mocks/utils.js"
+          },
+          "/libs/blocks/caas/": {
+            "/libs/utils/utils.js": "/test/blocks/caas/mocks/utils.js"
+          },
           "/test/config/": {
             "/libs/utils/utils.js": "/libs/utils/utils.js"
           }
@@ -82,5 +89,5 @@ export default {
         <script type="module" src="${testFramework}"></script>
       </body>
     </html>`,
-  files: '**/twitter.test.js',
+  files: ['**/global-navigation.test.js'],
 };

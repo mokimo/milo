@@ -59,6 +59,7 @@ class ProfileDropdown {
 
   async init() {
     await this.getData();
+    console.log('123');
     this.setButtonLabel();
     this.dropdown = this.decorateDropdown();
     this.addEventListeners();
@@ -69,24 +70,28 @@ class ProfileDropdown {
   }
 
   async getData() {
-    [
+    try {
       [
-        this.placeholders.profileButton,
-        this.placeholders.signOut,
-        this.placeholders.viewAccount,
-        this.placeholders.manageTeams,
-        this.placeholders.manageEnterprise,
-        this.placeholders.profileAvatar,
-      ],
-      { displayName: this.profileData.displayName, email: this.profileData.email },
-    ] = await Promise.all([
-      replaceKeyArray(
-        ['profile-button', 'sign-out', 'view-account', 'manage-teams', 'manage-enterprise', 'profile-avatar'],
-        getFedsPlaceholderConfig(),
-        'feds',
-      ),
-      window.adobeIMS.getProfile(),
-    ]);
+        [
+          this.placeholders.profileButton,
+          this.placeholders.signOut,
+          this.placeholders.viewAccount,
+          this.placeholders.manageTeams,
+          this.placeholders.manageEnterprise,
+          this.placeholders.profileAvatar,
+        ],
+        { displayName: this.profileData.displayName, email: this.profileData.email },
+      ] = await Promise.all([
+        replaceKeyArray(
+          ['profile-button', 'sign-out', 'view-account', 'manage-teams', 'manage-enterprise', 'profile-avatar'],
+          getFedsPlaceholderConfig(),
+          'feds',
+        ),
+        window.adobeIMS.getProfile(),
+      ]);
+    } catch (error) {
+      console.log({ error });
+    }
   }
 
   setButtonLabel() {

@@ -31,7 +31,8 @@ function debounceCallback(callback, time = 150) {
 }
 
 const { locale } = getConfig();
-const [, country = 'US'] = locale.ietf.split('-');
+console.log(getConfig());
+const [, country = 'US'] = locale?.ietf?.split('-') || [];
 
 class Search {
   constructor(config) {

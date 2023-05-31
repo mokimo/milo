@@ -254,6 +254,7 @@ class Gnav {
       try {
         this.el.removeEventListener('click', this.loadDelayed);
         this.el.removeEventListener('keydown', this.loadDelayed);
+
         const [
           { appLauncher },
           ProfileDropdown,

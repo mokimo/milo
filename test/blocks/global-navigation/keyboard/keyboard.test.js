@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 import { expect } from '@esm-bundle/chai';
 import { readFile, sendKeys, setViewport } from '@web/test-runner-commands';
-import { loadStyle } from '../../../../libs/utils/utils.js';
+import { loadStyle, setConfig } from '../../../../libs/utils/utils.js';
 import KeyboardNavigation from '../../../../libs/blocks/global-navigation/utilities/keyboard/index.js';
 import { selectors, isElementVisible, getNextVisibleItemPosition, getPreviousVisibleItemPosition } from '../../../../libs/blocks/global-navigation/utilities/keyboard/utils.js';
 
@@ -34,6 +34,8 @@ describe('keyboard navigation', () => {
   });
 
   beforeEach(async () => {
+    const locale = { ietf: 'en-US', prefix: '' };
+    setConfig(locale);
     document.dir = 'ltr';
     setViewport({ width: 1500, height: 1500 });
     document.body.innerHTML = await readFile({ path: './mocks/global-nav.html' });
@@ -707,7 +709,7 @@ describe('keyboard navigation', () => {
       keyboardNavigation.mainNav.setActive(trigger);
       keyboardNavigation.mainNav.open();
       navLinks = getNavLinks(trigger);
-      firstPopupItem = navLinks[0];
+      [firstPopupItem] = navLinks;
       firstPopupItem.focus();
     });
 
