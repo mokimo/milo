@@ -530,6 +530,7 @@ function decorateHeader() {
   const headerQuery = new URLSearchParams(window.location.search).get('headerqa');
   header.className = headerQuery || headerMeta || 'gnav';
   const breadcrumbs = document.querySelector('.breadcrumbs');
+  // console.log(breadcrumbs); TODO REMOVE COMMENT
   if (breadcrumbs) {
     header.classList.add('has-breadcrumbs');
     header.append(breadcrumbs);
