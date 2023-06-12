@@ -15,12 +15,10 @@ function getParent(path) {
   return `/${elements.join('/')}`;
 }
 
-function getItemTitle(doc, defaultTitle) {
-  const title = getMetadata('breadcrumbs-title', doc);
-  if (title) return title;
-  const titleElt = doc.getElementsByTagName('title');
-  if (!titleElt || !titleElt[0]) return defaultTitle;
-  return titleElt[0].innerHTML;
+function getTitle(defaultTitle) {
+  return getMetadata('breadcrumbs-title', document)
+  || document.getElementsByTagName('title')[0]?.innerHTML
+  || defaultTitle;
 }
 
 async function getItem(path) {
@@ -40,7 +38,7 @@ async function getItem(path) {
   const hideLastPage = getMetadata(BREADCRUMBS_HIDE_LAST, doc) === 'on';
   return {
     path,
-    title: getItemTitle(doc, defaultTitle),
+    title: getTitle(defaultTitle),
     hideInNav,
     hideLastPage,
   };
@@ -60,6 +58,7 @@ async function getItems(pagePath) {
 }
 
 async function fromUrl(pagePath) {
+  console.log({ pagePath });
   const items = await getItems(pagePath);
   if (!items || items.length === 0) return null;
   const ul = createTag('ul');
@@ -118,37 +117,39 @@ function fromBlock(element) {
 const isEnabled = () => {
   const metadata = getMetadata('breadcrumbs')?.toLowerCase();
   const conf = getConfig().breadcrumbs;
-  console.log({ metadata, conf });
-  return metadata === 'on' || metadata === 'true' || conf === 'on' || conf === 'true';
+  // TODO, metadata = off takes precedence
+  if (metadata === 'off') return false;
+  // TODO removed metadata === 'true && conf === 'true'
+  return metadata === 'on' || conf === 'on';
+};
+
+// page metadata: breadcrumbs-hide-last = on
+// hide the last item
+const hideLastEntry = ({ breadcrumbs, title }) => {
+  const ul = breadcrumbs.querySelector('ul');
+  if (!ul || getMetadata(BREADCRUMBS_HIDE_LAST) === 'on') return;
+  ul.querySelector('[aria-current="page"]')?.removeAttribute('aria-current');
+  ul.append(toFragment`<li aria-current="page">${title}</li>`);
 };
 
 async function fromFile() {
-  console.log('oh');
   if (!isEnabled()) return null;
-  console.log('oh-2');
-  const defaultTitle = document.location.pathname.split('/').pop();
-  const title = getItemTitle(document, defaultTitle);
+
   const html = await getFile(document.location.pathname);
+  console.log(html);
   if (!html) return null;
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  const breadcrumbs = fromBlock(doc);
-  if (!breadcrumbs) return null;
-  // add the breadcrumbs item for the current page
-  const hideLastPage = getMetadata(BREADCRUMBS_HIDE_LAST) === 'on';
-  if (!hideLastPage) {
-    const ul = breadcrumbs.querySelector(':scope ul');
-    if (!ul) return null;
-    const li = createTag('li', { 'aria-current': 'page' }, title);
-    ul.append(li);
-  }
+
+  const defaultTitle = document.location.pathname.split('/').pop();
+  const title = getTitle(defaultTitle);
+  const breadcrumbs = fromBlock(new DOMParser().parseFromString(html, 'text/html'));
+  hideLastEntry({ breadcrumbs, title });
   return breadcrumbs;
 }
 
 async function getBreadcrumbs(element) {
-  console.log(element);
-  return fromBlock(element)
-    || fromFile()
+  console.log({ element });
+  return fromBlock(element) // CHECKED
+    || fromFile() // CHECKED
     || fromUrl(document.location.pathname);
 
   const breadcrumbsMetadata = getMetadata('breadcrumbs')?.toLowerCase();
