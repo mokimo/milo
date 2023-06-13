@@ -24,8 +24,6 @@ import {
   logErrorFor,
   lanaLog,
 } from './utilities/utilities.js';
-import TODOBRDCRUMBS from './features/breadcrumbs/breadcrumbs.js';
-
 import { replaceKey } from '../../features/placeholders.js';
 
 const CONFIG = {
@@ -607,7 +605,10 @@ class Gnav {
     }
   };
 
-  decorateBreadCrumbs = async () => TODOBRDCRUMBS(this.el.querySelector('.breadcrumbs'));
+  decorateBreadCrumbs = async () => this.el.classList.contains('has-breadcrumbs')
+    && loadBlock('../features/breadcrumbs/breadcrumbs.js').then(
+      (createBreadcrumbs) => createBreadcrumbs(this.el.querySelector('.breadcrumbs')),
+    );
 
   decorateSearch = () => {
     const searchBlock = this.body.querySelector('.search');
