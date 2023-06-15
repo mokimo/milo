@@ -37,7 +37,7 @@ export const selectors = {
   popupItems: '.feds-menu-items',
   promoImage: '.feds-promo-image',
   topNavWrapper: '.feds-topnav-wrapper',
-  breadCrumbsWrapper: '.feds-breadcrumbs-wrapper',
+  breadcrumbsWrapper: '.feds-breadcrumbs-wrapper',
   mainNav: '.feds-nav',
 };
 
@@ -169,6 +169,7 @@ export const createFullGlobalNavigation = async ({
     waitForElements.push(waitForElement(selectors.profileMenu, profile));
   }
 
+  waitForElements.push(waitForElement(selectors.breadcrumbsWrapper, document.body));
   await Promise.all(waitForElements);
 
   window.fetch = ogFetch;

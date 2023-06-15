@@ -800,7 +800,7 @@ describe('global navigation', () => {
       expect(document.querySelector(selectors.mainNav).nextElementSibling)
         .to.equal(document.querySelector(selectors.search));
       expect(document.querySelector(selectors.topNavWrapper).lastElementChild)
-        .to.equal(document.querySelector(selectors.breadCrumbsWrapper));
+        .to.equal(document.querySelector(selectors.breadcrumbsWrapper));
 
       await setViewport(viewports.mobile);
       nav.isDesktop.dispatchEvent(new Event('change'));
@@ -808,7 +808,7 @@ describe('global navigation', () => {
       expect(document.querySelector(selectors.mainNav).previousElementSibling)
         .to.equal(document.querySelector(selectors.search));
       expect(document.querySelector(selectors.navWrapper).firstElementChild)
-        .to.equal(document.querySelector(selectors.breadCrumbsWrapper));
+        .to.equal(document.querySelector(selectors.breadcrumbsWrapper));
 
       await setViewport(viewports.smallDesktop);
       nav.isDesktop.dispatchEvent(new Event('change'));
@@ -816,7 +816,7 @@ describe('global navigation', () => {
       expect(document.querySelector(selectors.mainNav).nextElementSibling)
         .to.equal(document.querySelector(selectors.search));
       expect(document.querySelector(selectors.topNavWrapper).lastElementChild)
-        .to.equal(document.querySelector(selectors.breadCrumbsWrapper));
+        .to.equal(document.querySelector(selectors.breadcrumbsWrapper));
     });
   });
 });
