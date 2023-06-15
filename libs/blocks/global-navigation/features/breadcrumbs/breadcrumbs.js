@@ -1,5 +1,5 @@
 import { getConfig, getMetadata } from '../../../../utils/utils.js';
-import { toFragment } from '../../utilities/utilities.js';
+import { toFragment, lanaLog } from '../../utilities/utilities.js';
 
 const metadata = {
   seo: 'breadcrumb-seo',
@@ -104,7 +104,12 @@ const fromUrl = () => {
 };
 
 export default async function init(element) {
-  const breadcrumbsEl = createBreadcrumbs(element) || (await fromFile()) || fromUrl();
-  setBreadcrumbSEO(breadcrumbsEl);
-  return breadcrumbsEl;
+  try {
+    const breadcrumbsEl = createBreadcrumbs(element) || (await fromFile()) || fromUrl();
+    setBreadcrumbSEO(breadcrumbsEl);
+    return breadcrumbsEl;
+  } catch (e) {
+    lanaLog({ e, message: 'GNAV breadcrumbs failed rendering' });
+    return null;
+  }
 }

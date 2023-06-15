@@ -231,8 +231,8 @@ class Gnav {
 
         // On desktop, breadcrumbs are below the whole nav
         if (this.elements.topnav instanceof HTMLElement
-          && this.elements.breadcrumbs.wrapper instanceof HTMLElement) {
-          this.elements.topnav.after(this.elements.breadcrumbs.wrapper);
+          && this.elements.breadcrumbsWrapper instanceof HTMLElement) {
+          this.elements.topnav.after(this.elements.breadcrumbsWrapper);
         }
       } else {
         // On mobile, nav is after search
@@ -243,8 +243,8 @@ class Gnav {
 
         // On mobile, breadcrumbs are before the search and nav
         if (this.elements.navWrapper instanceof HTMLElement
-          && this.elements.breadcrumbs.wrapper instanceof HTMLElement) {
-          this.elements.navWrapper.prepend(this.elements.breadcrumbs.wrapper);
+          && this.elements.breadcrumbsWrapper instanceof HTMLElement) {
+          this.elements.navWrapper.prepend(this.elements.breadcrumbsWrapper);
         }
       }
     });
@@ -609,7 +609,7 @@ class Gnav {
     if (!this.el.classList.contains('has-breadcrumbs')) return null;
     if (this.elements.breadcrumbsWrapper) return this.elements.breadcrumbsWrapper;
     const createBreadcrumbs = await loadBlock('../features/breadcrumbs/breadcrumbs.js');
-    this.elements.breadcrumbsWrapper = createBreadcrumbs(this.el.querySelector('.breadcrumbs'));
+    this.elements.breadcrumbsWrapper = await createBreadcrumbs(this.el.querySelector('.breadcrumbs'));
     return this.elements.breadcrumbsWrapper;
   };
 
