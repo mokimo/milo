@@ -10,7 +10,6 @@ const ogFetch = window.fetch;
 
 // TODO
 // - test localization
-// - test breadcrumbs SEO
 
 describe('global navigation', () => {
   describe('basic sanity tests', () => {

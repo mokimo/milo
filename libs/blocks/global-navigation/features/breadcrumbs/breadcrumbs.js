@@ -4,7 +4,7 @@ import { toFragment } from '../../utilities/utilities.js';
 const metadata = {
   seo: 'breadcrumb-seo',
   fromFile: 'breadcrumbs-from-file',
-  hideLast: 'breadcrumbs-hide-current-page',
+  hideCurrent: 'breadcrumbs-hide-current-page',
   hiddenEntries: 'breadcrumbs-hidden-entries',
   pageTitle: 'breadcrumbs-page-title',
 };
@@ -65,12 +65,12 @@ const createBreadcrumbs = (element) => {
   if (!element) return null;
   const ul = element.querySelector('ul');
 
-  if (getMetadata(metadata.hideLast) !== 'on') {
+  if (getMetadata(metadata.hideCurrent) !== 'on') {
     ul.append(toFragment`
       <li>
         ${getMetadata(metadata.pageTitle) || document.title}
       </li>
-   `);
+    `);
   }
 
   removeHiddenEntries({ ul });
@@ -108,14 +108,3 @@ export default async function init(element) {
   setBreadcrumbSEO(breadcrumbsEl);
   return breadcrumbsEl;
 }
-
-export {
-  fromUrl,
-  init,
-  fromFile,
-  createBreadcrumbs,
-  setBreadcrumbSEO,
-  removeHiddenEntries,
-  getParent,
-  getFile,
-};

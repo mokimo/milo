@@ -1,0 +1,74 @@
+<html>
+  <head></head>
+  <body></body>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { readFile } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+    import breadcrumbs from '../../../../libs/blocks/global-navigation/features/breadcrumbs/breadcrumbs.js';
+    import { setConfig } from '../../../../libs/utils/utils.js';
+    import { stub } from 'sinon';
+    import { mockRes } from '../test-utilities.js';
+    const { fetch } = window;
+
+    const breadcrumbMock = () => `
+      <div class="breadcrumbs">
+        <div>
+          <div>
+            <ul>
+              <li><a href="http://www.google.com/">1-from-page</a></li>
+              <li><a href="http://www.adobe.com/">Actors</a></li>
+              <li>Players</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    `;
+    runTests(() => {
+      describe('breadcrumbs', () => {
+        beforeEach(() => {
+          window.fetch = stub().callsFake(() =>
+            mockRes({ payload: breadcrumbMock() })
+          );
+          setConfig({ 'breadcrumbs-from-file': 'off' });
+          document.head.innerHTML = '';
+        });
+
+        afterEach(() => {
+          window.fetch = fetch;
+        });
+
+        it('should create a breadcrumb from a file when enabled via config', async () => {
+          setConfig({ 'breadcrumbs-from-file': 'on' });
+          window.fetch = stub().callsFake(() =>
+            mockRes({ payload: breadcrumbMock() })
+          );
+          const breadcrumb = await breadcrumbs();
+          expect(breadcrumb.querySelector('ul').children.length).to.equal(4);
+          expect(
+            breadcrumb
+              .querySelector('ul li:last-of-type')
+              .getAttribute('aria-current')
+          ).to.equal('page');
+        });
+
+        it('should create a breadcrumb from a file when enabled via metadata', async () => {
+          document.head.innerHTML =
+            '<meta name="breadcrumbs-from-file" content="on">';
+          const breadcrumb = await breadcrumbs();
+          expect(breadcrumb.querySelector('ul').children.length).to.equal(4);
+          expect(
+            breadcrumb
+              .querySelector('ul li:last-of-type')
+              .getAttribute('aria-current')
+          ).to.equal('page');
+        });
+
+        it('should create a breadcrumb from the url', async () => {
+          const breadcrumb = await breadcrumbs();
+          expect(breadcrumb.querySelectorAll('li').length).to.equal(6);
+        });
+      });
+    });
+  </script>
+</html>

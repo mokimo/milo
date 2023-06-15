@@ -210,7 +210,7 @@ class Gnav {
   };
 
   decorateTopnavWrapper = async () => {
-    const breadcrumbs = this.isDesktop.matches ? await this.decorateBreadCrumbs() : '';
+    const breadcrumbs = this.isDesktop.matches ? await this.decorateBreadcrumbs() : '';
     this.elements.topnavWrapper = toFragment`<div class="feds-topnav-wrapper">
         ${this.elements.topnav}
         ${breadcrumbs}
@@ -479,7 +479,7 @@ class Gnav {
   };
 
   decorateMainNav = async () => {
-    const breadcrumbs = this.isDesktop.matches ? '' : await this.decorateBreadCrumbs();
+    const breadcrumbs = this.isDesktop.matches ? '' : await this.decorateBreadcrumbs();
     this.elements.mainNav = toFragment`<div class="feds-nav"></div>`;
     this.elements.navWrapper = toFragment`
       <div class="feds-nav-wrapper">
@@ -605,10 +605,13 @@ class Gnav {
     }
   };
 
-  decorateBreadCrumbs = async () => this.el.classList.contains('has-breadcrumbs')
-    && loadBlock('../features/breadcrumbs/breadcrumbs.js').then(
-      (createBreadcrumbs) => createBreadcrumbs(this.el.querySelector('.breadcrumbs')),
-    );
+  decorateBreadcrumbs = async () => {
+    if (!this.el.classList.contains('has-breadcrumbs')) return null;
+    if (this.elements.breadcrumbsWrapper) return this.elements.breadcrumbsWrapper;
+    const createBreadcrumbs = await loadBlock('../features/breadcrumbs/breadcrumbs.js');
+    this.elements.breadcrumbsWrapper = createBreadcrumbs(this.el.querySelector('.breadcrumbs'));
+    return this.elements.breadcrumbsWrapper;
+  };
 
   decorateSearch = () => {
     const searchBlock = this.body.querySelector('.search');
