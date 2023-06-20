@@ -62,14 +62,14 @@ const decorateSignIn = async ({ rawElem, decoratedElem }) => {
   let signInElem;
 
   if (!dropdownElem) {
-    signInElem = toFragment`<a href="#" daa-ll="${signInLabel}" class="feds-signIn">${signInLabel}</a>`;
+    signInElem = toFragment`<button daa-ll="${signInLabel}" class="feds-signIn">${signInLabel}</button>`;
 
     signInElem.addEventListener('click', (e) => {
       e.preventDefault();
       signIn();
     });
   } else {
-    signInElem = toFragment`<a href="#" daa-ll="${signInLabel}" class="feds-signIn" role="button" aria-expanded="false" aria-haspopup="true">${signInLabel}</a>`;
+    signInElem = toFragment`<button daa-ll="${signInLabel}" class="feds-signIn" aria-expanded="false" aria-haspopup="true">${signInLabel}</button>`;
 
     signInElem.addEventListener('click', (e) => trigger({ element: signInElem, event: e }));
     signInElem.addEventListener('keydown', (e) => e.code === 'Escape' && closeAllDropdowns());
@@ -81,12 +81,13 @@ const decorateSignIn = async ({ rawElem, decoratedElem }) => {
     const dropdownSignIn = dropdownElem.querySelector('[href="https://adobe.com?sign-in=true"]');
 
     if (dropdownSignIn) {
-      dropdownSignIn.addEventListener('click', (e) => {
+      const button = toFragment`<button>${dropdownSignIn.innerText}</button>`;
+      dropdownSignIn.replaceWith(button);
+      button.addEventListener('click', (e) => {
         e.preventDefault();
         signIn();
       });
     }
-
     decoratedElem.append(dropdownElem);
   }
 
