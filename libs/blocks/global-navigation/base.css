@@ -39,8 +39,7 @@
   flex-shrink: 0;
 }
 
-.feds-navLink:hover,
-.feds-navLink:focus {
+.feds-navLink:hover {
   color: var(--feds-color-link--hover--light);
 }
 
