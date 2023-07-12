@@ -44,6 +44,16 @@ describe('Utils', () => {
       console.log.restore();
     });
 
+    describe('loadIms', () => {
+      it('calls the onReadyFn if IMS is already loaded', () => {
+        window.adobeIMS = {};
+        const onReadyFn = sinon.spy();
+        utils.loadIms(onReadyFn);
+        expect(onReadyFn.calledOnce).to.equal(true);
+        delete window.adobeIMS;
+      });
+    });
+
     describe('Template', () => {
       it('loads a template script and style', async () => {
         const meta = document.createElement('meta');

@@ -620,10 +620,13 @@ function decorateFooterPromo(config) {
 }
 
 export function loadIms(onReadyFn) {
-  if (window.adobeIMS) return;
+  if (window.adobeIMS) {
+    if (onReadyFn) onReadyFn();
+    return;
+  }
 
   const { locale, imsClientId, imsScope, env, onReady } = getConfig();
-  if (!imsClientId) return null;
+  if (!imsClientId) return;
 
   window.adobeid = {
     client_id: imsClientId,
