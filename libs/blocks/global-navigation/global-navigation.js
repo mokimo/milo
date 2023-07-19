@@ -395,6 +395,7 @@ class Gnav {
       theme: 'light',
       locale: 'en_US',
       env: 'prod',
+      hasUserConsent: true,
     });
   };
 
