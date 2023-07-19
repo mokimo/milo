@@ -196,7 +196,6 @@ class Gnav {
       this.decorateMainNav,
       this.decorateTopNav,
       this.decorateTopnavWrapper,
-      this.decorateAppLauncher,
       this.ims,
       this.addChangeEventListeners,
     ];
@@ -319,6 +318,7 @@ class Gnav {
   imsReady = async () => {
     const tasks = [
       this.decorateProfile,
+      this.decorateAppLauncher,
     ];
     try {
       for await (const task of tasks) {
