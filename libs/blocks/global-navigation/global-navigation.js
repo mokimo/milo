@@ -197,6 +197,7 @@ class Gnav {
       this.decorateTopNav,
       this.decorateTopnavWrapper,
       this.ims,
+      this.decorateAppLauncher,
       this.addChangeEventListeners,
     ];
     this.el.addEventListener('click', this.loadDelayed);
@@ -318,7 +319,6 @@ class Gnav {
   imsReady = async () => {
     const tasks = [
       this.decorateProfile,
-      this.decorateAppLauncher,
     ];
     try {
       for await (const task of tasks) {
