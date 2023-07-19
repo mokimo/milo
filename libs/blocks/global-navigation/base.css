@@ -164,3 +164,12 @@
     color: var(--feds-color-navLink-description--light);
   }
 }
+
+.feds-applauncher {
+  display: flex;
+  align-items: center;
+}
+
+.feds-applauncher .app-launcher-container {
+  height: auto !important;
+}

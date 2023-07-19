@@ -4,7 +4,10 @@ import {
   getMetadata,
   loadIms,
   localizeLink,
+  loadScript,
+  loadStyle,
   decorateSVG,
+  createTag,
 } from '../../utils/utils.js';
 import {
   toFragment,
@@ -289,18 +292,18 @@ class Gnav {
         this.el.removeEventListener('click', this.loadDelayed);
         this.el.removeEventListener('keydown', this.loadDelayed);
         const [
-          { appLauncher },
+          // { appLauncher },
           ProfileDropdown,
           Search,
         ] = await Promise.all([
-          loadBlock('../features/appLauncher/appLauncher.js'),
+          // loadBlock('../features/appLauncher/appLauncher.js'),
           loadBlock('../features/profile/dropdown.js'),
           loadBlock('../features/search/gnav-search.js'),
           loadStyles('features/profile/dropdown.css'),
           loadStyles('features/search/gnav-search.css'),
         ]);
         this.ProfileDropdown = ProfileDropdown;
-        this.appLauncher = appLauncher;
+        // this.appLauncher = appLauncher;
         this.Search = Search;
         resolve();
       } catch (e) {
@@ -377,15 +380,22 @@ class Gnav {
     decorationTimeout = setTimeout(decorateDropdown, CONFIG.delays.loadDelayed);
   };
 
-  decorateAppLauncher = () => {
-    // const appLauncherBlock = this.body.querySelector('.app-launcher');
-    // if (appLauncherBlock) {
-    //   await this.loadDelayed();
-    //   this.appLauncher(
-    //     decoratedElem,
-    //     appLauncherBlock,
-    //   );
-    // }
+  decorateAppLauncher = async () => {
+    await Promise.all([
+      loadStyle('https://prod.adobeccstatic.com/appl/latest/AppLauncher.css'),
+      loadScript('https://prod.adobeccstatic.com/appl/latest/AppLauncher.js'),
+    ]);
+
+    const placeholder = createTag('div', { class: 'feds-applauncher' });
+    document.querySelector('.feds-profile').after(placeholder);
+
+    window.AppLauncher({
+      target: placeholder,
+      analyticsContext: { consumer: { client_id: window.adobeid.client_id } },
+      theme: 'light',
+      locale: 'en_US',
+      env: 'prod',
+    });
   };
 
   loadSearch = () => {
