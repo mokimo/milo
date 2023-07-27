@@ -196,8 +196,8 @@ class Gnav {
       this.decorateMainNav,
       this.decorateTopNav,
       this.decorateTopnavWrapper,
-      this.ims,
       this.decorateAppLauncher,
+      this.ims,
       this.addChangeEventListeners,
     ];
     this.el.addEventListener('click', this.loadDelayed);
