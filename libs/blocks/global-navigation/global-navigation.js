@@ -196,8 +196,8 @@ class Gnav {
       this.decorateMainNav,
       this.decorateTopNav,
       this.decorateTopnavWrapper,
-      this.decorateAppLauncher,
       this.ims,
+      this.decorateAppLauncher,
       this.addChangeEventListeners,
     ];
     this.el.addEventListener('click', this.loadDelayed);
@@ -391,7 +391,7 @@ class Gnav {
 
     window.AppLauncher({
       target: placeholder,
-      analyticsContext: { consumer: { client_id: 'milo' } },
+      analyticsContext: { consumer: { client_id: window.adobeid.client_id } },
       theme: 'light',
       locale: 'en_US',
       env: 'prod',
