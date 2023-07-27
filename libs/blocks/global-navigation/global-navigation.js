@@ -391,7 +391,7 @@ class Gnav {
 
     window.AppLauncher({
       target: placeholder,
-      analyticsContext: { consumer: { client_id: window.adobeid.client_id } },
+      analyticsContext: { consumer: { client_id: 'milo' } },
       theme: 'light',
       locale: 'en_US',
       env: 'prod',
