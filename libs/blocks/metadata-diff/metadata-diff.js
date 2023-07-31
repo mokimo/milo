@@ -46,7 +46,6 @@ export default function init(el) {
   urlInput.id = 'urlInput';
   urlInput.type = 'text';
   urlInput.placeholder = 'https://main--milo--adobecom.hlx.page/metadata.json';
-  urlInput.value = 'https://main--milo--adobecom.hlx.page/metadata.json';
 
   const getDiffButton = document.createElement('button');
   getDiffButton.id = 'getDiffButton';
@@ -82,7 +81,6 @@ export default function init(el) {
     ])
       .then((responses) => Promise.all(responses.map((response) => response.json()))).then((data) => {
         const diff = getDifference(data[0], data[1]);
-        console.log(diff);
         document.getElementById('resultArea').innerText = JSON.stringify(diff, null, 2);
         // Hide the loader
         document.getElementById('loader').style.display = 'none';
