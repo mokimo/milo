@@ -13,13 +13,13 @@ function getDifference(object1, object2) {
         }
       } else if (object1[key] !== object2[key] && object1[key] !== '' && object2[key] !== '') {
         diff[key] = {
-          original: object1[key],
+          preview: object1[key],
           live: object2[key],
         };
       }
     } else if (object1[key] !== '') {
       diff[key] = {
-        original: object1[key],
+        preview: object1[key],
         live: 'key does not exist in live object',
       };
     }
@@ -28,7 +28,7 @@ function getDifference(object1, object2) {
   Object.keys(object2).forEach((key) => {
     if (!object1.hasOwnProperty(key) && object2[key] !== '') {
       diff[key] = {
-        original: 'key does not exist in original object',
+        preview: 'key does not exist in preview object',
         live: object2[key],
       };
     }
