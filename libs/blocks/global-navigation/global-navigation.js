@@ -381,9 +381,13 @@ class Gnav {
   };
 
   decorateAppLauncher = async () => {
+    const url = new URL(window.location.href);
+    const appLauncherEnv = url.searchParams.get('appLauncherEnv') || 'dev';
+    const version = url.searchParams.get('appLauncherVersion') || '2.4';
+    window.appLauncherChunkUrl = `https://${appLauncherEnv}.adobeccstatic.com/appl/${version}/`;
     await Promise.all([
-      loadStyle('https://prod.adobeccstatic.com/appl/latest/AppLauncher.css'),
-      loadScript('https://prod.adobeccstatic.com/appl/latest/AppLauncher.js'),
+      loadStyle(`https://${appLauncherEnv}.adobeccstatic.com/appl/${version}/AppLauncher.css`),
+      loadScript(`https://${appLauncherEnv}.adobeccstatic.com/appl/${version}/AppLauncher.js`),
     ]);
 
     const placeholder = createTag('div', { class: 'feds-applauncher' });
