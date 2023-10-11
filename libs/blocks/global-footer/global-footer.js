@@ -112,7 +112,15 @@ class Footer {
     const parsedHTML = await replaceText(html, getFedsPlaceholderConfig(), undefined, 'feds');
 
     try {
-      return new DOMParser().parseFromString(parsedHTML, 'text/html').body;
+      const { body } = new DOMParser().parseFromString(parsedHTML, 'text/html');
+      const inlineFrags = [...body.querySelectorAll('a[href*="#_inline"]')];
+      if (inlineFrags.length) {
+        const { default: loadInlineFrags } = await import('../fragment/fragment.js');
+        const fragPromises = inlineFrags.map((link) => loadInlineFrags(link));
+        await Promise.all(fragPromises);
+      }
+
+      return body;
     } catch (e) {
       // TODO: log to LANA if Footer could not be instantiated
       return null;
@@ -132,7 +140,7 @@ class Footer {
 
   decorateGrid = async () => {
     this.elements.footerMenu = '';
-    const columns = this.body.querySelectorAll(':scope > div > h2:first-child');
+    const columns = this.body.querySelectorAll(':scope > div > h2:first-child, :scope > div > p > h2:first-child');
 
     if (!columns || !columns.length) return this.elements.footerMenu;
 

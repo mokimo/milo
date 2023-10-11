@@ -230,6 +230,9 @@ const decorateColumns = async ({ content, separatorTagName = 'H5' } = {}) => {
         const promoElem = decoratePromo(columnElem, itemIndex);
 
         itemDestination.append(promoElem);
+      } else if (!columnElem.children.length) {
+        // fragments can lead to empty paragraphs that we want to exclude
+        columnElem.remove();
       } else {
         const decoratedElem = decorateElements({ elem: columnElem, itemIndex });
         columnElem.remove();
@@ -275,9 +278,18 @@ const decorateMenu = (config) => logErrorFor(async () => {
     if (res.status !== 200) return;
     const content = await res.text();
     const parsedContent = await replaceText(content, getFedsPlaceholderConfig(), undefined, 'feds');
+
+    const dom = new DOMParser().parseFromString(parsedContent, 'text/html');
+    const inlineFrags = [...dom.body.querySelectorAll('a[href*="#_inline"]')];
+    if (inlineFrags.length) {
+      const { default: loadInlineFrags } = await import('../../../fragment/fragment.js');
+      const fragPromises = inlineFrags.map((link) => loadInlineFrags(link));
+      await Promise.all(fragPromises);
+    }
+
     menuTemplate = toFragment`<div class="feds-popup">
         <div class="feds-menu-content">
-          ${parsedContent}
+          ${dom.body.innerHTML}
         </div>
       </div>`;
 
