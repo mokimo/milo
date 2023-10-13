@@ -280,6 +280,7 @@ const decorateMenu = (config) => logErrorFor(async () => {
     const parsedContent = await replaceText(content, getFedsPlaceholderConfig(), undefined, 'feds');
 
     const dom = new DOMParser().parseFromString(parsedContent, 'text/html');
+    decorateLinks(dom.body);
     const inlineFrags = [...dom.body.querySelectorAll('a[href*="#_inline"]')];
     if (inlineFrags.length) {
       const { default: loadInlineFrags } = await import('../../../fragment/fragment.js');
