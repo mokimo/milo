@@ -1,6 +1,6 @@
 import { toFragment } from '../../blocks/global-navigation/utilities/utilities.js';
 import { getConfig } from '../../utils/utils.js'; // TODO: doesn't make sense outside of Milo
-import { replaceKey, replaceText } from '../../features/placeholders.js';
+import { replaceKey, replaceText } from '../placeholders.js';
 
 const CONFIG = {
   selectors: { prompt: '.appPrompt' },
@@ -83,19 +83,19 @@ class AppPrompt {
     // TODO: is there a better way to let authors define the CTA text? Should we just use a placeholder?
     this.cancelText = cancelText?.innerText || await replaceKey('pep-prompt-cancel', getConfig());
 
-    this.profile = {};
-    const accessToken = window.adobeIMS.getAccessToken()?.token;
+    this.profile = { avatar: '', name: 'okan', email: 'okan@adobe.com' };
+    // const accessToken = window.adobeIMS.getAccessToken()?.token;
 
-    const [imsProfile, ppsProfile] = await Promise.all([
-      window.adobeIMS.getProfile(),
-      // TODO: get profile data from the new PPS service, no clear API as of yet
-      fetch(this.profileApi, { headers: new Headers({ Authorization: `Bearer ${accessToken}` }) }),
-    ]).catch(() => [null, null]);
+    // const [imsProfile, ppsProfile] = await Promise.all([
+    //   window.adobeIMS.getProfile(),
+    //   // TODO: get profile data from the new PPS service, no clear API as of yet
+    //   fetch(this.profileApi, { headers: new Headers({ Authorization: `Bearer ${accessToken}` }) }),
+    // ]).catch(() => [null, null]);
 
-    if (imsProfile && ppsProfile) {
-      ({ displayName: this.profile.name, email: this.profile.email } = imsProfile);
-      ({ user: { avatar: this.profile.avatar } } = await ppsProfile.json());
-    }
+    // if (imsProfile && ppsProfile) {
+    //   ({ displayName: this.profile.name, email: this.profile.email } = imsProfile);
+    //   ({ user: { avatar: this.profile.avatar } } = await ppsProfile.json());
+    // }
 
     const metadata = getMetadata(content.querySelector('.section-metadata'));
     metadata['loader-duration'] = parseInt(metadata['loader-duration'] || CONFIG.delay, 10);
@@ -182,3 +182,4 @@ export default async function init(config) {
   const appPrompt = await new AppPrompt(config);
   return appPrompt;
 }
+window.init = init;

@@ -1,5 +1,5 @@
 import { getConfig, getMetadata, loadStyle, loadLana } from '../../../utils/utils.js';
-import { processTrackingLabels } from '../../../martech/attributes.js';
+import { processTrackingLabels } from '../../../martech/attributes.js'; // Move to dynamic import? If we directly import this module as ESM - it will always be included even if not used
 
 loadLana();
 

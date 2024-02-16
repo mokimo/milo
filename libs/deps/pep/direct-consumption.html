@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web App Prompt</title>
+  <link rel="stylesheet" href="https://project-pep-microbundle--milo--mokimo/libs/deps/pep/webapp-prompt.css">
+</head>
+<body>
+  <!-- Your HTML content here -->
+
+  <script type="module">
+    import init from 'https://project-pep-microbundle--milo--mokimo.hlx.page/libs/features/webapp-prompt/webapp-prompt.js';
+    const id = "pep-prompt-content"
+    const profileApi = "https://cc-collab-stage.adobe.io/profile"
+    const promptPath = "https://localhost:3000/drafts/ramuntea/pep-prompt-content"
+    window.adobeIMS = {
+      getAccessToken: () => Promise.resolve({token: "token"}),
+      getProfile: () => Promise.resolve({user: {avatar: ""}})
+    }
+
+    init({ promptPath, id, profileApi });
+  </script>
+  <!-- <script src="webapp-prompt.js"></script>
+  <script>
+    console.log(window.init)
+    const id = "pep-prompt-content"
+    const profileApi = "https://cc-collab-stage.adobe.io/profile"
+    const promptPath = "https://localhost:3000/drafts/ramuntea/pep-prompt-content"
+    window.adobeIMS = {
+      getAccessToken: () => Promise.resolve({token: "token"}),
+      getProfile: () => Promise.resolve({user: {avatar: ""}})
+    }
+    window.init({ promptPath, id, profileApi })
+  </script> -->
+</body>
+</html>
