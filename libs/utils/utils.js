@@ -134,6 +134,13 @@ ENVS.local = {
 
 export const MILO_EVENTS = { DEFERRED: 'milo:deferred' };
 
+fetch(
+  'https://main--bacom--adobecom.hlx.page/drafts/sghimpos/discover-with-federal-megamenu.plain.html',
+  { credentials: 'include' },
+)
+  .then((res) => console.log({ res }))
+  .catch((e) => console.log({ e }));
+
 const LANGSTORE = 'langstore';
 const PAGE_URL = new URL(window.location.href);
 
