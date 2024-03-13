@@ -95,7 +95,6 @@ const createAndPushBranch = ({ script, branch, scriptPath, origin = 'origin' }) 
   }
   console.log('writing script to file', scriptPath);
   fs.writeFileSync(scriptPath, script);
-  console.log({ origin, branch });
   execSync(`git add ${scriptPath}`);
   execSyncSafe('git commit -m "Update self hosted dependency"');
   execSync(`git push --force ${origin} ${branch}`);
@@ -106,7 +105,7 @@ const main = async ({
 }) => {
   try {
     const { data: script } = await fetchScript(path);
-    const selfHostedScript = fs.readFileSync(scriptPath, 'utf8');
+    const selfHostedScript = fs.existsSync(scriptPath) && fs.readFileSync(scriptPath, 'utf8');
     const scriptHasChanged = script !== selfHostedScript;
     console.log(`Validating if "${scriptPath}" has changed. Script change: ${scriptHasChanged}`);
 
