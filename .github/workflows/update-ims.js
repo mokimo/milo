@@ -1,4 +1,7 @@
+// Run from the root of the project for local testing: node --env-file=.env .github/workflows/update-ims.js
 const isLocalTestRun = process.env.LOCAL_TEST_RUN || false;
+const branchHead = process.env.BRANCH_HEAD || 'update-imslib';
+const origin = process.env.ORIGIN || 'origin';
 
 const https = require('https');
 const { execSync } = require('child_process');
@@ -75,18 +78,20 @@ const execSyncSafe = (command) => {
 };
 
 const createAndPushBranch = ({ imslib }) => {
-  // If you run this on local, this might overwrite ur current git configs.
-  if (!isLocalTestRun) execSync('git config --global user.name "GitHub Action"');
-  if (!isLocalTestRun) execSync('git config --global user.email "action@github.com"');
-  execSync('git fetch');
-  execSync('git checkout stage');
-  execSyncSafe('git branch -D update-imslib');
-  execSync('git checkout -b update-imslib');
-  const imslibPath = `${isLocalTestRun ? '../../' : ''}libs/deps/imslib.min.js`;
+  // When testing locally, u likely do not want to kill your dev branch
+  if (!isLocalTestRun) {
+    execSync('git config --global user.name "GitHub Action"');
+    execSync('git config --global user.email "action@github.com"');
+    execSync('git fetch');
+    execSync('git checkout stage');
+    execSyncSafe('git branch -D update-imslib');
+    execSync('git checkout -b update-imslib');
+  }
+  const imslibPath = './libs/deps/imslib.min.js';
   fs.writeFileSync(imslibPath, imslib);
   execSync(`git add ${imslibPath}`);
   execSync('git commit -m "Update imslib.min.js"');
-  execSync('git push --force origin update-imslib');
+  execSync(`git push --force ${origin} ${branchHead}`);
 };
 
 const main = async ({ github, context }) => {
@@ -108,7 +113,7 @@ const main = async ({ github, context }) => {
       owner: context.repo.owner,
       repo: context.repo.repo,
       title: 'Update imslib.min.js',
-      head: 'update-imslib',
+      head: branchHead,
       base: 'stage',
       body: prBody,
     });
@@ -117,7 +122,7 @@ const main = async ({ github, context }) => {
       owner: context.repo.owner,
       repo: context.repo.repo,
       pull_number: pr.data.number,
-      reviewers: 'robert-bogos',
+      reviewers: ['robert-bogos'],
       // reviewers: ['adobecom/admins', 'mokimo', 'overmyheadandbody', 'narcis-radu', 'robert-bogos']
     });
 
