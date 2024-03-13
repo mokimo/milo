@@ -83,6 +83,7 @@ const execSyncSafe = (command) => {
 };
 
 const createAndPushBranch = ({ script, branch, scriptPath, origin = 'origin' }) => {
+  console.log({ branch, scriptPath, origin });
   // When testing locally, u likely do not want to kill your dev branch
   if (!localExecution) {
     execSync('git config --global user.name "GitHub Action"');
@@ -103,10 +104,8 @@ const main = async ({
 }) => {
   const { data: script } = await fetchScript(path);
   const selfHostedScript = fs.readFileSync(scriptPath, 'utf8');
-
-  if (script !== localScript || localExecution) {
+  if (script !== selfHostedScript || localExecution) {
     createAndPushBranch({ script, branch, scriptPath, origin });
-    return;
     const pr = await github.rest.pulls.create({
       owner: context.repo.owner,
       repo: context.repo.repo,
@@ -115,21 +114,19 @@ const main = async ({
       base: 'stage',
       body: getPrDescription({ branch, scriptPath }),
     });
-
     await github.rest.issues.addLabels({
       owner: context.repo.owner,
       repo: context.repo.repo,
       issue_number: pr.data.number,
       labels: ['needs-verification'],
     });
-
-    // await github.rest.pulls.requestReviewers({
-    //   owner: context.repo.owner,
-    //   repo: context.repo.repo,
-    //   pull_number: pr.data.number,
-    //   team_reviewers: ['admins'],
-    //   reviewers: [ 'mokimo', 'overmyheadandbody', 'narcis-radu', 'robert-bogos']
-    // });
+    await github.rest.pulls.requestReviewers({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      pull_number: pr.data.number,
+      team_reviewers: ['admins'],
+      reviewers: ['mokimo', 'overmyheadandbody', 'narcis-radu', 'robert-bogos'],
+    });
   }
 };
 
