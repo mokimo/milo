@@ -1,4 +1,4 @@
-name: Update imslib.min.js
+name: Update dependencies
 
 on:
   schedule:
@@ -17,7 +17,14 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          const script = require('./.github/workflows/update-ims.js')
-          script({github, context})
+          const updateDependency = require('./.github/workflows/update-script.js')
+          updateDependency({
+            github, 
+            context, 
+            title: '[AUTOMATED-PR] Update imslib.min.js dependency', 
+            path: 'https://auth.services.adobe.com/imslib/imslib.min.js'
+            branch: 'update-imslib',
+            scriptPath: './libs/deps/imslib.min.js'
+          })
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
