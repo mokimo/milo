@@ -49,6 +49,7 @@ Resolves: NO TICKET - AUTOMATED CREATED PR.
 - After: https://${branch}--milo--adobecom.hlx.page/ch_de/drafts/ramuntea/gnav-refactor?martech=off`;
 
 const fetchScript = (path) => new Promise((resolve, reject) => {
+  console.log(`Fetching script from ${path}`);
   https
     .get(path, (res) => {
       if (res.statusCode < 200 || res.statusCode >= 300) {
@@ -83,7 +84,6 @@ const execSyncSafe = (command) => {
 };
 
 const createAndPushBranch = ({ script, branch, scriptPath, origin = 'origin' }) => {
-  console.log({ branch, scriptPath, origin });
   // When testing locally, u likely do not want to kill your dev branch
   if (!localExecution) {
     execSync('git config --global user.name "GitHub Action"');
@@ -93,64 +93,75 @@ const createAndPushBranch = ({ script, branch, scriptPath, origin = 'origin' }) 
     execSyncSafe(`git branch -D ${branch}`);
     execSync(`git checkout -b ${branch}`);
   }
+  console.log('writing script to file', scriptPath);
   fs.writeFileSync(scriptPath, script);
+  console.log({ origin, branch });
   execSync(`git add ${scriptPath}`);
-  execSync('git commit -m "Update self hosted dependency"');
+  execSyncSafe('git commit -m "Update self hosted dependency"');
   execSync(`git push --force ${origin} ${branch}`);
 };
 
 const main = async ({
   github, context, title, path, branch, scriptPath, origin,
 }) => {
-  const { data: script } = await fetchScript(path);
-  const selfHostedScript = fs.readFileSync(scriptPath, 'utf8');
-  if (script !== selfHostedScript || localExecution) {
-    createAndPushBranch({ script, branch, scriptPath, origin });
-    const pr = await github.rest.pulls.create({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      title,
-      head: branch,
-      base: 'stage',
-      body: getPrDescription({ branch, scriptPath }),
-    });
-    await github.rest.issues.addLabels({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: pr.data.number,
-      labels: ['needs-verification'],
-    });
-    await github.rest.pulls.requestReviewers({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      pull_number: pr.data.number,
-      team_reviewers: ['admins'],
-      reviewers: ['mokimo', 'overmyheadandbody', 'narcis-radu', 'robert-bogos'],
-    });
+  try {
+    const { data: script } = await fetchScript(path);
+    const selfHostedScript = fs.readFileSync(scriptPath, 'utf8');
+    const scriptHasChanged = script !== selfHostedScript;
+    console.log(`Validating if "${scriptPath}" has changed. Script change: ${scriptHasChanged}`);
+
+    if (scriptHasChanged || localExecution) {
+      const { data: openPRs } = await github.rest.pulls.list({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        state: 'open',
+      });
+
+      const hasPR = openPRs.find((pr) => pr.head.ref === branch);
+      if (hasPR) return console.log(`PR already exists for branch ${branch}. Execution stopped.`);
+
+      createAndPushBranch({ script, branch, scriptPath, origin });
+
+      const pr = await github.rest.pulls.create({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        title,
+        head: branch,
+        base: 'stage',
+        body: getPrDescription({ branch, scriptPath }),
+      });
+
+      await github.rest.issues.addLabels({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        issue_number: pr.data.number,
+        labels: ['needs-verification'],
+      });
+
+      await github.rest.pulls.requestReviewers({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        pull_number: pr.data.number,
+        team_reviewers: ['admins'],
+        reviewers: ['mokimo', 'overmyheadandbody', 'narcis-radu', 'robert-bogos'],
+      });
+    }
+  } catch (error) {
+    console.error(`An error occurred while running workflow for ${title}`, error);
   }
 };
 
 if (localExecution) {
   const { github, context } = require('./localWorkflowConfigs.js')();
-  try {
-    main({
-      github,
-      context,
-      title: localRunConfigs.title,
-      path: localRunConfigs.path,
-      branch: localRunConfigs.branch,
-      scriptPath: localRunConfigs.scriptPath,
-      origin: localRunConfigs.origin,
-    });
-  } catch (error) {
-    console.error('An error occurred while running workflow', error);
-  }
+  main({
+    github,
+    context,
+    title: localRunConfigs.title,
+    path: localRunConfigs.path,
+    branch: localRunConfigs.branch,
+    scriptPath: localRunConfigs.scriptPath,
+    origin: localRunConfigs.origin,
+  });
 }
 
-module.exports = async function (...args) {
-  try {
-    await main(...args);
-  } catch (error) {
-    console.error(`An error occurred while running workflow for ${args.title}`, error);
-  }
-};
+module.exports = main;
