@@ -1,5 +1,13 @@
 // Those env variables are set by an github action automatically
 // For local testing, you should test on your fork.
+// example .env on the root of the project for local testing
+// REQUIRED_APPROVALS=0
+// LOCAL_RUN=true
+// REPO_OWNER=mokimo
+// REPO_NAME=milo
+// GH_TOKEN=...
+// MILO_RELEASE_SLACK_WH=...
+// ISSUE=59
 const owner = process.env.REPO_OWNER || ''; // example owner: adobecom
 const repo = process.env.REPO_NAME || ''; // example repo name: milo
 const auth = process.env.GH_TOKEN || ''; // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
@@ -74,6 +82,9 @@ Then run: node --env-file=.env .github/workflows/update-ims.js`);
       repo: {
         owner,
         repo,
+      },
+      issue: {
+        number: process.env.ISSUE,
       },
     },
   };
