@@ -1,0 +1,62 @@
+main {
+  margin: 20px
+}
+
+#urlInput {
+  padding: 10px;
+  font-size: 16px;
+  width: 60%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+#getDiffButton {
+  margin-left: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#getDiffButton:hover {
+  background-color: #45a049;
+}
+
+#resultArea {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+  color: #333;
+  width: 90%;
+  overflow-y: auto;
+  height: 300px;
+}
+
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}

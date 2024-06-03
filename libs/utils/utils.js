@@ -687,12 +687,9 @@ function decorateHeader() {
 
 async function decorateIcons(area, config) {
   const icons = area.querySelectorAll('span.icon');
-  if (icons.length === 0) return;
-  const { miloLibs, codeRoot } = config;
-  const base = miloLibs || codeRoot;
-  await new Promise((resolve) => { loadStyle(`${base}/features/icons/icons.css`, resolve); });
-  const { default: loadIcons } = await import('../features/icons/icons.js');
-  await loadIcons(icons, config);
+  if (icons.length === 0) return null;
+  return import('../features/icons/icons.js')
+    .then(({ default: loadIcons }) => loadIcons(area, config));
 }
 
 async function decoratePlaceholders(area, config) {

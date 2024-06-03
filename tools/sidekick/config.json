@@ -154,6 +154,17 @@
       "url": "https://milo.adobe.com/tools/faas",
       "isPalette": false,
       "includePaths": [ "**.docx**"]
+    },
+    {
+      "containerId": "tools",
+      "id": "metadata diff",
+      "title": "Metadata difference",
+      "environments": [ "edit", "dev", "preview", "live" ],
+      "isPalette": true,
+      "passConfig": true,
+      "passReferrer": true,
+      "url": "/drafts/osahin/metadiff",
+      "includePaths": [ "**.json**"]
     }
   ]
 }
