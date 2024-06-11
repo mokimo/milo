@@ -49,7 +49,6 @@ export default {
   reporters: [
     defaultReporter({ reportTestResults: true, reportTestProgress: true }),
     customReporter(),
-    summaryReporter(),
   ],
   testRunnerHtml: (testFramework) => `
     <html>

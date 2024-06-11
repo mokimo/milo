@@ -321,6 +321,7 @@
         const hash = copyTextArea.value.split('#')[1].trim();        
         let isCorrectHash = false;
         let osHash = navigator.platform.startsWith('Win') ? windowsHash : osxHash;
+        console.log({platform: navigator.platform})
         expect(hash).to.equal(osHash);
       });
 
