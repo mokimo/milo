@@ -367,6 +367,7 @@ describe('global navigation', () => {
         const toggle = document.querySelector(selectors.mainNavToggle);
         // Clicking the toggle will load the search logic
         toggle.click();
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
         await clock.runAllAsync();
         // Expect the search input to be visible; focus on it and type
         const searchField = document.querySelector(selectors.searchField);
@@ -939,6 +940,7 @@ describe('global navigation', () => {
 
       it('fetches results from the search and clears them', async () => {
         document.querySelector(selectors.mainNavToggle).click();
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
         await clock.runAllAsync();
 
         const searchResults = document.querySelector(selectors.searchResults);
