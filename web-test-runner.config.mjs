@@ -1,6 +1,8 @@
 import { importMapsPlugin } from '@web/dev-server-import-maps';
 import { defaultReporter, summaryReporter } from '@web/test-runner';
 
+import { playwright, playwrightLauncher } from '@web/test-runner-playwright';
+
 const GITHUB_ACTIONS = process.env.GITHUB_ACTIONS === 'true';
 
 function customReporter() {
@@ -17,7 +19,11 @@ function customReporter() {
   };
 }
 export default {
-  concurrency: 1,
+  // debug: true,
+  playwright: true,
+  browsers: [
+    playwrightLauncher({ product: 'chromium', launchOptions: { headless: true } }),
+  ],
   coverageConfig: {
     include: [
       '**/libs/**',
@@ -99,6 +105,8 @@ export default {
   // Comment in the files for selectively running test suites
   // npm run test:file:watch allows to you to run single test file & view the result in a browser.
   // files: ['**/table.test.js', '**/utils.test.js'],
-  files: ['**/table.test.js', '**/tabs.test.js'],
+  // files: ['**/table.test.js', '**/tabs.test.js'],
+  // files: ['**/interlinks.test.js', '**/gnav.test.js', '**/caas-config.test.html'],
+  files: ['**/caas-config.test.html'],
 };
 // };
