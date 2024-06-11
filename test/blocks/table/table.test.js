@@ -1,5 +1,5 @@
-import { readFile, sendMouse, sendKeys } from '@web/test-runner-commands';
-import { expect } from '@esm-bundle/chai';
+import { readFile, sendMouse, sendKeys, resetMouse } from '@web/test-runner-commands';
+import { expect } from 'chai';
 import { MILO_EVENTS } from '../../../libs/utils/utils.js';
 import { delay, waitForElement } from '../../helpers/waitfor.js';
 
@@ -11,6 +11,12 @@ describe('table and tablemetadata', () => {
     const tables = document.querySelectorAll('.table');
     tables.forEach((t) => init(t));
     window.dispatchEvent(new Event(MILO_EVENTS.DEFERRED));
+  });
+
+  afterEach(async () => {
+    console.log('resetMouse-1');
+    await resetMouse();
+    console.log('resetMouse-2');
   });
 
   describe('standard table', () => {
@@ -42,10 +48,11 @@ describe('table and tablemetadata', () => {
       const lastSectionHead = sectionHeads[sectionHeads.length - 1];
       const lastExpandIcon = lastSectionHead.querySelector('.icon.expand');
       lastExpandIcon.setAttribute('aria-expanded', 'false');
+      console.log('SEND MOUSE');
       await sendMouse({
         type: 'move',
         position: [10, (headingCol?.offsetTop ?? 0) + 1],
-      });
+      }).then((res) => console.log({ res })).catch((res) => console.log({ res }));
       expect(headingCol.classList.contains('hover')).to.be.true;
     });
 
