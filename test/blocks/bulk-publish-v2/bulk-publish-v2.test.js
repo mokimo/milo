@@ -108,7 +108,6 @@ describe('Bulk Publish Tool', () => {
   });
 
   it('can validate milo urls and enable form', async () => {
-    await delay(1200);
     await setProcess(rootEl, 'publish');
     await setTextArea(rootEl, testPage);
     expect(rootEl.querySelector('#RunProcess').getAttribute('disable')).to.equal('false');
@@ -116,7 +115,6 @@ describe('Bulk Publish Tool', () => {
   });
 
   it('can submit valid bulk publish job', async () => {
-    await delay(1200);
     await mouseEvent(rootEl.querySelector('.switch.full'));
     await setProcess(rootEl, 'publish');
     await setTextArea(rootEl, testPage);
@@ -126,7 +124,6 @@ describe('Bulk Publish Tool', () => {
   });
 
   it('can submit valid bulk preview job', async () => {
-    await delay(1200);
     await setProcess(rootEl, 'preview');
     await setTextArea(rootEl, testPage);
     await mouseEvent(rootEl.querySelector('#RunProcess'));
@@ -134,7 +131,6 @@ describe('Bulk Publish Tool', () => {
   });
 
   it('can submit valid bulk delete job', async () => {
-    await delay(1500);
     await setProcess(rootEl, 'delete');
     await setTextArea(rootEl, `${testPage}${testPage}1`);
     await mouseEvent(rootEl.querySelector('#RunProcess'));
@@ -142,7 +138,6 @@ describe('Bulk Publish Tool', () => {
   });
 
   it('can copy result page url', async () => {
-    await delay(1500);
     const deleteProcess = rootEl.querySelectorAll('job-process')[1];
     const deleteResult = deleteProcess?.shadowRoot.querySelector('.result');
     await mouseEvent(deleteResult);
@@ -151,56 +146,45 @@ describe('Bulk Publish Tool', () => {
   });
 
   it('can copy a job invocation ID', async () => {
-    await delay(1300);
     const doneJobProcess = rootEl.querySelectorAll('job-process')[0];
     const jobInfo = doneJobProcess?.shadowRoot.querySelector('job-info');
     const jobIdLink = jobInfo?.shadowRoot.querySelector('.job-id-link');
     await mouseEvent(jobIdLink);
-    await delay(200);
   });
 
   it('can submit valid index job', async () => {
     await setProcess(rootEl, 'index', true);
     await setTextArea(rootEl, testPage);
-    await delay(1500);
     await mouseEvent(rootEl.querySelector('#RunProcess'));
     expect(rootEl.querySelectorAll('job-process')).to.have.lengthOf(4);
   });
 
   it('can toggle job timing flyout', async () => {
-    await delay(300);
     const doneJobProcess = rootEl.querySelector('job-process');
     const jobInfo = doneJobProcess?.shadowRoot.querySelector('job-info');
     const timerDetail = jobInfo?.shadowRoot.querySelector('.timer');
-    await mouseEvent(timerDetail);
-    await delay(600);
     await mouseEvent(timerDetail);
     expect(timerDetail.classList.contains('show-times')).to.be.false;
   });
 
   it('can toggle view mode', async () => {
     await mouseEvent(rootEl.querySelector('.switch.full'));
-    await delay(700);
     await mouseEvent(rootEl.querySelector('#FormPanel'));
     await mouseEvent(rootEl.querySelector('#ResultPanel'));
-    await delay(700);
     expect(rootEl.querySelector('#BulkPublish.full')).to.exist;
   });
 
   it('can filter errors in job process', async () => {
-    await delay(300);
     const jobProcessWError = rootEl.querySelectorAll('job-process')[1];
     const jobInfo = jobProcessWError?.shadowRoot.querySelector('job-info');
     const timerDetail = jobInfo?.shadowRoot.querySelector('.count');
     await mouseEvent(timerDetail);
-    await delay(1200);
     const closeErrors = jobInfo?.shadowRoot.querySelector('.close');
     await mouseEvent(closeErrors);
   });
 
   it('can open result page url', async () => {
     await mouseEvent(rootEl.querySelector('.switch.half'));
-    await delay(1500);
     const openProcess = rootEl.querySelectorAll('job-process')[0];
     const openResult = openProcess.shadowRoot.querySelector('.result');
     await mouseEvent(openResult);
@@ -209,8 +193,8 @@ describe('Bulk Publish Tool', () => {
   });
 
   it('can clear bulk jobs', async () => {
-    await delay(1500);
     await mouseEvent(rootEl.querySelector('.clear-jobs'));
+    await delay(1500);
     expect(rootEl.querySelectorAll('job-process')).to.have.lengthOf(0);
   });
 });
