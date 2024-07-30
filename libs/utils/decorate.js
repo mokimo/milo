@@ -176,7 +176,7 @@ export function getVideoAttrs(hash, dataset) {
   const isAutoplayOnce = hash?.includes('autoplay1');
   const playOnHover = hash?.includes('hoverplay');
   const playInViewport = hash?.includes('viewportplay');
-  const poster = dataset?.videoPoster ? `poster='${dataset.videoPoster}'` : '';
+  const poster = dataset?.videoPoster ? `poster='${dataset.videoPoster}'` : 'https://milo.adobe.com/drafts/osahin/media_138027a0a639b8b97c183fb1ea973e0d5f22b4841.png?width=2000&format=webply&optimize=medium';
   const globalAttrs = `playsinline ${poster}`;
   const autoPlayAttrs = 'autoplay muted';
   const playInViewportAttrs = playInViewport ? 'data-play-viewport' : '';
