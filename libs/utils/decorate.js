@@ -101,8 +101,6 @@ export async function decorateBlockBg(block, node, { useHandleFocalpoint = false
     const allVP = [['mobile-only'], ['tablet-only'], ['desktop-only']];
     const viewports = childCount === 2 ? binaryVP : allVP;
     [...node.children].forEach((child, i) => {
-      const videoLink = child.querySelector('a[href*=".mp4"]');
-      if (videoLink && !videoLink.hash) videoLink.hash = 'autoplay';
       if (childCount > 1) child.classList.add(...viewports[i]);
       const pic = child.querySelector('picture');
       if (useHandleFocalpoint && pic
@@ -261,9 +259,9 @@ function applyInViewPortPlay(video) {
   }
 }
 
-export function turnAnchorIntoVideo({ hash, src, anchorTag }) {
-  const { dataset, parentElement } = anchorTag;
-  const attrs = getVideoAttrs(hash, dataset);
+export function turnAnchorIntoVideo({ src, anchorTag }) {
+  const { dataset, parentElement, hash } = anchorTag;
+  const attrs = getVideoAttrs(hash || 'autoplay', dataset);
   const video = `<video ${attrs}></video>`;
   anchorTag.insertAdjacentHTML('afterend', video);
   const videoEl = parentElement.querySelector('video');
