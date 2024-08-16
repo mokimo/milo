@@ -738,7 +738,7 @@ export async function customFetch({ resource, withCacheRules }) {
 
 const findReplaceableNodes = (area) => {
   const regex = /{{(.*?)}}|%7B%7B(.*?)%7D%7D/g;
-  const el = area.querySelector('main') || area;
+  const el = area;
   const walker = document.createTreeWalker(
     el,
     NodeFilter.SHOW_TEXT,
@@ -762,10 +762,9 @@ const findReplaceableNodes = (area) => {
 };
 
 async function decoratePlaceholders(area, config) {
-  console.log(area);
   const nodes = findReplaceableNodes(area);
   if (!nodes.length) return;
-  const placeholderPath = `${config?.locale?.contentRoot}/placeholders.json`;
+  const placeholderPath = `${config.locale?.contentRoot}/placeholders.json`;
   const placeholderRequest = customFetch({ resource: placeholderPath, withCacheRules: true })
     .catch(() => ({}));
   return import('../features/placeholders.js')
@@ -999,7 +998,8 @@ async function checkForPageMods() {
 }
 
 async function loadPostLCP(config) {
-  decoratePlaceholders(document, config);
+  // We decorate placeholders for every section, the head / footer are not included though.
+  await decoratePlaceholders(document, config);
   if (config.mep?.targetEnabled === 'gnav') {
     /* c8 ignore next 2 */
     const { init } = await import('../features/personalization/personalization.js');
