@@ -25,3 +25,9 @@ jobs:
           prBaseBranch: ${{ github.event.pull_request.base.ref }}
           IMS_EMAIL: ${{ secrets.IMS_EMAIL }}
           IMS_PASS: ${{ secrets.IMS_PASS }}
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results
