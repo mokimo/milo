@@ -8,7 +8,6 @@ const { devices } = require('@playwright/test');
  */
 const config = {
   testDir: './nala',
-  outputDir: './playwright/output',
   globalSetup: './nala/utils/global.setup.js',
   /* Maximum time one test can run for. */
   timeout: 30 * 1000,
@@ -37,7 +36,6 @@ const config = {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 60000,
     screenshot: 'only-on-failure',
-    outputDir: './test-results/screenshots',
     trace: 'on-first-retry',
     baseURL: process.env.PR_BRANCH_LIVE_URL || (process.env.LOCAL_TEST_LIVE_URL || 'https://main--milo--adobecom.hlx.live'),
   },
