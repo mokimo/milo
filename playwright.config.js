@@ -8,7 +8,6 @@ const { devices } = require('@playwright/test');
  */
 const config = {
   testDir: './nala',
-  outputDir: './test-results',
   globalSetup: './nala/utils/global.setup.js',
   /* Maximum time one test can run for. */
   timeout: 30 * 1000,
@@ -30,13 +29,13 @@ const config = {
   workers: process.env.CI ? 4 : 3,
   /* Reporter to use. */
   reporter: process.env.CI
-    ? [['github'], ['list'], ['./nala/utils/base-reporter.js']]
+    ? [['github', { outputFolder: 'test-html-results' }], ['list'], ['./nala/utils/base-reporter.js']]
     : [['html', { outputFolder: 'test-html-results' }], ['list'], ['./nala/utils/base-reporter.js']],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 60000,
-
+    screenshot: 'only-on-failure',
     trace: 'on-first-retry',
     baseURL: process.env.PR_BRANCH_LIVE_URL || (process.env.LOCAL_TEST_LIVE_URL || 'https://main--milo--adobecom.hlx.live'),
   },

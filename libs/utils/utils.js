@@ -459,6 +459,9 @@ export async function loadBlock(block) {
   const base = miloLibs && MILO_BLOCKS.includes(name) ? miloLibs : codeRoot;
   let path = `${base}/blocks/${name}`;
 
+  if (name === 'marquee' || name === 'hero-marquee') {
+    loadLink(`${base}/utils/decorate.js`, { rel: 'preload', as: 'script', crossorigin: 'anonymous' });
+  }
   if (mep?.blocks?.[name]) path = mep.blocks[name];
 
   const blockPath = `${path}/${name}`;
@@ -466,7 +469,6 @@ export async function loadBlock(block) {
   const styleLoaded = hasStyles && new Promise((resolve) => {
     loadStyle(`${blockPath}.css`, resolve);
   });
-
   const scriptLoaded = new Promise((resolve) => {
     (async () => {
       try {
@@ -620,17 +622,50 @@ export function decorateAutoBlock(a) {
   });
 }
 
+const decorateCopyLink = (a, evt) => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobile = /android|iphone|mobile/.test(userAgent) && !/ipad/.test(userAgent);
+  if (!isMobile || !navigator.share) {
+    a.remove();
+    return;
+  }
+  const link = a.href.replace(evt, '');
+  const isConButton = ['EM', 'STRONG'].includes(a.parentElement.nodeName)
+    || a.classList.contains('con-button');
+  if (!isConButton) a.classList.add('static', 'copy-link');
+  a.href = '';
+  a.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (navigator.share) await navigator.share({ title: link, url: link });
+  });
+};
+
+export function convertStageLinks({ anchors, config, hostname }) {
+  if (config.env?.name === 'prod' || !config.stageDomainsMap) return;
+  const matchedRules = Object.entries(config.stageDomainsMap)
+    .find(([domain]) => hostname.includes(domain));
+  if (!matchedRules) return;
+  const [, domainsMap] = matchedRules;
+  [...anchors].forEach((a) => {
+    const matchedDomain = Object.keys(domainsMap)
+      .find((domain) => a.href.includes(domain));
+    if (!matchedDomain) return;
+    a.href = a.href.replace(a.hostname, domainsMap[matchedDomain] === 'origin'
+      ? hostname
+      : domainsMap[matchedDomain]);
+  });
+}
+
 export function decorateLinks(el) {
   const config = getConfig();
   decorateImageLinks(el);
   const anchors = el.getElementsByTagName('a');
+  const { hostname } = window.location;
+  convertStageLinks({ anchors, config, hostname });
   return [...anchors].reduce((rdx, a) => {
     appendHtmlToLink(a);
     a.href = localizeLink(a.href);
     decorateSVG(a);
-    if (config.env?.name === 'stage' && config.stageDomainsMap?.[a.hostname]) {
-      a.href = a.href.replace(a.hostname, config.stageDomainsMap[a.hostname]);
-    }
     if (a.href.includes('#_blank')) {
       a.setAttribute('target', '_blank');
       a.href = a.href.replace('#_blank', '');
@@ -655,6 +690,10 @@ export function decorateLinks(el) {
         e.preventDefault();
         window.adobeIMS?.signIn();
       });
+    }
+    const copyEvent = '#_evt-copy';
+    if (a.href.includes(copyEvent)) {
+      decorateCopyLink(a, copyEvent);
     }
     return rdx;
   }, []);
@@ -717,14 +756,14 @@ function decorateHeader() {
   if (promo?.length) header.classList.add('has-promo');
 }
 
-async function decorateIcons(area, config) {
-  const icons = area.querySelectorAll('span.icon');
-  if (icons.length === 0) return;
+let decorateIcons;
+async function fetchIcons(config) {
+  if (decorateIcons) return decorateIcons;
   const { base } = config;
   loadStyle(`${base}/features/icons/icons.css`);
   loadLink(`${base}/img/icons/icons.svg`, { rel: 'preload', as: 'fetch', crossorigin: 'anonymous' });
-  const { default: loadIcons } = await import('../features/icons/icons.js');
-  await loadIcons(icons, config);
+  return import('../features/icons/icons.js')
+    .then((mod) => { decorateIcons = mod.default; });
 }
 
 export async function customFetch({ resource, withCacheRules }) {
@@ -737,40 +776,40 @@ export async function customFetch({ resource, withCacheRules }) {
 }
 
 const findReplaceableNodes = (area) => {
+  if (!area) return [];
   const regex = /{{(.*?)}}|%7B%7B(.*?)%7D%7D/g;
-  const walker = document.createTreeWalker(
-    area,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode(node) {
-        const a = regex.test(node.nodeValue)
-          ? NodeFilter.FILTER_ACCEPT
-          : NodeFilter.FILTER_REJECT;
-        regex.lastIndex = 0;
-        return a;
-      },
-    },
-  );
+  const walker = document.createTreeWalker(area, NodeFilter.SHOW_ALL);
   const nodes = [];
   let node = walker.nextNode();
   while (node !== null) {
-    nodes.push(node);
+    let matchFound = false;
+    if (node.nodeType === Node.TEXT_NODE) {
+      matchFound = regex.test(node.nodeValue);
+    } else if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute('href')) {
+      const hrefValue = node.getAttribute('href');
+      matchFound = regex.test(hrefValue);
+    }
+    if (matchFound) {
+      nodes.push(node);
+      regex.lastIndex = 0;
+    }
     node = walker.nextNode();
   }
   return nodes;
 };
 
 let placeholderRequest;
-async function decoratePlaceholders(area, config) {
-  if (!area) return;
-  const nodes = findReplaceableNodes(area);
-  if (!nodes.length) return;
-  const placeholderPath = `${config.locale?.contentRoot}/placeholders.json`;
+let decoratePlaceholderArea;
+let placeholderPath;
+async function fetchPlaceholders(config) {
+  placeholderPath = `${config.locale?.contentRoot}/placeholders.json`;
   placeholderRequest = placeholderRequest
-  || customFetch({ resource: placeholderPath, withCacheRules: true })
-    .catch(() => ({}));
-  const { decoratePlaceholderArea } = await import('../features/placeholders.js');
-  await decoratePlaceholderArea({ placeholderPath, placeholderRequest, nodes });
+    || customFetch({ resource: placeholderPath, withCacheRules: true })
+      .catch(() => ({}));
+  return import('../features/placeholders.js')
+    .then((placeholderModule) => {
+      decoratePlaceholderArea = placeholderModule.decoratePlaceholderArea;
+    });
 }
 
 async function loadFooter() {
@@ -1004,7 +1043,15 @@ async function checkForPageMods() {
 }
 
 async function loadPostLCP(config) {
-  await decoratePlaceholders(document.body.querySelector('header'), config);
+  const nodes = findReplaceableNodes(document.body.querySelector('header'));
+  if (nodes.length) await fetchPlaceholders(document.body.querySelector('header'), config);
+  if (nodes.length && decoratePlaceholderArea) {
+    await decoratePlaceholderArea({
+      placeholderRequest,
+      nodes,
+      placeholderPath,
+    });
+  }
   if (config.mep?.targetEnabled === 'gnav') {
     /* c8 ignore next 2 */
     const { init } = await import('../features/personalization/personalization.js');
@@ -1186,38 +1233,45 @@ export function partition(arr, fn) {
   );
 }
 
-async function processSection(section, config, isDoc) {
+const decorateInlineFragments = async (section) => {
   const inlineFrags = [...section.el.querySelectorAll('a[href*="#_inline"]')];
-  if (inlineFrags.length) {
-    const { default: loadInlineFrags } = await import('../blocks/fragment/fragment.js');
-    const fragPromises = inlineFrags.map((link) => loadInlineFrags(link));
-    await Promise.all(fragPromises);
-    const newlyDecoratedSection = decorateSection(section.el, section.idx);
-    section.blocks = newlyDecoratedSection.blocks;
-    section.preloadLinks = newlyDecoratedSection.preloadLinks;
-  }
-  await decoratePlaceholders(section.el, config);
+  if (!inlineFrags.length) return;
+  const { default: loadInlineFrags } = await import('../blocks/fragment/fragment.js');
+  const fragPromises = inlineFrags.map((link) => loadInlineFrags(link));
+  await Promise.all(fragPromises);
+  const newlyDecoratedSection = decorateSection(section.el, section.idx);
+  section.blocks = newlyDecoratedSection.blocks;
+  section.preloadLinks = newlyDecoratedSection.preloadLinks;
+};
 
+async function processSection(section, config, isDoc) {
+  await decorateInlineFragments(section);
+
+  const tasks = [];
+  const icons = section.el.querySelectorAll('span.icon');
+  if (icons.length > 0) tasks.push(fetchIcons(config));
+  if (findReplaceableNodes(section.el).length) tasks.push(fetchPlaceholders(section.el, config));
   if (section.preloadLinks.length) {
     const [modals, nonModals] = partition(section.preloadLinks, (block) => block.classList.contains('modal'));
-    const preloads = nonModals.map((block) => loadBlock(block));
-    await Promise.all(preloads);
+    nonModals.forEach((block) => tasks.push(loadBlock(block)));
     modals.forEach((block) => loadBlock(block));
   }
+  section.blocks.forEach((block) => tasks.push(loadBlock(block)));
+  await Promise.all(tasks);
 
-  const loaded = section.blocks.map((block) => loadBlock(block));
+  const postDecorationTasks = [];
+  if (icons.length > 0 && decorateIcons) postDecorationTasks.push(decorateIcons(icons, config));
+  const nodes = findReplaceableNodes(section.el);
+  if (nodes.length && decoratePlaceholderArea) {
+    postDecorationTasks.push(
+      decoratePlaceholderArea({ placeholderRequest, nodes, placeholderPath }),
+    );
+  }
 
-  await decorateIcons(section.el, config);
-
-  // Only move on to the next section when all blocks are loaded.
-  await Promise.all(loaded);
-
-  // Show the section when all blocks inside are done.
+  await Promise.all(postDecorationTasks);
   delete section.el.dataset.status;
 
-  if (isDoc && section.el.dataset.idx === '0') {
-    await loadPostLCP(config);
-  }
+  if (isDoc && section.el.dataset.idx === '0') await loadPostLCP(config);
 
   delete section.el.dataset.idx;
 

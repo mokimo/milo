@@ -322,7 +322,7 @@ class Gnav {
     isDesktop.addEventListener('change', closeAllDropdowns);
   }, 'Error in global navigation init', 'errorType=error,module=gnav');
 
-  ims = async () => loadIms()
+  ims = async () => (window.adobeIMS?.initialized ? this.imsReady() : loadIms()
     .then(() => this.imsReady())
     .catch((e) => {
       if (e?.message === 'IMS timeout') {
@@ -330,7 +330,7 @@ class Gnav {
         return;
       }
       lanaLog({ message: 'GNAV: Error with IMS', e, tags: 'errorType=info,module=gnav' });
-    });
+    }));
 
   decorateTopNav = () => {
     this.elements.mobileToggle = this.decorateToggle();
@@ -822,6 +822,7 @@ class Gnav {
         ${isDesktop.matches ? '' : this.decorateSearch()}
         ${this.elements.mainNav}
         ${isDesktop.matches ? this.decorateSearch() : ''}
+        ${getConfig().searchEnabled === 'on' ? toFragment`<div class="feds-client-search"></div>` : ''}
       </div>
     `;
 
