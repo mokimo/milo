@@ -123,9 +123,12 @@ export default class WebUtil {
         if (property === 'class' && typeof expectedValue === 'string') {
           // If the property is 'class' and the expected value is an string,
           // split the string value into individual classes
-          const classes = expectedValue.split(' ');
+          const classes = expectedValue.split(' ').concat('block');
+          classes.push('block');
           try {
-            await expect(await this.locator).toHaveClass(classes.join(' '));
+            for (const className of classes) {
+              await expect(this.locator).toHaveClass(new RegExp(`\\b${className}\\b`));
+            }
           } catch (error) {
             console.error('Attribute class not found:', error);
             result = false;
