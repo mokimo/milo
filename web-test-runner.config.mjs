@@ -55,6 +55,10 @@ export default {
       <head>
         <link rel="icon" href="/libs/img/favicons/favicon.ico" size="any">
         <script type='module'>
+          window.hlx = {
+            rum: {}
+          }
+          console.log(window.hlx)
           const oldFetch = window.fetch;
           window.fetch = async (resource, options) => {
             if (!resource.startsWith('/') && !resource.startsWith('http://localhost')) {

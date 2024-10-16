@@ -3,28 +3,29 @@
 
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { sampleRUM } from '../../libs/utils/samplerum.js';
 
 describe('SampleRUM', () => {
-  it('Collects RUM data', () => {
-    const sendBeacon = sinon.stub(navigator, 'sendBeacon');
-    // turn on RUM
-    window.history.pushState({}, '', `${window.location.href}&rum=on`);
-    delete window.hlx;
+  it('Collects RUM data', async () => {
+    const { fetch } = window;
+    window.fetch = () => Promise.resolve({ json: () => Promise.resolve({}) });
+    const { sampleRUM } = await import('../../libs/utils/samplerum.js');
+    window.hlx.rum.collector = sinon.stub();
+    window.hlx.rum.isSelected = true;
 
     // sends checkpoint beacon
     sampleRUM('test', { foo: 'bar' });
-    expect(sendBeacon.called).to.be.true;
-    sendBeacon.resetHistory();
+    // check the call count
+    expect(window.hlx.rum.collector.callCount).to.equal(1);
 
     // sends cwv beacon
     sampleRUM('cwv', { foo: 'bar' });
-    expect(sendBeacon.called).to.be.true;
+    expect(window.hlx.rum.collector.callCount).to.equal(2);
 
     // test error handling
-    sendBeacon.throws();
     sampleRUM('error', { foo: 'bar' });
+    expect(window.hlx.rum.collector.callCount).to.equal(3);
 
-    sendBeacon.restore();
+    window.fetch = fetch;
+    document.head.innerHTML = '';
   });
 });
