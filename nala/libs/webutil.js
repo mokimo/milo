@@ -97,6 +97,7 @@ export default class WebUtil {
     let result = true;
     await Promise.allSettled(
       Object.entries(cssProps).map(async ([property, expectedValue]) => {
+        if (property === 'block') return;
         try {
           await expect(this.locator).toHaveCSS(property, expectedValue);
         } catch (error) {
