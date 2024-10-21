@@ -7,16 +7,32 @@ on:
 
 env:
   MILO_RELEASE_SLACK_WH: ${{ secrets.MILO_RELEASE_SLACK_WH }}
+  STAGE_RCP_OFFSET_DAYS: ${{ secrets.MILO_RCP_SLACK_WH }}
 
 jobs:
   rcp-notification:
     runs-on: ubuntu-latest
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download sent RCP messages
+        if: always()
+        uses: actions/download-artifact@v4
+        with:
+          name: rcp-notifier
+          path: .github/workflows/rcp-notifier.json
 
       - name: Create RCP Notification
         uses: actions/github-script@v7
         with:
           script: |
-            const {RCPDates, slackNotification} = require('./.github/workflows/helpers.js')
-            
+            const main = require('./.github/workflows/rcp-notifier.js')
+            main({ github, context })
+      
+      - name: Upload sent RCP messages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rcp-messages-sent
+          path: .github/workflows/rcp-notifier.json

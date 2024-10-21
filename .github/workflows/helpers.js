@@ -26,8 +26,9 @@ const RCPDates = [
     end: new Date('2024-09-12T14:00:00-07:00'),
   },
   {
-    start: new Date('2024-10-07T00:00:00-07:00'),
-    end: new Date('2024-10-18T17:00:00-07:00'),
+    // WP REMOVE THIS AGAIN!!! DO N O T COMMIT
+    start: new Date('2024-10-24T00:00:00-07:00'),
+    end: new Date('2024-10-25T17:00:00-07:00'),
   },
   {
     start: new Date('2024-11-17T00:00:00-08:00'),
@@ -50,13 +51,15 @@ const isWithinRCP = (offset = 0) => {
     return true;
   }
 
-  if (RCPDates.some(({ start, end }) => {
-    const adjustedStart = new Date(start);
-    adjustedStart.setDate(adjustedStart.getDate() - offset);
-    return start <= now && now <= end
-  })) {
+  if (
+    RCPDates.some(({ start, end }) => {
+      const adjustedStart = new Date(start);
+      adjustedStart.setDate(adjustedStart.getDate() - Number(offset));
+      return start <= now && now <= end;
+    })
+  ) {
     console.log(
-      'Current date is within a RCP (2 days earlier for stage, to keep stage clean & make CSO contributions during an RCP easier). Stopping execution.'
+      'Current date is within a RCP (2 days earlier for stage, to keep stage clean & make CSO contributions during an RCP easier). Stopping execution.',
     );
     return true;
   }
