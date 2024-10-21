@@ -1,0 +1,22 @@
+name: RCP Notifier
+
+on:
+  # schedule:
+  #   - cron: '0 9 * * *' # Run every day at 9am UTC
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  MILO_RELEASE_SLACK_WH: ${{ secrets.MILO_RELEASE_SLACK_WH }}
+
+jobs:
+  rcp-notification:
+    runs-on: ubuntu-latest
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create RCP Notification
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {RCPDates, slackNotification} = require('./.github/workflows/helpers.js')
+            
