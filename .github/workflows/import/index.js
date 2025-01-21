@@ -1,0 +1,92 @@
+import { DA_ORIGIN } from './constants.js';
+import { replaceHtml, daFetch } from './daFetch.js';
+import { mdToDocDom, docDomToAemHtml } from './converters.js';
+
+const EXTS = ['json', 'svg', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'pdf'];
+
+const toOrg = 'adobecom';
+const toRepo = 'da-playground';
+
+export function calculateTime(startTime) {
+  const totalTime = Date.now() - startTime;
+  return `${String((totalTime / 1000) / 60).substring(0, 4)}`;
+}
+
+async function saveAllToDa(url, blob) {
+  const { destPath, editPath, route } = url;
+
+  url.daHref = `https://da.live${route}#/${toOrg}/${toRepo}${editPath}`;
+
+  const body = new FormData();
+  body.append('data', blob);
+  const opts = { method: 'PUT', body };
+
+  try {
+    const resp = await daFetch(`${DA_ORIGIN}/source/${toOrg}/${toRepo}${destPath}`, opts);
+    return resp.status;
+  } catch {
+    console.log(`Couldn't save ${destPath}`);
+    return 500;
+  }
+}
+
+async function importUrl(url) {
+  const [fromRepo, fromOrg] = url.hostname.split('.')[0].split('--').slice(1).slice(-2);
+  if (!(fromRepo || fromOrg)) {
+    url.status = '403';
+    url.error = 'URL is not from AEM.';
+    return;
+  }
+  
+  url.fromRepo ??= fromRepo;
+  url.fromOrg ??= fromOrg;
+  
+  const { pathname, href } = url;
+  if (href.endsWith('.xml') || href.endsWith('.html')) {
+    url.status = 'error';
+    url.error = 'DA does not support XML or raw HTML.';
+    return;
+  }
+  
+
+  const isExt = EXTS.some((ext) => href.endsWith(`.${ext}`));
+  const path = href.endsWith('/') ? `${pathname}index` : pathname;
+  const srcPath = isExt ? path : `${path}.md`;
+  url.destPath = isExt ? path : `${path}.html`;
+  url.editPath = href.endsWith('.json') ? path.replace('.json', '') : path;
+
+  if (isExt) {
+    url.route = url.destPath.endsWith('json') ? '/sheet' : '/media';
+  } else {
+    url.route = '/edit';
+  }
+
+  try {
+    const resp = await fetch(`${url.origin}${srcPath}`);
+    console.log("fetched resource from AEM at: ", `${url.origin}${srcPath}`)
+    if (resp.redirected && !srcPath.endsWith('.mp4')) {
+      url.status = 'redir';
+      throw new Error('redir');
+    }
+    if (!resp.ok) {
+      url.status = 'error';
+      throw new Error('error');
+    }
+    let content = isExt ? await resp.blob() : await resp.text();
+    if (!isExt) {
+      const aemHtml = docDomToAemHtml(mdToDocDom(content))
+      let html = replaceHtml(aemHtml, url.fromOrg, url.fromRepo);
+      content = new Blob([html], { type: 'text/html' });
+    }
+    url.status = await saveAllToDa(url, content);
+    console.log("imported resource " + url.destPath)
+
+    console.log("TODO - preview and publish.")
+  } catch (e) {
+    console.log(e)
+    if (!url.status) url.status = 'error';
+    // Do nothing
+  }
+}
+
+importUrl(new URL('https://main--bacom--adobecom.hlx.live' + "/customer-success-stories"))
