@@ -26,7 +26,7 @@ jobs:
         node-version: 18
 
     - name: Install dependencies
-      run: cd ./import/ && npm install
+      run: cd ./.github/workflows/import/ && npm install
 
     - name: Run script
-      run: node ./import/index.js
+      run: node ./.github/workflows/import/index.js
