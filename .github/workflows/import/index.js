@@ -6,6 +6,7 @@ const EXTS = ['json', 'svg', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'pdf'];
 
 const toOrg = 'adobecom';
 const toRepo = 'da-playground';
+const importFrom = "https://main--milo--adobecom.hlx.live"
 
 export function calculateTime(startTime) {
   const totalTime = Date.now() - startTime;
@@ -89,4 +90,5 @@ async function importUrl(url) {
   }
 }
 
-importUrl(new URL('https://main--bacom--adobecom.hlx.live' + "/customer-success-stories"))
+// TODO does it need the .md?
+importUrl(new URL(importFrom + process.env.PATH.replace(".md", "")));
