@@ -7,7 +7,7 @@ on:
 
 env:
   DA_TOKEN: ${{ secrets.DA_TOKEN }}
-  PATH: ${{ github.event.client_payload.path }}
+  AEM_PATH: ${{ github.event.client_payload.path }}
       
 permissions:
   contents: read

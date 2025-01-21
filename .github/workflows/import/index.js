@@ -91,4 +91,4 @@ async function importUrl(url) {
 }
 
 // TODO does it need the .md?
-importUrl(new URL(importFrom + process.env.PATH.replace(".md", "")));
+importUrl(new URL(importFrom + process.env.AEM_PATH.replace(".md", "")));
