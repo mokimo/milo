@@ -80,7 +80,7 @@ async function importUrl(url) {
       content = new Blob([html], { type: 'text/html' });
     }
     url.status = await saveAllToDa(url, content);
-    console.log("imported resource " + url.destPath)
+    console.log("imported resource to DA " + toOrg + "/" + toRepo + " | destination: " + url.destPath)
 
     console.log("TODO - preview and publish.")
   } catch (e) {

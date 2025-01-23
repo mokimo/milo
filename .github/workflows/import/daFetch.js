@@ -1,38 +1,37 @@
 import { DA_ORIGIN } from './constants.js';
 
-let imsDetails;
+async function getImsToken() {
+  const params = new URLSearchParams();
+  params.append('client_id', process.env.CLIENT_ID);
+  params.append('client_secret', process.env.CLIENT_SECRET);
+  params.append('code', process.env.CODE);
+  params.append('grant_type', process.env.GRANT_TYPE);
 
-export function setImsDetails(token) {
-  imsDetails = { accessToken: { token } };
+  const response = await fetch(process.env.IMS_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params,
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to retrieve IMS token');
+  }
+
+  const data = await response.json();
+  return data.access_token;
 }
-
-// export async function initIms() {
-//   if (imsDetails) return imsDetails;
-//   const { loadIms } = await import('./ims.js');
-//   try {
-//     imsDetails = await loadIms();
-//     return imsDetails;
-//   } catch {
-//     return null;
-//   }
-// }
 
 export const daFetch = async (url, opts = {}) => {
   opts.headers ||= {};
-  // if (localStorage.getItem('nx-ims') || imsDetails) {
-  //   const { accessToken } = await initIms();
-  //   if (accessToken) {
-  //     opts.headers.Authorization = `Bearer ${accessToken.token}`;
-  //   }
-  // }
-  const token = process.env.DA_TOKEN;
+  console.log("Fetching IMS token")
+  const token = await getImsToken();
+  console.log("Fetched IMS token")
   opts.headers.Authorization = `Bearer ${token}`;
   const resp = await fetch(url, opts);
-  // if (resp.status === 401) {
-  //   const { loadIms, handleSignIn } = await import('./ims.js');
-  //   await loadIms();
-  //   handleSignIn();
-  // }
+  if(resp.ok) console.log("DA import successful")
+  if(!resp.ok) throw new Error("DA import failed")
   return resp;
 };
 
@@ -68,9 +67,9 @@ export async function saveToDa(text, url) {
   try {
     const daResp = await daFetch(`${DA_ORIGIN}/source${daPath}.html`, opts);
     return { daHref, daStatus: daResp.status, daResp, ok: daResp.ok };
-  } catch {
-    console.log(`Couldn't save ${url.daUrl}`);
-    return null;
+  } catch (e) {
+    console.log(`Couldn't save ${url.daUrl} `);
+    throw e
   }
 }
 

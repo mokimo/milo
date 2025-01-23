@@ -6,8 +6,12 @@ on:
         - resource-published
 
 env:
-  DA_TOKEN: ${{ secrets.DA_TOKEN }}
   AEM_PATH: ${{ github.event.client_payload.path }}
+  CLIENT_ID: ${{ secrets.CLIENT_ID }}
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  CODE: ${{ secrets.CODE }}
+  GRANT_TYPE: ${{ secrets.GRANT_TYPE }}
+  IMS_URL: ${{ secrets.IMS_URL }}
       
 permissions:
   contents: read
