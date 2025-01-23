@@ -2,6 +2,7 @@ import { DA_ORIGIN } from './constants.js';
 import { replaceHtml, daFetch } from './daFetch.js';
 import { mdToDocDom, docDomToAemHtml } from './converters.js';
 
+// Run from the root of the project for local testing: node --env-file=.env .github/workflows/import/index.js
 const EXTS = ['json', 'svg', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'pdf'];
 
 const toOrg = 'adobecom';
@@ -69,7 +70,7 @@ async function importUrl(url) {
       url.status = 'redir';
       throw new Error('redir');
     }
-    if (!resp.ok) {
+    if (!resp.ok && resp.status !== 304) {
       url.status = 'error';
       throw new Error('error');
     }
@@ -90,5 +91,4 @@ async function importUrl(url) {
   }
 }
 
-// TODO does it need the .md?
 importUrl(new URL(importFrom + process.env.AEM_PATH.replace(".md", "")));
