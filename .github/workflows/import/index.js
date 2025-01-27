@@ -15,6 +15,7 @@ export function calculateTime(startTime) {
 }
 
 async function saveAllToDa(url, blob) {
+  console.log("Starting DA import")
   const { destPath, editPath, route } = url;
 
   url.daHref = `https://da.live${route}#/${toOrg}/${toRepo}${editPath}`;
@@ -30,6 +31,14 @@ async function saveAllToDa(url, blob) {
     console.log(`Couldn't save ${destPath}`);
     return 500;
   }
+}
+
+async function previewOrPublish({path, action}) {
+  const previewUrl = `https://admin.hlx.page/${action}/${toOrg}/${toRepo}/main/${path}`;
+  const opts = { method: 'POST' };
+  const resp = await fetch(previewUrl, opts);
+  if (!resp.ok) throw new Error(`Failed to post to preview: ${resp.statusText}`)
+  console.log(`Posted to ${action} successfully ${action}/${toOrg}/${toRepo}/main/${path}`);
 }
 
 async function importUrl(url) {
@@ -65,7 +74,8 @@ async function importUrl(url) {
 
   try {
     const resp = await fetch(`${url.origin}${srcPath}`);
-    console.log("fetched resource from AEM at: ", `${url.origin}${srcPath}`)
+
+    console.log("fetched resource from AEM at:", `${url.origin}${srcPath}`)
     if (resp.redirected && !(srcPath.endsWith('.mp4') || srcPath.endsWith('.png') || srcPath.endsWith('.jpg'))) {
       url.status = 'redir';
       throw new Error('redir');
@@ -81,13 +91,13 @@ async function importUrl(url) {
       content = new Blob([html], { type: 'text/html' });
     }
     url.status = await saveAllToDa(url, content);
-    console.log("imported resource to DA " + toOrg + "/" + toRepo + " | destination: " + url.destPath)
-
-    console.log("TODO - preview and publish.")
+    console.log("imported resource to DA " + url.daHref);
+    await previewOrPublish({path: pathname, action: 'preview'});
+    await previewOrPublish({path: pathname, action: 'live'});
+    console.log(`Resource: https://main--${toRepo}--${toOrg}.aem.live${url.pathname}`);
   } catch (e) {
-    console.log(e)
+    console.log("Failed to import resource to DA " + toOrg + "/" + toRepo + " | destination: " + url.pathname, + " | error: " + e.message);
     if (!url.status) url.status = 'error';
-    // Do nothing
   }
 }
 

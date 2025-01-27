@@ -30,7 +30,6 @@ export const daFetch = async (url, opts = {}) => {
   console.log("Fetched IMS token")
   opts.headers.Authorization = `Bearer ${token}`;
   const resp = await fetch(url, opts);
-  if(resp.ok) console.log("DA import successful")
   if(!resp.ok) throw new Error("DA import failed")
   return resp;
 };
