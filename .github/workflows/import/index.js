@@ -42,6 +42,7 @@ async function previewOrPublish({path, action}) {
 }
 
 async function importUrl(url) {
+  console.log("Started path: ", process.env.AEM_PATH);
   const [fromRepo, fromOrg] = url.hostname.split('.')[0].split('--').slice(1).slice(-2);
   if (!(fromRepo || fromOrg)) {
     url.status = '403';
