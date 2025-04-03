@@ -47,23 +47,6 @@ We have two problems in our PR automation system:
    - Posts Slack notifications when PRs are merged
    - Creates comments for stage-to-main PRs
 
-### Comment Patterns
-1. **Status Updates**
-   - Check failures
-   - Test results
-   - Lint results
-   - Merge status
-
-2. **Reminders**
-   - Ready for Stage label
-   - Needs verification
-   - Failed checks
-
-3. **Error Messages**
-   - Merge failures
-   - Test failures
-   - Check failures
-
 ## Contributor Guidance Scenarios
 
 ### Test Failure Scenarios
@@ -95,7 +78,7 @@ We have two problems in our PR automation system:
 
 ## Proposed Solution
 
-### Unified Notification System
+### Unified Notification System (UNS)
 We should create a single "milo-core" notification system that:
 1. Maintains one thread per PR
 2. Uses a timeline format to show PR history
@@ -127,22 +110,6 @@ The UNS has the potential to make several current workflows redundant:
      - Clear reasons for merge failures
      - Actionable next steps
 
-### Benefits of Simplification
-1. **Reduced Complexity**
-   - Fewer workflows to maintain
-   - Clearer notification patterns
-   - Less interference with stale workflow
-
-2. **Better Developer Experience**
-   - Single source of truth for PR status
-   - Clear historical context
-   - Actionable guidance for fixes
-
-3. **Improved Automation**
-   - More reliable stale label system
-   - Cleaner notification history
-   - Better tracking of PR lifecycle
-
 ### Timeline Format Example
 ```
 ### Merge Status
@@ -163,15 +130,3 @@ To fix the stale label interference, we should:
 2. Modify the stale workflow to ignore classified comments
 3. Use GitHub's bot comment features where possible
 4. Consider using comment metadata to identify workflow-generated comments
-
-## Next Steps
-1. Create a proof of concept for comment classification
-2. Modify the stale workflow to respect comment classification
-3. Implement the unified notification system
-4. Migrate existing workflows to use the new system
-
-## Action Items
-1. [ ] Design comment classification system
-2. [ ] Modify stale workflow to ignore classified comments
-3. [ ] Create unified notification system
-4. [ ] Plan migration of existing workflows
