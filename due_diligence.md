@@ -9,7 +9,6 @@ Another issue we have is that the PRs are too cramped with all the Notification 
 
 In this Ticket [MWPW-168241](https://jira.corp.adobe.com/browse/MWPW-168241) it was proposed that we implement a Unified Notification System (UNS) which is one big comment in each PR that every workflow writes into instead of creating a new comment, the UNS contains log history of each workflow, failing tests, guidance on why a PR wasn't merged + how to fix failing checks
 
-## Timeline Format Example
 
 ## Timeline Format Example
 ```
