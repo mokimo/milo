@@ -1,8 +1,8 @@
 # [Due Diligence] Improve milo core automation guidance
 
-## Problem Statement
+## Problem Issue
 
-We have two main issues in our PR automation system:
+We have two main problems in our PR automation system:
 
 1. **Stale Label Interference**
    - The stale label system is being reset by automated workflow comments
