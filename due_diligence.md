@@ -1,6 +1,6 @@
 # [Due Diligence] Improve milo core automation guidance
 
-## Problem Issue
+## Current Issue
 
 We have two main problems in our PR automation system:
 
