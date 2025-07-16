@@ -21,12 +21,14 @@ export const preflightCache = {
 };
 
 async function getJobId(step) {
+  const { token } = window.adobeIMS.getAccessToken() || {};
+  if (!token) return null;
   try {
     if (!CHECK_KEY) throw new Error('No preflight key found');
     const res = await fetch(`${CHECK_API}/preflight/jobs`, {
       method: 'POST',
       headers: {
-        'x-api-key': CHECK_KEY,
+        authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(
@@ -48,11 +50,12 @@ async function getJobResults(jobId, step) {
   const MAX_RETRIES = 50;
   const POLL_INTERVAL = 2500;
   let retries = 0;
-
+  const { token } = window.adobeIMS.getAccessToken() || {};
+  if (!token) return null;
   while (retries < MAX_RETRIES) {
     try {
       if (!CHECK_KEY) throw new Error('No preflight key found');
-      const res = await fetch(`${CHECK_API}/preflight/jobs/${jobId}`, { headers: { 'x-api-key': CHECK_KEY } });
+      const res = await fetch(`${CHECK_API}/preflight/jobs/${jobId}`, { headers: { authorization: `Bearer ${token}` } });
       const data = await res.json();
 
       if (step === 'IDENTIFY' && data.result) {

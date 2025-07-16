@@ -128,8 +128,8 @@ const DO_NOT_INLINE = [
 
 const ENVS = {
   stage: {
-    name: 'stage',
-    ims: 'stg1',
+    name: 'prod',
+    ims: 'prod',
     adobeIO: 'cc-collab-stage.adobe.io',
     adminconsole: 'stage.adminconsole.adobe.com',
     account: 'stage.account.adobe.com',
