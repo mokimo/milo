@@ -88,7 +88,7 @@
       "containerId": "tools",
       "title": "Preflight",
       "id": "preflight",
-      "environments": ["dev", "preview", "live"],
+      "environments": ["dev", "preview", "live", "prod"],
       "event": "preflight"
     },
     {
